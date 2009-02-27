@@ -502,6 +502,7 @@ use constant INDEX_TEMPLATE			=> compile_template(CENTER_HEAD_INCLUDE.INDEX_INCL
 use constant PAGE_TEMPLATE			=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.POSTS_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant THREAD_TEMPLATE		=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.POSTS_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant SEARCH_PAGE_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.SEARCH_INCLUDE.NORMAL_FOOT_INCLUDE);
+use constant ADV_SEARCH_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_ADVANCED_SEARCH.NORMAL_FOOT_INCLUDE);
 
 use constant REPORT_LIST_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.REPORT_LIST_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant REPORT_THUMBS_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.REPORT_HEADER_INCLUDE.REPORT_THUMBS_INCLUDE.NORMAL_FOOT_INCLUDE);
@@ -703,13 +704,13 @@ sub show_search($$$){
 	my $int=$cgi->param("search_int");
 	
 	my @list=$board->search($text,24,$offset,$advanced?(
-		name		=> $cgi->param("search_username"),
-		trip		=> $cgi->param("search_tripcode"),
+		name		=> ($cgi->param("search_username") or ""),
+		trip		=> ($cgi->param("search_tripcode") or ""),
 		showdel		=> ($del eq 'yes' or $del eq 'dontcare'),
 		shownodel	=> ($del eq 'no' or $del eq 'dontcare'),
 		showint		=> ($int eq 'yes' or $int eq 'dontcare'),
 		showext		=> ($int eq 'no' or $int eq 'dontcare'),
-		ord			=> $cgi->param("search_ord"),
+		ord			=> ($cgi->param("search_ord") or ""),
 	):());
 	
 	error $board->errstr if $board->error;
@@ -1007,6 +1008,16 @@ if($path){
 		show_thread($num);
 		exit;
 	};
+	m!^/advanced-search!x and do{
+		sendpage ADV_SEARCH_TEMPLATE->(
+			title		=> "Advanced search",
+			
+			height		=> 24,
+			width		=> 40,
+			
+			standalone	=> 1,
+		);
+	},exit;
 	m!^/post/S?(.*)!x and do{
 		my($num)=$1;
 		$num=~s/_/,/g;

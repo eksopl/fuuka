@@ -104,24 +104,9 @@ use constant INDEX_INCLUDE => <<'HERE';
 </p>
 HERE
 
-use constant SIDEBAR_INCLUDE => <<'HERE';
-<hr />
-<div style="overflow:hidden;">
-
+use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <form action="<var $self>" method="get">
-<div id="simple-search" class="postspan" style="float:left">
-<input type="hidden" name="task" value="search" />
-<input type="hidden" name="ghost" value="<var $ghost>" />
-Text search
-<a class="tooltip" href="#">[?]<span>Place a <tt>+</tt> before a word to have it included, e.g. <tt>+tripcode</tt> to locate posts that contain word tripcode in them.<br />Place a <tt>-</tt> before a word to exlude pages containing that word: <tt>-tripcode</tt><br />Place quotes around phrases to find pages containing the phrase: <tt>"I am a filthy tripcode user"</tt></span></a>&nbsp;
-<input type="text" name="search_text" size="24" value="<var $search_text>" />&nbsp;
-<input type="submit" value="Go" />&nbsp;
-<a href="#" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Advanced ]</a>
-</div>
-</form>
-
-<form action="<var $self>" method="get">
-<div id="advanced-search" class="postspan" style="float:left;display:none;">
+<div id="advanced-search" class="postspan" style="float:left;<if not $standalone>display:none;</if>">
 <input type="hidden" name="task" value="search2" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
 <table style="float:left"><tbody>
@@ -135,6 +120,24 @@ Text search
 <tr><td class="postblock">Action</td><td><input type="submit" value="Search" /> <a href="#" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Simple ]</a></td></tr>
 </tbody></table>
 </div></form>
+HERE
+
+use constant SIDEBAR_INCLUDE => <<'HERE'.SIDEBAR_ADVANCED_SEARCH.<<'THERE';
+<hr />
+<div style="overflow:hidden;">
+
+<form action="<var $self>" method="get">
+<div id="simple-search" class="postspan" style="float:left">
+<input type="hidden" name="task" value="search" />
+<input type="hidden" name="ghost" value="<var $ghost>" />
+Text search
+<a class="tooltip" href="#">[?]<span>Place a <tt>+</tt> before a word to have it included, e.g. <tt>+tripcode</tt> to locate posts that contain word tripcode in them.<br />Place a <tt>-</tt> before a word to exlude pages containing that word: <tt>-tripcode</tt><br />Place quotes around phrases to find pages containing the phrase: <tt>"I am a filthy tripcode user"</tt></span></a>&nbsp;
+<input type="text" name="search_text" size="24" value="<var $search_text>" />&nbsp;
+<input type="submit" value="Go" />&nbsp;
+<a href="<var $self>/advanced-search" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Advanced ]</a>
+</div>
+</form>
+HERE
 
 <form action="<var $self>" method="get">
 <div class="postspan" style="float:left">
@@ -152,12 +155,12 @@ View page&nbsp;
 <input type="text" name="page" size="6" value="<var $page or 1>" />&nbsp;
 <input type="submit" value="View" />&nbsp;
 <a class="tooltip" href="#">[?]<span>In ghost mode, only threads with non-archived posts will be shown</span></a>
-<input type="submit" name="ghost" value="View in Separatist ``FUCK THE POH LEECE'' Ghost mode" />
+<input type="submit" name="ghost" value="View in Ghost mode" />
 </div></form>
 
 </div>
 <hr />
-HERE
+THERE
 
 use constant POST_PANEL_INCLUDE => <<'HERE';
 	<div class="theader">Reply to thread <a class="tooltip-red" href="#">[?]<span>Don't expect anything heroic. Your post will not be uploaded to original board.</span></a></div>
