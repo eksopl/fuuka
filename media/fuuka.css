@@ -1,0 +1,153 @@
+h1{
+	font:bold 2em Verdana,Tahoma,sans-serif;
+	margin:0.1em;
+}
+h2{
+	font:bold 1.25em Verdana,Tahoma,sans-serif;
+	margin:0.1em;
+}
+ul{
+	margin:0;
+	list-style-type:circle;
+}
+.postblock{
+	font-weight:bold;
+	background:#98c1a9;
+	text-align:center;
+}
+.postspan{
+	font-weight:bold;
+	background:#d6f0da;
+	text-align:left;
+	padding:0.3em;
+	margin:0.3em 0.3em 0.3em 0;
+}
+.generic-table, .generic-table-monowidth{
+    margin-left:auto;
+    margin-right:auto;
+	overflow:hidden;
+}
+.generic-table-monowidth{
+	width:40em;
+}
+.generic-table {
+	margin-top:1em;
+}
+.generic-table-monowidth th {
+	background:#88cc99;
+	font-weight:bold;
+	text-align:right;
+	padding:2px;
+}
+.generic-table-monowidth tr {
+	background:#d6f0da;
+	padding:2px;
+}
+.generic-table th {
+	background:#7faa66;
+	color:#402800;
+	font-weight:800;
+	text-align:left;
+	padding:2px;
+}
+.report-thumbs div{
+	float:left;
+	width:300px;
+	height:300px;
+
+}
+.report-thumbs table{
+	border-spacing:0;
+	background:#d6f0da;
+	border:solid 2px #8c9;
+	margin:1em auto 1em auto;
+}
+.report-thumbs table tr {
+	font-weight:800;
+	text-align:center;
+	background:#8c9;
+}
+.nothumb {
+	color: inherit;
+	background: #eee;
+	border: 1px solid #aaa;
+	text-align: center;
+	padding: 1em;
+}
+.omittedposts {
+    color:#707070;
+}
+
+.filetitle {
+	font-size:1.1em;
+	color:#0f0c5d;
+	font-weight: bold;
+}
+.theader {
+	background:#E04000;
+	text-align:center;
+	padding:2px;
+	color:white;
+	width:100%;
+	font-weight:bold;
+}
+.newthr{
+    clear: left;
+}
+
+.warning,.info{
+	background: #dece7a;
+	color: #654225;
+	font-weight:bold;
+}
+.error{
+	background: #de887a;
+	color: #652534;
+	font-weight:bold;
+}
+
+.warning,.error{ padding: 0.675em 0.5em 1.325em 0.5em; }
+.info{ padding: 0.675em 0.5em 0.675em 0.5em; }
+
+.container{
+	-moz-border-radius: 0.75em;
+    margin: 4em auto 1em auto;
+	width: 70%;
+}
+
+a.tooltip span, a.tooltip-red span{
+	font-family:Georgia, serif;
+	display:none;
+	padding:6px;
+	margin:2em 0 0 0.5em;
+	width:25%;
+}
+a.tooltip:hover span, a.tooltip-red:hover span{
+	display:inline;
+	position:absolute;
+	border:1px solid black;
+	background:lightyellow;
+	color:black;
+	font-weight:normal;
+	text-align:left;
+}
+a.tooltip-red:hover{
+	color:white;
+}
+
+.spoiler, .spoiler:hover {
+	color: black;
+	background: black;
+	text-decoration: none;
+}
+.spoiler:hover {
+	color: white;
+}
+
+.o { text-decoration: overline; }
+.u { text-decoration: underline; }
+.aa { font-family:Mona,'MS PGothic' !important;}
+.s { text-decoration: line-through; }
+.banned { font-weight: bold; color: red; }
+.admin{ color: #f00000 !important;}
+.mod{ color: #800080 !important;}
