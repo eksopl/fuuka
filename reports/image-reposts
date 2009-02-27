@@ -1,0 +1,6 @@
+Query:			select preview,num,subnum,parent,media_hash,count(media_hash) from %%BOARD%% where preview!="" group by media_hash order by count(media_hash) desc limit 32;
+Title:			Most Reposted Images
+Rows:			Image,Reposts
+Row-Types:		image,text
+Mode:			thumbs
+Refresh-Rate:	86400

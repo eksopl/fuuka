@@ -1,0 +1,6 @@
+Query:			select group_concat(distinct concat(name) separator ', '),max(timestamp),num,subnum from %%BOARD%% where id!=0 and timestamp>%%NOW%%-3600 group by id order by max(timestamp) desc
+Title:			Users posting in archive
+Rows:			Posted as,Last seen,Last post
+Row-Types:		text,timediff,postno
+Mode:			table
+Refresh-Rate:	60

@@ -1,0 +1,17 @@
+set terminal png  transparent size 800,600
+set output "%%OUTFILE%%"
+show terminal
+
+set title 'Posts by'
+set style data fsteps
+set timefmt "%s"
+set yrange [ 0 : ]
+set xdata time
+set format x "%y/%m/%d"
+set grid
+set key left
+
+plot \
+		'%%INFILE%%' using 1:4 t 'Anonymous'	lt rgb "#008000" with filledcurve x1, \
+		'%%INFILE%%' using 1:2 t 'Tripfriends'	lt rgb "#0000ff" with filledcurve x1, \
+		'%%INFILE%%' using 1:3 t 'Namefags'		lt rgb "#ff0000" with filledcurve x1

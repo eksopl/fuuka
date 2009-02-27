@@ -1,0 +1,6 @@
+Query:			select name,trip,max(timestamp),num,subnum from %%BOARD%% where timestamp>%%NOW%%-1800 group by name,trip order by max(timestamp) desc
+Title:			Users online
+Rows:			Name,Last seen,Last post
+Row-Types:		username,timediff,postno
+Mode:			table
+Refresh-Rate:	60

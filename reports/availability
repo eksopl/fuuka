@@ -1,0 +1,6 @@
+Query:			select name,trip,count(num),avg(timestamp%86400),std(timestamp%86400),(avg((timestamp+43200)%86400)+43200)%86400,std((timestamp+43200)%86400) from %%BOARD%% where timestamp>%%NOW%%-2592000 group by name,trip having count(*)>4 order by name,trip
+Title:			Availability
+Rows:			Name,Posts last month,Availability
+Row-Types:		username,text,fromto
+Mode:			table
+Refresh-Rate:	21600

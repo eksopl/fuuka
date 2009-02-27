@@ -1,0 +1,4 @@
+Query:			select floor(timestamp/86400)*86400,count(*),count(case media_hash when '' then NULL else 1 end),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% where timestamp>%%NOW%%-31536000 group by floor(timestamp/86400) order by floor(timestamp/86400);
+Title:			Karma
+Mode:			graph
+Refresh-Rate:	604800
