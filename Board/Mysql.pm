@@ -62,16 +62,16 @@ create table if not exists $self->{table} (
 	media_w smallint unsigned,
 	media_h smallint unsigned,
 	media_size INT unsigned,
-	media_hash tinytext,
+	media_hash varchar(64),
 	media_filename tinytext,
 
 	spoiler bool,
 	deleted bool,
 	capcode enum('N', 'M', 'A', 'G') not null default 'N',
 
-	email tinytext,
-	name text,
-	trip tinytext,
+	email varchar(64),
+	name varchar(256),
+	trip varchar(64),
 	title text,
 	comment text,
 	delpass tinytext,
@@ -82,10 +82,11 @@ create table if not exists $self->{table} (
 	index subnum_index(subnum),
 	index parent_index(parent),
 	index timestamp_index(timestamp),
-	index media_hash_index(media_hash(8)),
-	index email_index(email(4)),
-	index name_index(name(10)),
-	index trip_index(trip(8)),
+	index media_hash_index(media_hash),
+	index email_index(email),
+	index name_index(name),
+	index trip_index(trip),
+	index fullname_index(name,trip),
 	fulltext index comment_index(comment)
 ) engine=myisam;
 HERE

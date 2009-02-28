@@ -64,7 +64,7 @@ sub reload_reports(){
 		open HANDLE,"$loc/$_" or die "$! - $loc/$_";
 		for(<HANDLE>){
 			uncrlf($_);
-
+			
 			/([\w\d\-]*)\s*:\s*(.*)/ or die "wrong report file format: $_";
 			
 			$opts{lc $1}=$2;

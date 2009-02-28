@@ -759,8 +759,6 @@ sub show_reports(){
 		
 		open HANDLE,"$loc/$_" or error "$! - $loc/$_";
 		for(<HANDLE>){
-			uncrlf($_);
-
 			/([\w\d\-]*)\s*:\s*(.*)/ or error "wrong report file format: $_";
 			
 			$opts{lc $1}=$2;
@@ -792,13 +790,13 @@ sub get_report($){
 	open HANDLE,"$loc/$name" or error "$! - $loc/$name";
 	for(<HANDLE>){
 		uncrlf($_);
-
+		
 		/([\w\d\-]*)\s*:\s*(.*)/ or error "wrong report file format: $name";
 		
 		$opts{lc $1}=$2;
 	}
 	close HANDLE;
-	die "$loc/$name: wrong format: must have field $_"
+	error "$loc/$name: wrong format: must have field $_"
 		foreach grep{not $opts{$_}} "query","mode","refresh-rate";
 
 	if($opts{mode} eq 'graph'){
@@ -1033,9 +1031,6 @@ if($path){
 	m!^/advanced-search!x and do{
 		sendpage ADV_SEARCH_TEMPLATE->(
 			title		=> "Advanced search",
-			
-			height		=> 24,
-			width		=> 40,
 			
 			standalone	=> 1,
 		);
