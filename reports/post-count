@@ -1,4 +1,4 @@
-Query:			select name,trip,count(*) from %%BOARD%% group by name,trip having count(*)>12 order by count(*) desc
+Query:			select name,trip,count(*) from %%BOARD%% group by name,trip order by count(*) desc limit 512
 Title:			Post counts
 Rows:			Name,Total posts
 Row-Types:		username,text
