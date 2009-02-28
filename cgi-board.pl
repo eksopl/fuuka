@@ -791,6 +791,8 @@ sub get_report($){
 	
 	open HANDLE,"$loc/$name" or error "$! - $loc/$name";
 	for(<HANDLE>){
+		uncrlf($_);
+
 		/([\w\d\-]*)\s*:\s*(.*)/ or error "wrong report file format: $name";
 		
 		$opts{lc $1}=$2;
