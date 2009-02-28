@@ -80,6 +80,12 @@ our $navigation="<div>".(join "",map{
 	"[ ".(join " / ",map{"<a href=\"$_->[2]\"".($_->[1] and " title=\"".html_encode($_->[1])."\"" or "").">$_->[0]</a>"}@$_)." ] "
 }@navigation)."</div>";
 
+sub uncrlf($){
+	$_[0]=~s/\r?\n?\r?$//;
+	
+	$_[0]
+}
+
 sub cgi_params(){
 	my %params;
 	
@@ -753,6 +759,8 @@ sub show_reports(){
 		
 		open HANDLE,"$loc/$_" or error "$! - $loc/$_";
 		for(<HANDLE>){
+			uncrlf($_);
+
 			/([\w\d\-]*)\s*:\s*(.*)/ or error "wrong report file format: $_";
 			
 			$opts{lc $1}=$2;

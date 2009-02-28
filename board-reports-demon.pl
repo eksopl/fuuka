@@ -33,6 +33,12 @@ mkdir "$loc";
 mkdir "$loc/status";
 mkdir "$loc/status/$_" foreach @$board_names;
 
+sub uncrlf($){
+	$_[0]=~s/\r?\n?\r?$//;
+	
+	$_[0]
+}
+
 sub mtime($){
 	my($filename)=@_;
 	
@@ -57,6 +63,8 @@ sub reload_reports(){
 		
 		open HANDLE,"$loc/$_" or die "$! - $loc/$_";
 		for(<HANDLE>){
+			uncrlf($_);
+
 			/([\w\d\-]*)\s*:\s*(.*)/ or die "wrong report file format: $_";
 			
 			$opts{lc $1}=$2;
@@ -81,8 +89,6 @@ sub reload_reports(){
 	
 	closedir DIRHANDLE;
 }
-
-use Data::Dumper;
 
 reload_reports;
 
