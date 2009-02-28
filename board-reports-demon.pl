@@ -55,23 +55,25 @@ sub reload_reports(){
 	
 	opendir DIRHANDLE,$loc or die "$! - $loc";
 	while($_=readdir DIRHANDLE){
-		next unless -f "$loc/$_";
+		my $filename="$loc/$_";
+		
+		next unless -f $filename;
 		my %opts;
 		
-		push @report_files,"$loc/$_";
-		$mtimes{"$loc/$_"}=mtime "$loc/$_";
+		push @report_files,$filename;
+		$mtimes{$filename}=mtime $filename;
 		
-		open HANDLE,"$loc/$_" or die "$! - $loc/$_";
+		open HANDLE,$filename or die "$! - $filename";
 		for(<HANDLE>){
 			uncrlf($_);
 			
-			/([\w\d\-]*)\s*:\s*(.*)/ or die "wrong report file format: $_";
+			/([\w\d\-]*)\s*:\s*(.*)/ or die "$filename: wrong report file format: $_";
 			
 			$opts{lc $1}=$2;
 		}
 		close HANDLE;
 		
-		die "$loc/$_: wrong format: must have field $_"
+		die "$filename: wrong format: must have field $_"
 			foreach grep{not $opts{$_}} "query","mode","refresh-rate";
 		
 		$opts{filename}="$_";

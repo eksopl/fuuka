@@ -67,7 +67,7 @@ our $board				= Board::Mysql->new($board_name,
 our @navigation=(
 	[
 		map{
-		[$_,			$board_desc,							"$ENV{SCRIPT_NAME}/$_"]
+		[$_,			$boards{$board_name}->{name},			"$ENV{SCRIPT_NAME}/$_"]
 		} @boards
 	],[
 		["index",		"Go to front page of archiver",			"$ENV{SCRIPT_NAME}"],
