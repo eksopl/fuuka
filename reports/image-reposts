@@ -1,4 +1,4 @@
-Query:			select preview,num,subnum,parent,media_hash,total from jp join (select hash,total,max(preview_w) as w from jp join (select media_hash as hash,count(media_hash) as total from jp where media_hash!='' group by media_hash order by count(media_hash) desc limit 32) as x on jp.media_hash=hash group by media_hash) as x on jp.media_hash=hash and jp.preview_w=w group by media_hash order by total desc;
+Query:			select preview,num,subnum,parent,media_hash,total from %%BOARD%% join (select hash,total,max(preview_w) as w from %%BOARD%% join (select media_hash as hash,count(media_hash) as total from %%BOARD%% where media_hash!='' group by media_hash order by count(media_hash) desc limit 32) as x on media_hash=hash group by media_hash) as x on media_hash=hash and preview_w=w group by media_hash order by total desc;
 Title:			Most Reposted Images
 Rows:			Image,Reposts
 Row-Types:		image,text
