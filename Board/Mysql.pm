@@ -79,6 +79,7 @@ create table if not exists $self->{table} (
 	primary key (num,subnum),
 	
 	index id_index(id),
+	index num_index(num),
 	index subnum_index(subnum),
 	index parent_index(parent),
 	index timestamp_index(timestamp),
@@ -223,6 +224,9 @@ sub search($$$$){
 	
 	push @conditions,"trip=".$dbh->quote($settings{tripcode})
 		if $settings{tripcode};
+	
+	push @conditions,"media_hash=".$dbh->quote($settings{media_hash})
+		if $settings{media_hash};
 	
 	push @conditions,"deleted=1"
 		if $settings{showdel} and not $settings{shownodel};

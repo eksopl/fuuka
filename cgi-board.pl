@@ -27,6 +27,8 @@ our $self				= "$ENV{SCRIPT_NAME}/$board_name";
 our $cgi				= new CGI;
 our %cookies			= fetch CGI::Cookie;
 our $id					= unpack "N",pack "C4",split /\./,$ENV{REMOTE_ADDR};
+
+our %cgi_params;
 	
 use constant LOCAL		=> $ENV{REMOTE_ADDR} eq '127.0.0.1';
 
@@ -93,11 +95,14 @@ sub cgi_params(){
 		foreach qw/search_text/;
 	
 	$cgi->param("$_") and $params{$_}=$cgi->param("$_")
-		foreach qw/search_username search_tripcode search_del search_int search_ord task/;
+		foreach qw/search_username search_tripcode search_del search_int search_ord task search_media_hash/;
+	
+	$params{$_}=$cgi_params{$_}
+		foreach keys %cgi_params;
 	
 	$params{ghost}='yes' if $ghost_mode;
 	
-	$params{delpass}=$cookies{'delpass'}->value if $cookies{'delpass'};
+#	$params{delpass}=$cookies{'delpass'}->value if $cookies{'delpass'};
 	
 	%params
 }
@@ -141,7 +146,7 @@ use constant BBCODE => {
 	b			=> ["<b>",									"</b>"],
 	i			=> ["<em>",									"</em>"],
 	code		=> ["<code>",								"</code>"],
-	m			=> ["<tt>",									"</tt>"],
+	m			=> ["<tt class='code'>",					"</tt>"],
 	u			=> ["<span class='u'>",						"</span>"],
 	o			=> ["<span class='o'>",						"</span>"],
 	s			=> ["<span class='s'>",						"</span>"],
@@ -199,7 +204,7 @@ sub format_comment($$){
 	local $_=html_encode(shift);
 	my($present_posts)=@_;
 	
-	s!(&gt;&gt;(\d+(?:&#44;)?\d+))(?: (.*))?!
+	s!(&gt;&gt;(\d+(?:&#44;)?\d+))(?: ([^\r\n]*))?!
 		my($text,$num,$quote)=($1,$2,$3);
 		$num=~s/&#44;/_/g;
 		
@@ -716,17 +721,20 @@ sub show_search($$$){
 #	error "Too bad. Database doesn't support searching for words with length less than 4"
 #		if $text and length $text<=3;
 	
-	my $del=$cgi->param("search_del");
-	my $int=$cgi->param("search_int");
+	my %keys=cgi_params;
+	
+	my $del=$keys{search_del};
+	my $int=$keys{search_int};
 	
 	my @list=$board->search($text,24,$offset,$advanced?(
-		name		=> ($cgi->param("search_username") or ""),
-		trip		=> ($cgi->param("search_tripcode") or ""),
+		name		=> ($keys{search_username} or ""),
+		trip		=> ($keys{search_tripcode} or ""),
 		showdel		=> ($del eq 'yes' or $del eq 'dontcare'),
 		shownodel	=> ($del eq 'no' or $del eq 'dontcare'),
 		showint		=> ($int eq 'yes' or $int eq 'dontcare'),
 		showext		=> ($int eq 'no' or $int eq 'dontcare'),
-		ord			=> ($cgi->param("search_ord") or ""),
+		ord			=> ($keys{search_ord} or ""),
+		media_hash	=> ($keys{search_media_hash} or ""),
 	):());
 	
 	error $board->errstr if $board->error;
@@ -772,9 +780,9 @@ sub show_reports(){
 		push @reports,\%opts;
 	}
 	closedir DIRHANDLE;
-
+	
 	sendpage REPORT_LIST_TEMPLATE->(title=>"reports",
-		reports		=> \@reports,
+		reports		=> [sort{$a->{title} cmp $b->{title}} @reports],
 		
 		page		=> 0,
 		thread		=> 0,
@@ -1056,15 +1064,11 @@ if($path){
 	m!^/image/(.*)! and do{
 		my($val)=$1;
 		
-		print <<HERE;
-Content-type: text/plain
-
-hash: $val
-there will more info here soon (probably!)
-HERE
-		
-		exit;
-	};
+		$cgi_params{search_media_hash}=$val;
+		$cgi_params{task}='search2';
+	
+		show_search "",0,1;
+	},exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
 		error "You are trying to do dangerous things" unless $ENV{REMOTE_ADDR} eq '127.0.0.1';

@@ -149,7 +149,7 @@ a.tooltip-red:hover{
 	font-weight:normal !important;
 }
 
-code { white-space: pre }
+code,.code { white-space: pre }
 
 .o { text-decoration: overline; }
 .u { text-decoration: underline; }

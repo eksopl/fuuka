@@ -174,7 +174,7 @@ HERE
 <input type="hidden" name="task" value="post" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
 View post&nbsp;
-<input type="text" name="post" size="9" value="<var $thread>" />&nbsp;
+<input type="text" name="post" size="9" value="" />&nbsp;
 <input type="submit" value="Submit" />
 </div></form>
 
@@ -236,7 +236,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.<var ref_post_text($num,$subnum)></a>
 </if>
 
-<!-- this icon hurts my eyes <if $subnum><img class="inline" src="<const MEDIA_LOCATION_HTTP>/internal.png" alt="[INTERNAL]" title="This is not an archived reply" />&nbsp;</if> -->
+<if $subnum><img class="inline" src="<const MEDIA_LOCATION_HTTP>/internal.png" alt="[INTERNAL]" title="This is not an archived reply" />&nbsp;</if>
 <if $spoiler><img class="inline" src="<const MEDIA_LOCATION_HTTP>/spoilers.png" alt="[SPOILER]" title="Picture in this post is marked as spoiler" />&nbsp;</if>
 <if $deleted><img class="inline" src="<const MEDIA_LOCATION_HTTP>/deleted.png" alt="[DELETED]" title="This post was deleted before its lifetime has expired" />&nbsp;</if>
 HERE
