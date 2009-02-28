@@ -172,7 +172,7 @@ async{my $board=$board_spawner->();my($pagenos,$wait)=@$_;while(1){foreach my $p
 
 # rebuild whole thread, either because it's new or because it's too old
 async{my $board=$board_spawner->();while(1){
-	my $_;
+	local $_;
 	{	lock @newthreads;
 		$_=shift @newthreads;
 	}

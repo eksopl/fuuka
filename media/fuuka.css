@@ -130,6 +130,7 @@ a.tooltip:hover span, a.tooltip-red:hover span{
 	color:black;
 	font-weight:normal;
 	text-align:left;
+	text-decoration:none;
 }
 a.tooltip-red:hover{
 	color:white;
@@ -144,10 +145,16 @@ a.tooltip-red:hover{
 	color: white;
 }
 
+.trip{
+	font-weight:normal !important;
+}
+
+code { white-space: pre }
+
 .o { text-decoration: overline; }
 .u { text-decoration: underline; }
-.aa { font-family:Mona,'MS PGothic' !important;}
+.aa { font-family:Mona,'MS PGothic' !important; }
 .s { text-decoration: line-through; }
 .banned { font-weight: bold; color: red; }
-.admin{ color: #f00000 !important;}
-.mod{ color: #800080 !important;}
+.admin{ color: #c00000 !important; }
+.mod{ color: #800080 !important; }

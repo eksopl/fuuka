@@ -32,7 +32,7 @@ sub new($$;%){
 		$name,
 		$password,
 		{AutoCommit=>1,PrintError=>0,mysql_enable_utf8=>1},
-	) or die "Couldn't connect: $!";
+	) or die $DBI::errstr;
 
 	$self->{dbh}				= $dbh;
 	$self->{table}				= $table;
@@ -67,7 +67,7 @@ create table if not exists $self->{table} (
 
 	spoiler bool,
 	deleted bool,
-	capcode ENUM('N', 'M', 'A') not null default 'N',
+	capcode enum('N', 'M', 'A', 'G') not null default 'N',
 
 	email tinytext,
 	name text,
@@ -79,6 +79,7 @@ create table if not exists $self->{table} (
 	primary key (num,subnum),
 	
 	index id_index(id),
+	index subnum_index(subnum),
 	index parent_index(parent),
 	index timestamp_index(timestamp),
 	index media_hash_index(media_hash(8)),
@@ -246,7 +247,7 @@ sub search($$$$){
 		$dbh->quote($text).
 		") as score from $self->{table} where $condition match(comment) against(".
 		$dbh->quote(join " ",map{"+$_"}split /\s+/,$text).
-		" in boolean mode) order by score desc, $query_ord limit $limit offset $offset;":
+		" in boolean mode) order by score desc, timestamp desc limit $limit offset $offset;":
 		
 		$text?
 		"select * from $self->{table} where $condition match(comment) against(".
@@ -284,6 +285,8 @@ sub post($;%){
 	$ref=$self->query("select num,subnum from $self->{table} where id=? and timestamp=?",$info{id},$date) or return;
 	
 	$ref and $ref->[0] and $ref->[0] and (ref $ref->[0] eq 'ARRAY') or $self->error(FORGET_IT,"I forgot where I put it");
+	
+	$self->ok;
 	
 	$ref->[0]->[0].($ref->[0]->[1]?",$ref->[0]->[1]":"")
 }
@@ -365,6 +368,8 @@ sub insert($$$){
 		
 		}@posts
 	) or return 0;
+
+	$self->ok;
 
 	1;
 }

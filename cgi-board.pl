@@ -71,6 +71,8 @@ our @navigation=(
 		["index",		"Go to front page of archiver",			"$ENV{SCRIPT_NAME}"],
 		["top",			"Go to first page of this board",		"$self"],
 		["reports",		"",										"$self/reports"],
+		["report a bug","Report a bug or suggest a feature",	"http://code.google.com/p/fuuka/issues/list"],
+		
 	]
 );
 
@@ -156,14 +158,15 @@ sub bbcode_encode($){
 		
 		if($quoting and $tag eq 'code'){
 			if(not $closing){
-				pop @tags;
+				push @tags,$tag;
 				$quoting++;
 			} else{
-				push @tags,$tag;
+				pop @tags;
 				$quoting--;
 			}
 			
-			$res.=$fulltag if $quoting
+			$res.=$fulltag if $quoting;
+			$res.=$html->[1] unless $quoting;
 		} elsif($quoting){
 			$res.=$fulltag;
 		} elsif(not $closing){
@@ -190,13 +193,14 @@ sub format_comment($$){
 	local $_=html_encode(shift);
 	my($present_posts)=@_;
 	
-	s!(&gt;&gt;(\d+(?:&#44;)?\d+))!
-		my($text,$num)=($1,$2);
+	s!(&gt;&gt;(\d+(?:&#44;)?\d+))(?: (.*))?!
+		my($text,$num,$quote)=($1,$2,$3);
 		$num=~s/&#44;/_/g;
 		
-		$present_posts->{$num}?
+		($present_posts->{$num}?
 			qq{<a href="#p$num" onclick="replyhighlight('p$num')">$text</a>}:
-			qq{<a href="}.(ref_post_far($num)).qq{">$text</a>}
+			qq{<a href="}.(ref_post_far($num)).qq{">$text</a>}).
+				($quote?qq{ <span class="unkfunc">$quote</span>}:"")
 	!ge;
 	
 	# make URLs into links
@@ -292,15 +296,20 @@ sub compile_template($%){
 	my ($str)=@_;
 	my $code;
 	
+	my $skipping_whitespace=0;
+	
 	$str=~s/^\s+//;
 	$str=~s/\s+$//;
 	$str=~s/\n\s*/ /sg;
 
-	while($str=~m!(.*?)(<(/?)(var|eval|const|if|else|elsif|loop)(?:|\s+(.*?))>(?=[^{])|$)!sg){
+	while($str=~m!(.*?)(<(/?)(var|eval|const|if|else|elsif|loop|nonl)(?:|\s+(.*?))>(?=[^{])|$)!sg){
 		my($html,$tag,$closing,$name,$args)=($1,$2,$3,$4,$5);
 		
 		$html=~s/(['\\])/\\$1/g;
+		$html=~s/^\s*//sg,$skipping_whitespace=0 if $skipping_whitespace;
+		
 		$code.="\$res.='$html';" if length $html;
+		
 		
 		if($tag){
 			if($closing){
@@ -314,6 +323,7 @@ sub compile_template($%){
 				elsif($name eq 'elsif')		{ $code.='}elsif(eval{'.$args.'}){' }
 				elsif($name eq 'else' )		{ $code.='}else{' }
 				elsif($name eq 'loop' )		{ $code.='my $__a=eval{'.$args.'};if($__a){for(@$__a){my %__ov;my %__v;eval{%__v=%{$_}};for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}' }
+				elsif($name eq 'nonl' )		{ $skipping_whitespace=1 }
 			}
 		}
 	}
@@ -560,8 +570,8 @@ sub show_index(){
 		
 		title		=> "Yotsuba archiver",
 		
-		height		=> 16,
-		width		=> 40,
+		height		=> 18,
+		width		=> 60,
 	
 		custom_css	=> <<HERE,
 body {
@@ -988,7 +998,9 @@ if($task){for($task){
 		exit;
 	};
 	/^redirect?$/ and do{
-		redirect_late $cgi->param("title"),$cgi->param("link");
+		my($link)=$cgi->param("link");
+		
+		redirect $link;
 	},exit;
 	
 	error "unknown task: $task";

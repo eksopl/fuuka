@@ -8,7 +8,7 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 <title><if $board_desc>/<var $board_name>/ - <var $board_desc></if><if $title> - <var $title></if></title>
 <script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js"></script>
 <meta name="description" content="The Pleasure of Being Cummed Inside" />
-<link rel="stylesheet" type="text/css" href="<const MEDIA_LOCATION_HTTP>/fuuka.css" title="forbidden(not4chan)" />
+<link rel="stylesheet" type="text/css" href="<const MEDIA_LOCATION_HTTP>/fuuka.css" title="Fuuka" />
 <style type="text/css"><!--
 	html,body { background:#eefff2; color:#002200; }
 	img { border: none; }
@@ -91,7 +91,7 @@ use constant LATE_REDIRECT_INCLUDE => <<'HERE';
 <div class="outer"><div class="inner">
 <span class='aa'><var simple_format($message)></span>
 </div></div>
-<p><a href="<var $link>" style>Click here to be forwarded manually</a><br /><br />Powered by pure enthusiasm | All characters <acronym title="DO NOT STEAL MY ART">&#169;</acronym> Darkpa's party</p>
+<p><a href="<var $link>" style>Click here to be forwarded manually</a><br /><br /><a href="http://code.google.com/p/fuuka/">Fuuka</a> | All characters <acronym title="DO NOT STEAL MY ART">&#169;</acronym> Darkpa's party</p>
 HERE
 
 use constant INDEX_INCLUDE => <<'HERE';
@@ -110,14 +110,44 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <input type="hidden" name="task" value="search2" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
 <table style="float:left"><tbody>
+
 <tr><td colspan="2" class="theader">Advanced search</td></tr>
-<tr><td class="postblock">Text to find</td><td><input type="text" name="search_text" size="32" value="<var $search_text>" /></td></tr>
-<tr><td class="postblock">Username <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> user name. Leave empty for any user name.</span></a></td><td><input type="text" name="search_username" size="32" value="<var $search_username>" /></td></tr>
-<tr><td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> tripcode. Leave empty for any.</span></a></td><td><input type="text" name="search_tripcode" size="32" value="<var $search_tripcode>" /></td></tr>
-<tr><td class="postblock">Deleted posts</td><td><input type="radio" <if $search_del eq 'dontcare' or not $search_del>checked="checked" </if>name="search_del" value="dontcare" />Show all posts<br /><input type="radio" <if $search_del eq 'yes'>checked="checked" </if>name="search_del" value="yes" />Show only deleted posts<br /><input type="radio" <if $search_del eq 'no'>checked="checked" </if>name="search_del" value="no" />Only show non deleted posts.</td></tr>
-<tr><td class="postblock">Internal posts</td><td><input type="radio" <if $search_int eq 'dontcare' or not $search_int>checked="checked" </if>name="search_int" value="dontcare" />Show all posts<br /><input type="radio" <if $search_int eq 'yes'>checked="checked" </if>name="search_int" value="yes" />Show only internal posts<br /><input type="radio" <if $search_int eq 'no'>checked="checked" </if>name="search_int" value="no" />Show only archived posts</td></tr>
-<tr><td class="postblock">Order</td><td><input type="radio" <if $search_ord eq 'new' or not $search_ord>checked="checked" </if>name="search_ord" value="new" />New post first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /><input type="radio" <if $search_ord eq 'rel'>checked="checked" </if>name="search_ord" value="rel" />Order by relevancy <a class="tooltip" href="#">[?]<span>Can only order by relevancy if query contains none of <tt>*</tt>, <tt>+</tt>, or <tt>-</tt> characters.</span></a></td></tr>
-<tr><td class="postblock">Action</td><td><input type="submit" value="Search" /> <a href="#" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Simple ]</a></td></tr>
+
+<tr>
+<td class="postblock">Text to find</td>
+<td><input type="text" name="search_text" size="32" value="<var $search_text>" /></td>
+</tr>
+
+<tr>
+<td class="postblock">Username <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> user name. Leave empty for any user name.</span></a></td>
+<td><input type="text" name="search_username" size="32" value="<var $search_username>" /></td>
+</tr>
+
+<tr>
+<td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> tripcode. Leave empty for any.</span></a></td>
+<td><input type="text" name="search_tripcode" size="32" value="<var $search_tripcode>" /></td>
+</tr>
+
+<tr>
+<td class="postblock">Deleted posts</td>
+<td><input type="radio" <if $search_del eq 'dontcare' or not $search_del>checked="checked" </if>name="search_del" value="dontcare" />Show all posts<br /><input type="radio" <if $search_del eq 'yes'>checked="checked" </if>name="search_del" value="yes" />Show only deleted posts<br /><input type="radio" <if $search_del eq 'no'>checked="checked" </if>name="search_del" value="no" />Only show non deleted posts.</td>
+</tr>
+
+<tr>
+<td class="postblock">Internal posts</td>
+<td><input type="radio" <if $search_int eq 'dontcare' or not $search_int>checked="checked" </if>name="search_int" value="dontcare" />Show all posts<br /><input type="radio" <if $search_int eq 'yes'>checked="checked" </if>name="search_int" value="yes" />Show only internal posts<br /><input type="radio" <if $search_int eq 'no'>checked="checked" </if>name="search_int" value="no" />Show only archived posts</td>
+</tr>
+
+<tr>
+<td class="postblock">Order</td>
+<td><input type="radio" <if $search_ord eq 'new'>checked="checked" </if>name="search_ord" value="new" />New post first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /><input type="radio" <if $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" value="rel" />Relevant posts first <a class="tooltip" href="#">[?]<span>Can only order by relevancy if query contains none of <tt>*</tt>, <tt>+</tt>, or <tt>-</tt> characters.</span></a></td>
+</tr>
+
+<tr>
+<td class="postblock">Action</td>
+<td><input type="submit" value="Search" /> <a href="#" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Simple ]</a></td>
+</tr>
+
 </tbody></table>
 </div></form>
 HERE
@@ -184,28 +214,29 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <label><input type="checkbox" name="delete" value="<var $num>,<var $subnum>" />
 <if $title><span class="filetitle"><var $title></span>&nbsp;</if>
 
+<if $capcode eq 'G'>
+<span style="background:white;color:black;border:1px solid gray;font-weight:bold;padding:0.5em 1.5em;position:relative;"><span style="background-image:url(/media/god-left.png);height:148px;left:-3em;position:absolute;top:-3.6em;width:121px;"></span><var $name> <span class="trip">## God</span></span>
+<span style="position:relative;"><span style="background-image:url(/media/god-right.png);height:148px;left:-6em;position:absolute;top:-4em;width:156px;"></span></span>
+<else>
 <span class="postername<if $capcode eq 'A'> admin</if><if $capcode eq 'M'> mod</if>">
-<if $email><a href="mailto:<var $email>"></if>
-<var $name>
-<if $email></a></if>
-</span>
-<if $trip>
-<if $email><a href="mailto:<var $email>"></if>
-<span class="postertrip<if $capcode eq 'A'> admin</if><if $capcode eq 'M'> mod</if>"><var $trip></span>
-<if $email></a></if>
-</if>
+<if $email><a href="mailto:<var $email>"></if><var $name><if $email></a></if><nonl>
+</span><nonl>
+<if $trip><nonl>
+<if $email><a href="mailto:<var $email>"></if><nonl>
+<span class="postertrip<if $capcode eq 'A'> admin</if><if $capcode eq 'M'> mod</if>">&nbsp;<var $trip></span><if $email></a></if></if>
 <if $capcode eq 'A'><span class="postername admin"> ##Admin</span></if>
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
+</if>
 
 <var gmtime $date></label>
 
 <if $replyform>
-<span class="js"><a href="<var ref_post($parent,$num,$subnum)>">No.</a><a href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a></span>
+<a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
 <else>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.<var ref_post_text($num,$subnum)></a>
 </if>
 
-<if $subnum><img class="inline" src="<const MEDIA_LOCATION_HTTP>/internal.png" alt="[INTERNAL]" title="This is not an archived reply" />&nbsp;</if>
+<!-- this icon hurts my eyes <if $subnum><img class="inline" src="<const MEDIA_LOCATION_HTTP>/internal.png" alt="[INTERNAL]" title="This is not an archived reply" />&nbsp;</if> -->
 <if $spoiler><img class="inline" src="<const MEDIA_LOCATION_HTTP>/spoilers.png" alt="[SPOILER]" title="Picture in this post is marked as spoiler" />&nbsp;</if>
 <if $deleted><img class="inline" src="<const MEDIA_LOCATION_HTTP>/deleted.png" alt="[DELETED]" title="This post was deleted before its lifetime has expired" />&nbsp;</if>
 HERE
