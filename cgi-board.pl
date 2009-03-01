@@ -728,7 +728,7 @@ sub show_search($$$){
 	
 	my @list=$board->search($text,24,$offset,$advanced?(
 		name		=> ($keys{search_username} or ""),
-		trip		=> ($keys{search_tripcode} or ""),
+		tripcode	=> ($keys{search_tripcode} or ""),
 		showdel		=> ($del eq 'yes' or $del eq 'dontcare'),
 		shownodel	=> ($del eq 'no' or $del eq 'dontcare'),
 		showint		=> ($int eq 'yes' or $int eq 'dontcare'),
