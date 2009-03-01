@@ -115,60 +115,70 @@ async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(
 }} foreach 1..$settings->{"thumb-threads"};
 
 # insert updates into database
-async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(1){
+async{my $local_board=SPAWNER->($board_name);while(1){
 	while(my $ref=pop @thread_updates){
-		$local_board->insert($ref,$board);
+		$local_board->insert($ref);
 		
-		debug ERROR,"Couldn't insert posts into database: ".$board->errstr
+		debug ERROR,"Couldn't insert posts into database: ".$local_board->errstr
 			if $local_board->error;
 	}
 	sleep 1;
 }};
 
 # scan pages
-async{my $board=$board_spawner->();my($pagenos,$wait)=@$_;while(1){foreach my $pageno(@$pagenos){
-	my $list=$board->content(PAGE $pageno);
-	sleep 1 and next if $board->error;
-	
-	for(@{$list->{threads}}){
-		my $num=$_->{num};
+async{
+	my $board=$board_spawner->();
+	my($pagenos,$wait)=@$_;
+	while(1){
+		my $now=time;
 		
-		push @newthreads,$num and next unless $threads{$num};
-		
-		my $thread=$threads{$num};
-		my(@posts)=@{$_->{posts}};
-		
-		my($old,$new,$must_refresh)=(0,0,0);
-		
-		mark_deletes $thread,$_ and $must_refresh=1;
-		
-		for(@posts){
-			my $post=find_post($thread->{ref},$_->{num});
+		foreach my $pageno(@$pagenos){
+			my $list=$board->content(PAGE $pageno);
+			sleep 1 and next if $board->error;
 			
-			# Comment too long. Click here to view the full text.
-			$must_refresh=1 if $_->{omitted};
-			
-			# this post already is in %threads
-			$post and ++$old and next;
-			
-			# is not
-			push @{$thread->{ref}->{posts}},shared_clone($_);
-			$new++;
-			
-			$must_refresh=1 if $_->{media};
+			for(@{$list->{threads}}){
+				my $num=$_->{num};
+				
+				push @newthreads,$num and next unless $threads{$num};
+				
+				my $thread=$threads{$num};
+				my(@posts)=@{$_->{posts}};
+				
+				my($old,$new,$must_refresh)=(0,0,0);
+				
+				mark_deletes $thread,$_ and $must_refresh=1;
+				
+				for(@posts){
+					my $post=find_post($thread->{ref},$_->{num});
+					
+					# Comment too long. Click here to view the full text.
+					$must_refresh=1 if $_->{omitted};
+					
+					# this post already is in %threads
+					$post and ++$old and next;
+					
+					# is not
+					push @{$thread->{ref}->{posts}},shared_clone($_);
+					$new++;
+					
+					$must_refresh=1 if $_->{media};
+				}
+				
+				$thread->{lasthit}=time;
+				
+				# no new posts
+				next if $old!=0 and $new==0;
+				
+				debug TALK,"$_->{num}: ".($pageno==0?"front page":"page $pageno")." update";
+				
+				update_thread $thread->{ref};
+				push @newthreads,$num if $must_refresh or $old<2;
+			}
 		}
-		
-		$thread->{lasthit}=time;
-		
-		# no new posts
-		next if $old!=0 and $new==0;
-		
-		debug TALK,"$_->{num}: ".($pageno==0?"front page":"page $pageno")." update";
-		
-		update_thread $thread->{ref};
-		push @newthreads,$num if $must_refresh or $old<2;
+		my $left=$wait-(time-$now);
+		sleep $left if $left>0;
 	}
-}}sleep ($wait or 1);} foreach @{ $settings->{pages} };
+} foreach @{ $settings->{pages} };
 
 # rebuild whole thread, either because it's new or because it's too old
 async{my $board=$board_spawner->();while(1){

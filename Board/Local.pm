@@ -110,7 +110,7 @@ sub insert($$){
 	$self->error(0);
 }
 
-sub insert_media_preview($$){
+sub insert_media_preview{
 	my $self=shift;
 	my($h,$source)=@_;
 	
@@ -131,7 +131,21 @@ sub insert_media_preview($$){
 	print HANDLE $$ref;
 	close HANDLE;
 	
-	$self->error(0);
+	$self->ok;
+	
+	1;
 }
 
-1;
+sub media_preview_exists{
+	my $self=shift;
+	my($h,$source)=@_;
+	
+	ref $h eq "Board::Post"
+		or die "Can work with Board::Post, received ".ref $h;
+	
+	my($thumb_dir)=$self->make_dirs($h->{parent} or $h->{num});
+
+	return 1 if -e "$thumb_dir/$h->{preview}";
+	
+	0;	
+}

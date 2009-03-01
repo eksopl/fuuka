@@ -124,6 +124,8 @@ REDO:
 	$self->warn($self->error) and goto REDO
 		if $self->error and $self->error==TRY_AGAIN;
 	
+	print "c ".(ref $ref)." ".$$ref."\n";
+	
 	$contents
 }
 

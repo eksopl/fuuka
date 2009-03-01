@@ -9,14 +9,14 @@ use constant BOARD_SETTINGS			=> {
 	a => {
 		name					=> "Anime & Manga", # Name, as it will appear on web page
 		
-		pages					=> [[[0],0],[[1..10],7200]],
+		pages					=> [[[0],15],[[1..10],7200]],
 													# Each element of a list is processed in own thread.
 													# Each element is a list with two elements
 													#      first: list of pages to check periodically, e.g. [0,1,2]
 													#      second: how long to sleep in seconds after checking all of them
 													
 													# how many requests should be carried out simultaneously to
-		"thread-refresh-rate"	=> 16,				#     get new threads ad refresh old ones
+		"thread-refresh-rate"	=> 16,				#     get new threads and refresh old ones
 		"new-thread-threads"	=> 6,				#     get thumbs
 		"thumb-threads"			=> 6,				#     get pictures
 		
@@ -24,7 +24,7 @@ use constant BOARD_SETTINGS			=> {
 	},
 	jp => {
 		name					=> "Japan/General",
-		pages					=> [[[0],0],[[1..10],7200]],
+		pages					=> [[[0],30],[[1..10],7200]],
 		"thread-refresh-rate"	=> 12,
 		"new-thread-threads"	=> 3,
 		"thumb-threads"			=> 3,

@@ -326,9 +326,9 @@ sub database_delete{
 	$self->query("delete from $self->{table} where num=? and subnum=?",$num,$subnum);
 }
 
-sub insert($$$){
+sub insert{
 	my $self=shift;
-	my($thread,$source)=@_;
+	my($thread)=@_;
 	my $dbh=$self->{dbh};
 	my($num,$parent,@posts);
 	
