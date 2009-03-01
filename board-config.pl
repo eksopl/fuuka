@@ -87,6 +87,9 @@ use constant DB_PASSWORD				=> "qwerty";
 # Posting
 #
 
+# Password to actually delete files and not just a trash bun icon next to them.
+use constant DELPASS					=> 'TOPSECRET';				
+
 # Cryptographic secret. It's okay to leave this unchanged, not like anyone cares.
 use constant SECRET						=> 'TOPSECRET';				
 
@@ -119,6 +122,7 @@ use constant SPAWNER => sub{my $board_name=shift;Board::Mysql->new($board_name,
 	name			=> DB_USERNAME,
 	password		=> DB_PASSWORD,
 	images			=> IMAGES_LOCATION,
+	create			=> 1,
 ) or die "Couldn't use mysql board with table $board_name"};
 
 sub yotsutime(){time-5*60*60}

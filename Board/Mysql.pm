@@ -24,6 +24,7 @@ sub new($$;%){
 	my $name		=(delete $info{name}		or "root");
 	my $password	=(delete $info{password}	or "");
 	my $connstr		=(delete $info{connstr}		or "");
+	my $create_new	= delete $info{create};
 	
 	my $self=$class->SUPER::new($path,%info);
 	
@@ -40,7 +41,7 @@ sub new($$;%){
 	$self->{threads_per_page}	= 20;
 	$self->{opts}				= $opts;
 	
-	$self->_create_table;
+	$self->_create_table if $create_new;
 
 	bless $self,$class;
 }
@@ -317,6 +318,13 @@ sub delete{
 	$self->ok;
 }
 
+sub database_delete{
+	my $self=shift;
+	my($num)=@_;
+	($num,my $subnum)=((split /,/,$num),0);
+	
+	$self->query("delete from $self->{table} where num=? and subnum=?",$num,$subnum);
+}
 
 sub insert($$$){
 	my $self=shift;
@@ -390,6 +398,8 @@ sub query($$;@){
 	my $ref=($sth->fetchall_arrayref() or []);
 
 	$sth->finish;
+	
+	$self->ok;
 	
 	$ref
 }

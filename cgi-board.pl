@@ -967,7 +967,9 @@ if($task){for($task){
 		my($succ)=0;
 		
 		for(@postnums){
-			$board->delete($_,$pass,$id);
+			if($pass eq DELPASS) { $board->database_delete($_,$pass) }
+			else                 { $board->delete($_,$pass,$id) }
+			
 			error $board->errstr if $board->error;
 			
 			$succ++;
