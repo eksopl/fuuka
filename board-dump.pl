@@ -199,9 +199,9 @@ async{my $board=$board_spawner->();while(1){
 	if($board->error){
 		debug WARN,"$_: error: ",$board->errstr;
 		
-		# if thread is no more than 30 minutes old, it was forcefully deleted
+		# if thread is no more than 1 hour old, it was forcefully deleted
 		if($board->errstr eq 'Not Found' and $threads{$_} and
-				yotsutime-$threads{$_}->{ref}->{posts}->[0]->{date}<120*60*60){
+				yotsutime-$threads{$_}->{ref}->{posts}->[0]->{date}<60*60){
 			$threads{$_}->{ref}->{posts}->[0]->{deleted}=1;
 			
 			debug TALK,"$_: deleted";
