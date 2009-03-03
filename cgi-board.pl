@@ -284,7 +284,7 @@ sub ref_post_far($;$$){
 	
 	$num.="_$subnum" if $subnum;
 	
-	"$self/post/$shadow$num" unless $board;
+	return "$self/post/$shadow$num" unless $board;
 	
 	"$ENV{SCRIPT_NAME}/$board/post/$shadow$num";
 }
