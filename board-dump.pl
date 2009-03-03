@@ -134,11 +134,10 @@ async{
 		
 		foreach my $pageno(@$pagenos){
 			my $list=$board->content(PAGE $pageno);
-			sleep 1 and next if $board->error;
+			sleep 1 and print $board->errstr,"\n" and next if $board->error;
 			
 			for(@{$list->{threads}}){
 				my $num=$_->{num};
-				
 				push @newthreads,$num and next unless $threads{$num};
 				
 				my $thread=$threads{$num};
@@ -186,6 +185,8 @@ async{my $board=$board_spawner->();while(1){
 	{	lock @newthreads;
 		$_=shift @newthreads;
 	}
+	
+	print "$_\n";
 	
 	sleep 1 and next unless $_ and /^\d+$/;
 	
