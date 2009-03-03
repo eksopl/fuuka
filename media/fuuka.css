@@ -149,6 +149,13 @@ a.tooltip-red:hover{
 	font-weight:normal !important;
 }
 
+.invis-link {
+	text-decoration: none;
+}
+.invis-link:hover {
+	text-decoration: underline;
+}
+
 code,.code { white-space: pre }
 
 .o { text-decoration: overline; }

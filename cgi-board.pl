@@ -200,13 +200,19 @@ sub bbcode_encode($){
 	$res
 }
 
-sub format_comment($$){
+sub format_comment($$$){
 	local $_=html_encode(shift);
-	my($present_posts)=@_;
+	my($present_posts,$posts)=@_;
 	
-	s!(&gt;&gt;(\d+(?:&#44;)?\d+))(?: ([^\r\n]*))?!
+	# >>postno links
+	s!(&gt;&gt;(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
 		my($text,$num,$quote)=($1,$2,$3);
 		$num=~s/&#44;/_/g;
+		
+		# >>1 >>2 links
+		if($num=~/^\d+$/ and not $present_posts->{$num} and $posts->[$num-1]){
+			$num=ref_post_id($posts->[$num-1]->{num},$posts->[$num-1]->{subnum});
+		}
 		
 		($present_posts->{$num}?
 			qq{<a href="#p$num" onclick="replyhighlight('p$num')">$text</a>}:
@@ -214,8 +220,19 @@ sub format_comment($$){
 				($quote?qq{ <span class="unkfunc">$quote</span>}:"")
 	!ge;
 	
+	# >>>/board/postno links
+	s!(&gt;&gt;&gt;/(\w+)/(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
+		my($text,$board,$num,$quote)=($1,$2,$3,$4);
+		$num=~s/&#44;/_/g;
+		
+		(BOARD_SETTINGS->{$board}?
+			qq{<a href="}.ref_post_far($num,undef,$board).qq{">$text</a>}:
+			qq{<span class="unkfunc">$text</span>}).
+				($quote?qq{ <span class="unkfunc">$quote</span>}:"")
+	!ge;
+
 	# make URLs into links
-#	s{(https?://[^\s<>"]*?)((?:\s|<|>|"|\.|\)|\]|!|\?|,|&#44;|&quot;)*(?:[\s<>"]|$))}{\<a href="$1"\>$1\</a\>$2}sgi;
+	s{(https?://[^\s<>"]*?)((?:\s|<|>|"|\.|\)|\]|!|\?|,|&#44;|&quot;)*(?:[\s<>"]|$))}{\<a href="$1"\>$1\</a\>$2}sgi;
 	
 	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>$3!g;
 	
@@ -261,13 +278,15 @@ sub ref_post($$$){
 	
 	"$self/thread/$shadow$parent#p${num}_$subnum"
 }
-sub ref_post_far($;$){
-	my($num,$subnum)=(@_);
+sub ref_post_far($;$$){
+	my($num,$subnum,$board)=(@_);
 	my($shadow)=$ghost_mode?"S":"";
 	
 	$num.="_$subnum" if $subnum;
 	
-	"$self/post/$shadow$num"
+	"$self/post/$shadow$num" unless $board;
+	
+	"$ENV{SCRIPT_NAME}/$board/post/$shadow$num";
 }
 sub ref_post_text($$){
 	my($num,$subnum)=(@_,0);
@@ -447,7 +466,7 @@ sub fix_threads($){
 		}
 		my $present_posts=present_posts $head,@rest;
 		for my $post($head,@rest){
-			push @posts,fix_post($post,$present_posts);
+			push @posts,fix_post($post,$present_posts,$thread->{posts});
 		}
 		
 		$thread->{posts}=\@posts;
@@ -459,11 +478,10 @@ sub fix_threads($){
 sub fix_thread($){
 	my($thread)=@_;
 	
-	use Data::Dumper;
 	my $present_posts=present_posts @{$thread->{posts}};
 	
 	for my $post(@{$thread->{posts}}){
-		$post=fix_post($post,$present_posts);
+		$post=fix_post($post,$present_posts,$thread->{posts});
 	}
 	
 	$thread
@@ -478,7 +496,7 @@ sub fix_filename($){
 }
 
 sub fix_post($$){
-	my($post,$present_posts)=@_;
+	my($post,$present_posts,$posts)=@_;
 	
 	my $file=$board->get_media_preview_location($post);
 	
@@ -488,7 +506,7 @@ sub fix_post($$){
 		"$server_file":
 		"";
 
-	$post->{comment}=format_comment($post->{comment},$present_posts);
+	$post->{comment}=format_comment($post->{comment},$present_posts,$posts);
 	$post->{name}=html_encode($post->{name});
 	$post->{title}=html_encode($post->{title});
 	
@@ -796,6 +814,7 @@ sub get_report($){
 	my %opts;
 	
 	open HANDLE,"$loc/$name" or error "$! - $loc/$name";
+	binmode HANDLE,":utf8";
 	for(<HANDLE>){
 		uncrlf($_);
 		
@@ -827,6 +846,7 @@ sub show_report($){
 	goto skip_messing_with_text_data if $opts{mode} eq 'graph';
 	
 	open HANDLE,"$opts{'result-location'}/$board_name/$opts{'result'}" or error "$! - $opts{'result-location'}/$board_name/$opts{'result'}";
+	binmode HANDLE,":utf8";
 	<HANDLE>;
 	my @list=map{
 		[map{s!^\s*!!;s!\s*$!!;$_}split /\|/,$_]
@@ -906,7 +926,7 @@ sub show_report($){
 					
 					push @$ref,{
 						name	=> $rownames[$num],
-						text	=> qq{<span class="postername">$name</span><span class="postertrip">$trip</span>},
+						text	=> qq{<a class="invis-link" href="$self?}.link_encode("task=search2&search_username=$name&search_tripcode=$trip").qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
 						type	=> "text",
 					};
 					next;
@@ -951,13 +971,15 @@ skip_messing_with_text_data:
 #
 #
 
-
 our $task=$cgi->param("task");
 $task="delete" if $cgi->param("delposts");
 if($task){for($task){
 	/^reply$/ and do{
-		my($name,$email,$subject,$comment,$parent,$delpass)=
-			map{$cgi->param($_)} qw/name email subject comment parent delpass/;
+		my($name,$email,$subject,$comment,$parent,$delpass,$fname,$fmail,$fcomment)=
+			map{$cgi->param($_)} qw/NAMAE MERU subject KOMENTO parent delpass username comment/;
+		
+		redirect_late "That was /b/ Quality! Please die in a fire~ ($fname or $fmail or $fcomment)",ref_page 1
+			if $fname or $fmail or $fcomment;
 		
 		add_reply($name,$email,$subject,$comment,$parent,$delpass);
 	},exit;

@@ -275,6 +275,8 @@ sub get_thread($$){
 					<span \s class="filesize">
 					|
 					<img \s src="[^"]*" \s alt="File \s deleted\.">
+					|
+					<a \s href="" \s name="\s+"></a>
 				)
 				(?>.*?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
@@ -284,10 +286,13 @@ sub get_thread($$){
 			(?:<table><tr><td \s nowrap \s class="doubledash">(?>.*?</blockquote></td></tr></table>))
 	)!gxs){
 		my($text,$type)=($1,$2);
+		die $text;
 		if($type){
+			print "a\n";
 			$self->troubles("two thread posts in one thread------$res------") if $t;
 			$t=$self->parse_thread($text);
 		}else{
+			print "b\n";
 			$self->troubles("posts without thread------$res------") unless $t;
 			
 			push @{$t->{posts}},$self->parse_post($text,$t->{num});
@@ -300,10 +305,13 @@ sub get_thread($$){
 
 sub get_page($$){
 	my $self=shift;
-	my($page)=@_;
-	
-	my $res=$self->wget($self->link_page($page));
-	return if $self->error;
+#	my($page)=@_;
+#	
+#	my $res=$self->wget($self->link_page($page));
+#	return if $self->error;
+	my($page)=1;
+
+	my($res)=@_;
 	
 	my $t;
 	my $p=$self->new_page($page);

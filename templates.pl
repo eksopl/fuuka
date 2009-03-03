@@ -24,8 +24,8 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 	.subreply { background:#cce1cf; }
 	.highlight { background:#d6bad0; }
 	.unkfunc{ color:#789922; }
-	.postername { color:#117743; font-weight:bold; }
-	.postertrip { color:#228854; }
+	.postername { color:#117743; font-weight:bold; text-decoration: none; }
+	.postertrip { color:#228854; text-decoration: none; }
 	a.tooltip span, a.tooltip-red span { display:none; }
 --></style>
 </head>
@@ -35,9 +35,7 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 HERE
 
 use constant NORMAL_FOOT_INCLUDE => <<'HERE';
-
 </body>
-
 </html>
 HERE
 
@@ -95,7 +93,7 @@ use constant LATE_REDIRECT_INCLUDE => <<'HERE';
 HERE
 
 use constant INDEX_INCLUDE => <<'HERE';
-<h1>Welcome to 4chan archiver</h1>
+<h1>Welcome to the 4chan archiver</h1>
 <h2>Choose a board:</h2>
 <p>
 <loop $list>
@@ -127,6 +125,13 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> tripcode. Leave empty for any.</span></a></td>
 <td><input type="text" name="search_tripcode" size="32" value="<var $search_tripcode>" /></td>
 </tr>
+
+<if $search_media_hash>
+<tr>
+<td class="postblock">Image hash</td>
+<td><input type="text" name="search_media_hash" size="32" value="<var $search_media_hash>" /></td>
+</tr>
+</if>
 
 <tr>
 <td class="postblock">Deleted posts</td>
@@ -200,10 +205,12 @@ use constant POST_PANEL_INCLUDE => <<'HERE';
 
 	<table><tbody>
 	
-	<tr><td class="postblock">Name</td><td><input type="text" name="name" size="63" /></td></tr>
-	<tr><td class="postblock">E-mail</td><td><input type="text" name="email" size="63" /></td></tr>
+	<tr style="display:none"><td class="postblock">Name (leave empty)</td><td><input type="text" name="username" size="63" /></td></tr>
+	<tr style="display:none"><td class="postblock">Comment (leave empty)</td><td><textarea name="comment" cols="48" rows="4"></textarea></td></tr>
+	<tr><td class="postblock">Name</td><td><input type="text" name="NAMAE" size="63" /></td></tr>
+	<tr><td class="postblock">E-mail</td><td><input type="text" name="MERU" size="63" /></td></tr>
 	<tr><td class="postblock">Subject</td><td><input type="text" name="subject" size="63" /></td></tr>
-	<tr><td class="postblock">Comment</td><td><textarea name="comment" cols="48" rows="4"></textarea></td></tr>
+	<tr><td class="postblock">Comment</td><td><textarea name="KOMENTO" cols="48" rows="4"></textarea></td></tr>
 	<tr><td class="postblock">Password <a href="#" class="tooltip">[?]<span>Password used for file deletion.</span></a></td><td><input type="password" value="" size="24" name="delpass"/></td></tr>
 	<tr><td class="postblock">Action</td><td><input type="submit" value="Submit" /> <input type="submit" name="delposts" value="Delete selected posts" /></td></tr>
 
@@ -241,6 +248,21 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $deleted><img class="inline" src="<const MEDIA_LOCATION_HTTP>/deleted.png" alt="[DELETED]" title="This post was deleted before its lifetime has expired" />&nbsp;</if>
 HERE
 
+use constant POSTS_INCLUDE_FILE => <<'HERE';
+<if $file>
+	<span>File: <var make_filesize_string($media_size)>, <var $media_w>x<var $media_h>, <var $media><!-- <var $media_hash> --></span>
+	
+	[<a href="<var $self>/image/<var $media_hash>">View same</a>]
+	
+	<br />
+	
+	<if $media_filename><a href="<var "$yotsuba_link/src/$media_filename">"></if>
+	<if $file><img class="thumb" src="<var $file>" alt="<var $num>" <if $preview_w>width="<var $preview_w>" height="<var $preview_h>"</if> /></if>
+	<if $media_filename></a></if>
+	<if not $file><img src="<const MEDIA_LOCATION_HTTP>/error.png" alt="ERROR" class="nothumb" title="No thumbnail" /></if>
+</if>
+HERE
+
 use constant POSTS_INCLUDE => q{
 <form id="postform" action="<var $self>" method="post" enctype="multipart/form-data">
 <div class="content">
@@ -248,23 +270,19 @@ use constant POSTS_INCLUDE => q{
 <loop $threads>
 	<loop $posts>
 		<if not $parent and not $blockquote>
-			<div id="p<var $$_{num}>">
+			<div id="p<var $num>">
 			
 			<if !$file>
 				<if $spoiler><img class="thumb" src="<const MEDIA_LOCATION_HTTP>/spoiler.png" alt="[SPOILER]" /></if>
 				<if !$spoiler><img src="<const MEDIA_LOCATION_HTTP>/error.png" alt="[ERROR]" class="nothumb" title="No thumbnail" /></if>
 			</if>
-			<if $file>
-				<span>File: <var make_filesize_string($media_size)>, <var $media_w>x<var $media_h>, <var $media><!-- <var $media_hash> --></span><br />
-				<if $media_filename><a href="<var "$yotsuba_link/src/$media_filename">"></if>
-				<img class="thumb" src="<var $file>" alt="<var $num>" <if $preview_w>width="<var $preview_w>" height="<var $preview_h>"</if> />
-				<if $media_filename></a></if>
-			</if>
+			
+			}.POSTS_INCLUDE_FILE.qq{
 			
 			}.POSTS_INCLUDE_POST_HEADER.q{
 			
 			[<a href="<var ref_thread($num)>">Reply</a>]&nbsp;[<a href="<var $yotsuba_link>/res/<var $num>.html">Original</a>]
-			<blockquote><p><var $$_{comment}></p></blockquote>
+			<blockquote><p><var $comment></p></blockquote>
 			<if $count>
 				<span class="omittedposts"><var $count> replies omitted. Click Reply to view.</span>
 			</if>
@@ -281,15 +299,9 @@ use constant POSTS_INCLUDE => q{
 			
 			<if $blockquote>[<a href="<var ref_post($parent,$num,$subnum)>">View</a>]</if>
 			
-			<if $preview>
-				<br />
-				<span>File: <var make_filesize_string($media_size)>, <var $media_w>x<var $media_h>, <var $media><!-- <var $media_hash> --></span>
-				
-				<if $media_filename><a href="<var "$yotsuba_link/src/$media_filename">"></if>
-				<if $file><img class="thumb" src="<var $file>" alt="<var $$_{num}>" <if $preview_w>width="<var $preview_w>" height="<var $preview_h>"</if> /></if>
-				<if $media_filename></a></if>
-				<if not $file><img src="<const MEDIA_LOCATION_HTTP>/error.png" alt="ERROR" class="nothumb" title="No thumbnail" /></if>
-			</if>
+			<br />
+			
+			}.POSTS_INCLUDE_FILE.q{
 			
 			<blockquote><p>
 			<var $comment>

@@ -54,6 +54,7 @@ sub reload_reports(){
 	$mtimes{$loc}=mtime $loc;
 	
 	opendir DIRHANDLE,$loc or die "$! - $loc";
+MAINLOOP:
 	while($_=readdir DIRHANDLE){
 		my $filename="$loc/$_";
 		
@@ -67,13 +68,13 @@ sub reload_reports(){
 		for(<HANDLE>){
 			uncrlf($_);
 			
-			/([\w\d\-]*)\s*:\s*(.*)/ or die "$filename: wrong report file format: $_";
+			/([\w\d\-]*)\s*:\s*(.*)/ or warn "$filename: wrong report file format: $_" and next;
 			
 			$opts{lc $1}=$2;
 		}
 		close HANDLE;
 		
-		die "$filename: wrong format: must have field $_"
+		warn "$filename: wrong format: must have field $_" and next MAINLOOP
 			foreach grep{not $opts{$_}} "query","mode","refresh-rate";
 		
 		$opts{filename}="$_";
