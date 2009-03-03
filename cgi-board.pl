@@ -205,8 +205,8 @@ sub format_comment($$$){
 	my($present_posts,$posts)=@_;
 	
 	# >>postno links
-	s!(&gt;&gt;(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
-		my($text,$num,$quote)=($1,$2,$3);
+	s!(.?)(&gt;&gt;(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
+		my($first,$text,$num,$quote)=($1,$2,$3,$4);
 		$num=~s/&#44;/_/g;
 		
 		# >>1 >>2 links
@@ -214,22 +214,26 @@ sub format_comment($$$){
 			$num=ref_post_id($posts->[$num-1]->{num},$posts->[$num-1]->{subnum});
 		}
 		
-		($present_posts->{$num}?
+		$first.($present_posts->{$num}?
 			qq{<a href="#p$num" onclick="replyhighlight('p$num')">$text</a>}:
 			qq{<a href="}.(ref_post_far($num)).qq{">$text</a>}).
-				($quote?qq{ <span class="unkfunc">$quote</span>}:"")
-	!ge;
+				($first?
+					" $quote":
+					($quote?qq{ <span class="unkfunc">$quote</span>}:""))
+	!gem;
 	
 	# >>>/board/postno links
-	s!(&gt;&gt;&gt;/(\w+)/(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
-		my($text,$board,$num,$quote)=($1,$2,$3,$4);
+	s!(.?)(&gt;&gt;&gt;/(\w+)/(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
+		my($first,$text,$board,$num,$quote)=($1,$2,$3,$4,$5);
 		$num=~s/&#44;/_/g;
 		
-		(BOARD_SETTINGS->{$board}?
+		$first.(BOARD_SETTINGS->{$board}?
 			qq{<a href="}.ref_post_far($num,undef,$board).qq{">$text</a>}:
 			qq{<span class="unkfunc">$text</span>}).
-				($quote?qq{ <span class="unkfunc">$quote</span>}:"")
-	!ge;
+				($first?
+					" $quote":
+					($quote?qq{ <span class="unkfunc">$quote</span>}:""))
+	!gem;
 
 	# make URLs into links
 	s{(https?://[^\s<>"]*?)((?:\s|<|>|"|\.|\)|\]|!|\?|,|&#44;|&quot;)*(?:[\s<>"]|$))}{\<a href="$1"\>$1\</a\>$2}sgi;
