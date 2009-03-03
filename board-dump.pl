@@ -186,8 +186,6 @@ async{my $board=$board_spawner->();while(1){
 		$_=shift @newthreads;
 	}
 	
-	print "$_\n";
-	
 	sleep 1 and next unless $_ and /^\d+$/;
 	
 	{	lock %busythreads;
