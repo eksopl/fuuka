@@ -15,7 +15,7 @@ function replyhighlight(id){
 }
 
 function insert(text){
-	var textarea=document.forms.postform.comment;
+	var textarea=document.forms.postform.KOMENTO;
 	if(!textarea) return;
 	
 	if(textarea.createTextRange && textarea.caretPos){
@@ -53,12 +53,12 @@ window.onload=function(){
 	arr=location.href.split(/#/);
 	if(arr[1]) 
 		replyhighlight(arr[1]);
-
-	if(document.forms.postform && document.forms.postform.name)
-		document.forms.postform.name.value=get_cookie("name");
 	
-	if(document.forms.postform && document.forms.postform.email)
-		document.forms.postform.email.value=get_cookie("email");
+	if(document.forms.postform && document.forms.postform.NAMAE)
+		document.forms.postform.NAMAE.value=get_cookie("name");
+	
+	if(document.forms.postform && document.forms.postform.MERU)
+		document.forms.postform.MERU.value=get_cookie("email");
 
 	if(document.forms.postform && document.forms.postform.delpass)
 		document.forms.postform.delpass.value=get_cookie("delpass");
