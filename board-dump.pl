@@ -59,6 +59,8 @@ sub find_post($$){
 sub update_thread($){
 	my($thread)=@_;
 	
+	return unless $thread->{posts};
+	
 	my(@posts)=@{$thread->{posts}};
 	
 	$_->{preview} and push @media_preview_updates,shared_clone($_)

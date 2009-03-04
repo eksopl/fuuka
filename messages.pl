@@ -1,6 +1,6 @@
 # /^([\w_]+)$/ and print "<<'$1'," foreach <DATA>;
 
-use constant MESSAGES => [<<'SQUEEKS',<<'CANDLE',<<'FATE',<<'DARKPA',<<'DARKPA2',<<'YOSHINOYA',<<'TANASS_INN',<<'NOT_INTO',<<'NOT_INTO',<<'YOTSUBA',<<'ROGER_KUMA',<<'KUMA_ROGER',<<'FURCHAN',<<'NYA1',<<'NIDA',<<'TWOATCOMP',<<'DESUSJIS',<<'JK',<<'DEAD',<<'YONGAIJIN',<<'TIME',<<'ICAME',<<'ICAME',<<'YARANAIKA',<<'NNG',<<'NNG',<<'MAYI',<<'HEARD',<<'TANASINN',<<'DANCE',<<'YIFF',<<'THREE',<<'KITA',<<'VIP_AD',<<'DANCE',<<'OURTHEME',<<'DARKRITUAL',<<'PENIS',<<'PYO',<<'NOT4',<<'REILEAVE',<<'CRAP',<<'LOVE',<<'POOPING',<<'GENITALS',<<'AHEM',<<'WIFE',<<'PLACES',<<'LS',<<'FARTED',<<'CLARA',<<'NICEBOAT',<<'OHDARN',<<'SECURITY',<<'YUKKURI',<<'TOILET',<<'FLAMETHROWER',<<'USB_LINE_I_LL_SHOW_YOU_LATER',<<'POOP',<<'GOGO',<<'MICKY',<<'KFC',<<'SHINJI',<<'ORZ',<<'RONALD',<<'GRANDPA',<<'TANASINN',<<'NYO',<<'LETMEDOWN',<<'GOKART',<<'CONTRIBUTE',<<'HITTHEROAD',<<'THISSUCKS',<<'FRIEND',<<'POWERUP',<<'SANTA',<<'HURTSME',<<'RELIGION',<<'TANASINN',<<'HAVEYOU',<<'JAZZ',<<'BIGGERTHANLIFE',<<'TANASINN_SPACE',<<'LOLI',<<'KITA',<<'TANASINN',<<'MARTY',<<'T',<<'TT',<<'POMPEI',<<'NIDA',<<'MAYI',<<'ALITTLE',<<'SASUGA',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'WTDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'SWASTIKA',<<'GENDO_SERIOUS',<<'DEEP_FRIED',<<'WE_ARE',<<'ANA',<<'DADDYCOOL',<<'YARANAIKA',<<'KUMA',<<'INDIVIDUALISM',<<'SLICK',<<'OHSNAP',<<'DESU',<<'REIDINER',<<'REIDINER',<<'NOBEL',<<'MUNCH',<<'REIDINER',<<'LUCKYSTART',<<'MARTYS',<<'NIDADINER'];
+use constant MESSAGES => [<<'SQUEEKS',<<'CANDLE',<<'FATE',<<'DARKPA',<<'DARKPA2',<<'YOSHINOYA',<<'TANASS_INN',<<'NOT_INTO',<<'NOT_INTO',<<'YOTSUBA',<<'ROGER_KUMA',<<'KUMA_ROGER',<<'FURCHAN',<<'NYA1',<<'NIDA',<<'TWOATCOMP',<<'DESUSJIS',<<'JK',<<'DEAD',<<'YONGAIJIN',<<'TIME',<<'ICAME',<<'ICAME',<<'YARANAIKA',<<'NNG',<<'NNG',<<'MAYI',<<'HEARD',<<'TANASINN',<<'DANCE',<<'YIFF',<<'THREE',<<'KITA',<<'VIP_AD',<<'DANCE',<<'OURTHEME',<<'DARKRITUAL',<<'PENIS',<<'PYO',<<'NOT4',<<'REILEAVE',<<'CRAP',<<'LOVE',<<'POOPING',<<'GENITALS',<<'AHEM',<<'WIFE',<<'PLACES',<<'LS',<<'FARTED',<<'CLARA',<<'NICEBOAT',<<'OHDARN',<<'SECURITY',<<'YUKKURI',<<'TOILET',<<'FLAMETHROWER',<<'USB_LINE_I_LL_SHOW_YOU_LATER',<<'POOP',<<'GOGO',<<'MICKY',<<'KFC',<<'SHINJI',<<'ORZ',<<'RONALD',<<'GRANDPA',<<'TANASINN',<<'NYO',<<'LETMEDOWN',<<'GOKART',<<'CONTRIBUTE',<<'HITTHEROAD',<<'THISSUCKS',<<'FRIEND',<<'POWERUP',<<'SANTA',<<'HURTSME',<<'RELIGION',<<'TANASINN',<<'HAVEYOU',<<'JAZZ',<<'BIGGERTHANLIFE',<<'TANASINN_SPACE',<<'LOLI',<<'KITA',<<'TANASINN',<<'MARTY',<<'T',<<'TT',<<'POMPEI',<<'NIDA',<<'MAYI',<<'ALITTLE',<<'SASUGA',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'WTDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'REIDINER',<<'SWASTIKA',<<'GENDO_SERIOUS',<<'DEEP_FRIED',<<'WE_ARE',<<'ANA',<<'DADDYCOOL',<<'YARANAIKA',<<'KUMA',<<'INDIVIDUALISM',<<'SLICK',<<'OHSNAP',<<'DESU',<<'REIDINER',<<'REIDINER',<<'NOBEL',<<'MUNCH',<<'REIDINER',<<'LUCKYSTART',<<'MARTYS',<<'NIDADINER',<<'WARNING'];
 　　　人　　　　　
 　　（＿_）　　　　
 　 （＿＿）　　　
@@ -2034,5 +2034,36 @@ MARTYS
 ==　　 THE NIDA'S DINER　　 　==
 ∞∞∞∞∞∞∞∞∞∞∞∞∞∞
 NIDADINER
-
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　 ▲　　▲. 　　　　　.▲　　▲. 　　　　　▲　　▲. 　　　　　▲　　▲. 　　　　
+.　　　●　　　　　.　　　　●　　　　　.　　　　●　　　　　.　　　　●　　　　　
+.　　　▲　　　　　　　　　.▲　　　　　　　　　.▲　　　　　　　　　.▲　　　　　
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　　
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　Ｏ　。　　　　　　　　　　　 ,　'"　　}
+　　　ト ､.,＿　　　　　 　 ／　　　　 {
+　　　ヽ.　　　＼ _,._-=ﾆ´=─‐-＜ くｰ-‐ｧ　　　　 　 　ﾄ.、　　　　
+　ｵﾛ 　}_＿,＞''"´::::::::::::::::::::::::::::::::｀ヽ,　/　　 　 )　 　 .!::::＼∧
+　,..-‐　ﾉ／::::::::::::::::;:::::::::;:::::::::｀ヽ;:::::::::∨　　-‐''　　　　|:::::::::::::::＼
+.(　　∠.7::/:::::::::/:::ハ::::;ﾊ､::::::::::::::':;::::::::',　 ＿ノ　 　　 !:::::::::::::::::::::':,＿
+　　　　/:::!::::::::/:::/　 ∨　ｰ-＼::::::::＼::::|　　　　ｵﾛ　 ,'::::::::::::::::::::::::::::/_
+　　 ∠＿:';:::::/イ　 　 　　 ●　｀'7ｧｰrヽ!　 　　　 　 /:::::::::::::::::::::::::::::／
+ﾟ　　　　/:::∨::! ●　　　　　　 "" |::::::|:::::'、　ｏ　　, ｲ:::::::::::::::::::::::::::::/
+　　　／:::::/:::7''"　　 ｒ‐- ､　　　 ,':::::/::::::::＼　 ／　',::::::::::::::::::::::::::,'
+＼ '´￣｀7::::人　　 　 ､___ﾉ ι ,.'::::;:':::::::::::::::::∨　　　ヽ::::::::::::::::::::::i
+::::::ト､　　|／/::|＞ ､.,,＿_ 　 イ|／､_::::::::/!:::::/　　　 　 !:::::::::::::::::::,'
+::::::|　 ＼ ／:::/::::::::_;r＜|___／　　//´￣｀ヽ/　　　　　 |::::::::::::::::/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　 ▲　　▲. 　　　　　.▲　　▲. 　　　　　▲　　▲. 　　　　　▲　　▲. 　　　　
+.　　　●　　　　　.　　　　●　　　　　.　　　　●　　　　　.　　　　●　　　　　
+.　　　▲　　　　　　　　　.▲　　　　　　　　　.▲　　　　　　　　　.▲　　　　　
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　　CAUTION!!　　　
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WARNING
 1;

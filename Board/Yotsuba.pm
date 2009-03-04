@@ -211,8 +211,9 @@ sub magnitude($$){
 	
 	/No text entered/ and return (FORGET_IT,"no text entered");
 	
-	/Can't find the post / and return (NONEXIST,"post  doesn't exist");
+	/Can't find the post / and return (NONEXIST,"post doesn't exist");
 	
+	/No file selected./ and return (FORGET_IT,"no file selected");
 	die $_;
 }
 

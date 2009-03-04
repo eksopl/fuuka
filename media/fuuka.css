@@ -157,6 +157,7 @@ a.tooltip-red:hover{
 }
 
 code,.code { white-space: pre }
+a img { vertical-align: top; }
 
 .o { text-decoration: overline; }
 .u { text-decoration: underline; }

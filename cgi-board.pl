@@ -205,7 +205,9 @@ sub format_comment($$$){
 	my($present_posts,$posts)=@_;
 	
 	# >>postno links
-	s!(.?)(&gt;&gt;(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
+	s!
+		(.?)(&gt;&gt;(\d+(?:&\#44;\d+)?))(?: ([^\r\n]*))?
+	!
 		my($first,$text,$num,$quote)=($1,$2,$3,$4);
 		$num=~s/&#44;/_/g;
 		
@@ -220,10 +222,12 @@ sub format_comment($$$){
 				($first?
 					" $quote":
 					($quote?qq{ <span class="unkfunc">$quote</span>}:""))
-	!gem;
+	!gemx;
 	
 	# >>>/board/postno links
-	s!(.?)(&gt;&gt;&gt;/(\w+)/(\d+(?:&#44;\d+)?))(?: ([^\r\n]*))?!
+	s!
+		(.?)(&gt;&gt;&gt;/(\w+)/(\d+(?:&\#44;\d+)?))(?: ([^\r\n]*))?
+	!
 		my($first,$text,$board,$num,$quote)=($1,$2,$3,$4,$5);
 		$num=~s/&#44;/_/g;
 		
@@ -233,10 +237,22 @@ sub format_comment($$$){
 				($first?
 					" $quote":
 					($quote?qq{ <span class="unkfunc">$quote</span>}:""))
-	!gem;
+	!gemx;
 
 	# make URLs into links
-	s{(https?://[^\s<>"]*?)((?:\s|<|>|"|\.|\)|\]|!|\?|,|&#44;|&quot;)*(?:[\s<>"]|$))}{\<a href="$1"\>$1\</a\>$2}sgi;
+	s!
+		(https?://[^\s<>"]*?)
+		(?=
+			(?:[\s<>"\.\\\!\?\,\]\)]|&quot;)*
+			(?:[\s<>"]|$)
+		)
+	!
+		my($link,$text)=($1,$1);
+		
+		$text=~s~^(https?://$ENV{SERVER_NAME}(:$ENV{SERVER_PORT})?$ENV{SCRIPT_NAME})~>><img src="/media/favicon.png" alt="$1" />~;
+		
+		qq{<a href="$link">$text</a>}
+	!sgixe;
 	
 	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>$3!g;
 	
