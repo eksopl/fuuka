@@ -385,7 +385,7 @@ sub do_clean($$){
 
 	s!<span class="abbr">.*?</span>!!g;
 	
-#	s!<b style="color:red;">(.*?)</b>![banned]$1[/banned]!g;
+	s!<b style="color:red;">(.*?)</b>![banned]${1}[/banned]!g;
 	
 	s!<font class="unkfunc">(.*?)</font>!$1!g;
 	s!<a[^>]*>(.*?)</a>!$1!g;
