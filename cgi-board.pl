@@ -110,7 +110,7 @@ sub cgi_params(){
 sub x_www_params(@){
 	my(%args)=@_;
 	
-	html_encode(join "&",map{"$_=".link_encode($args{$_})}keys %args)
+	link_encode(join "&",map{"$_=".link_encode($args{$_})}keys %args)
 }
 
 sub html_encode($){
