@@ -113,7 +113,7 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 
 <tr>
 <td class="postblock">Text to find</td>
-<td><input type="text" name="search_text" size="32" value="<var $search_text>" /></td>
+<td><input type="text" name="search_text" size="32" value="<var html_encode($search_text)>" /></td>
 </tr>
 
 <tr>
@@ -167,7 +167,7 @@ use constant SIDEBAR_INCLUDE => <<'HERE'.SIDEBAR_ADVANCED_SEARCH.<<'THERE';
 <input type="hidden" name="ghost" value="<var $ghost>" />
 Text search
 <a class="tooltip" href="#">[?]<span>Place a <tt>+</tt> before a word to have it included, e.g. <tt>+tripcode</tt> to locate posts that contain word tripcode in them.<br />Place a <tt>-</tt> before a word to exlude pages containing that word: <tt>-tripcode</tt><br />Place quotes around phrases to find pages containing the phrase: <tt>"I am a filthy tripcode user"</tt></span></a>&nbsp;
-<input type="text" name="search_text" size="24" value="<var $search_text>" />&nbsp;
+<input type="text" name="search_text" size="24" value="<var html_encode($search_text)>" />&nbsp;
 <input type="submit" value="Go" />&nbsp;
 <a href="<var $self>/advanced-search" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Advanced ]</a>
 </div>

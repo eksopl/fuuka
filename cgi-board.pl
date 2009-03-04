@@ -91,7 +91,7 @@ sub uncrlf($){
 sub cgi_params(){
 	my %params;
 	
-	$cgi->param("$_") and $params{$_}=html_encode($cgi->param("$_"))
+	$cgi->param("$_") and $params{$_}=$cgi->param("$_")
 		foreach qw/search_text/;
 	
 	$cgi->param("$_") and $params{$_}=$cgi->param("$_")
