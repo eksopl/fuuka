@@ -7,7 +7,7 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 <head>
 <title><if $board_desc>/<var $board_name>/ - <var $board_desc></if><if $title> - <var $title></if></title>
 <script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js"></script>
-<meta name="description" content="The Pleasure of Being Cummed Inside" />
+<meta name="description" content="～The Pleasure of Being Cummed Inside" />
 <link rel="stylesheet" type="text/css" href="<const MEDIA_LOCATION_HTTP>/fuuka.css" title="Fuuka" />
 <style type="text/css"><!--
 	html,body { background:#eefff2; color:#002200; }
@@ -256,9 +256,14 @@ use constant POSTS_INCLUDE_FILE => <<'HERE';
 	
 	<br />
 	
-	<if $media_filename><a href="<var "$yotsuba_link/src/$media_filename">"></if>
+	<if $fullfile><a href="<var $fullfile>">
+	<elsif $media_filename><a href="<var "$yotsuba_link/src/$media_filename">">
+	</if>
+	
 	<if $file><img class="thumb" src="<var $file>" alt="<var $num>" <if $preview_w>width="<var $preview_w>" height="<var $preview_h>"</if> /></if>
-	<if $media_filename></a></if>
+	
+	<if $fillfile or $media_filename></a></if>
+	
 	<if not $file><img src="<const MEDIA_LOCATION_HTTP>/error.png" alt="ERROR" class="nothumb" title="No thumbnail" /></if>
 </if>
 HERE
