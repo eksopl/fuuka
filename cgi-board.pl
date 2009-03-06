@@ -1,4 +1,4 @@
-#!perl
+#!/usr/local/bin/perl
 
 use strict;
 use utf8;
@@ -802,18 +802,19 @@ sub show_reports(){
 	
 	opendir DIRHANDLE,$loc or error "$! - $loc";
 	while($_=readdir DIRHANDLE){
-		next unless -f "$loc/$_";
+		my $filename="$loc/$_";
+		next unless -f $filename;
 		my %opts;
 		
-		open HANDLE,"$loc/$_" or error "$! - $loc/$_";
+		open HANDLE,$filename or error "$! - $filename";
 		for(<HANDLE>){
 			/([\w\d\-]*)\s*:\s*(.*)/ or error "wrong report file format: $_";
 			
 			$opts{lc $1}=$2;
 		}
 		close HANDLE;
-		
-		error "$loc/$_: wrong format: must have field $_"
+	
+		error "$filename: wrong format: must have field $_"	
 			foreach grep{not $opts{$_}} "query","mode","refresh-rate";
 		
 		$opts{filename}=$_;
