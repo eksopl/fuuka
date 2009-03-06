@@ -141,8 +141,11 @@ a.tooltip-red:hover{
 	background: black;
 	text-decoration: none;
 }
-.spoiler:hover {
-	color: white;
+.spoiler a {
+	color: black !important;
+}
+.spoiler:hover, .spoiler:hover a {
+	color: white !important;
 }
 
 .trip{

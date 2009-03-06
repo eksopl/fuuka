@@ -132,7 +132,7 @@ sub html_encode($){
 sub link_encode($){
 	local $_=shift;
 	
-	s/([^\-\w\d\.\&\=])/sprintf "%%%02x",ord $1/ge;
+	s!([^\-\w\d\.\&\=])!sprintf "%%%02x",ord $1!ge;
 	s/ /+/g;
 	
 	$_
@@ -240,13 +240,15 @@ sub format_comment($$$){
 	!gemx;
 
 	# make URLs into links
-	s!
-		(https?://[^\s<>"]*?)
-		(?=
-			(?:[\s<>"\.\\\!\?\,\]\)]|&quot;)*
-			(?:[\s<>"]|$)
-		)
-	!
+	s!(
+		(?:
+			https?://
+			[-a-zA-Z0-9_\.:]+
+		)(?:
+			/
+			[\w\d_/'()\$\-\.\+\!\*\?\&=%:#;]*
+		)?
+	)!
 		my($link,$text)=($1,$1);
 		
 		$text=~s~^(https?://$ENV{SERVER_NAME}(:$ENV{SERVER_PORT})?$ENV{SCRIPT_NAME})~>><img src="/media/favicon.png" alt="$1" />~;
@@ -800,11 +802,10 @@ sub show_reports(){
 	
 	opendir DIRHANDLE,$loc or error "$! - $loc";
 	while($_=readdir DIRHANDLE){
-		my $filename="$loc/$_";
-		next unless -f $filename;
+		next unless -f "$loc/$_";
 		my %opts;
 		
-		open HANDLE,$filename or error "$! - $filename";
+		open HANDLE,"$loc/$_" or error "$! - $loc/$_";
 		for(<HANDLE>){
 			/([\w\d\-]*)\s*:\s*(.*)/ or error "wrong report file format: $_";
 			
@@ -812,7 +813,7 @@ sub show_reports(){
 		}
 		close HANDLE;
 		
-		error "$filename: wrong format: must have field $_"
+		error "$loc/$_: wrong format: must have field $_"
 			foreach grep{not $opts{$_}} "query","mode","refresh-rate";
 		
 		$opts{filename}=$_;
@@ -912,14 +913,6 @@ sub show_report($){
 					};
 					next;
 				};
-                /^timestamp$/ and do{
-                    push @$ref,{
-                        name    => $rownames[$num],
-                        text    => scalar gmtime(shift @$list),
-                        type    => "text",
-                    };
-                    next;
-                };
 				/^fromto$/ and do{
 					my($avg,$std,$avgp,$stdp)=
 						(shift @$list,shift @$list,shift @$list,shift @$list);

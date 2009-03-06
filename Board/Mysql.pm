@@ -219,14 +219,18 @@ sub search($$$$){
 	$offset=int $offset;
 	
 	my @conditions;
+	my @index_hint;
 	
-	push @conditions,"name=".$dbh->quote($settings{name})
+	push @conditions,"name=".$dbh->quote($settings{name}) and
+	push @index_hint,"name_index"
 		if $settings{name};
 	
-	push @conditions,"trip=".$dbh->quote($settings{tripcode})
+	push @conditions,"trip=".$dbh->quote($settings{tripcode}) and
+	push @index_hint,"trip_index"
 		if $settings{tripcode};
 	
-	push @conditions,"media_hash=".$dbh->quote($settings{media_hash})
+	push @conditions,"media_hash=".$dbh->quote($settings{media_hash}) and
+	push @index_hint,"media_hash_index"
 		if $settings{media_hash};
 	
 	push @conditions,"deleted=1"
@@ -241,26 +245,30 @@ sub search($$$$){
 	push @conditions,"subnum=0"
 		if $settings{showext} and not $settings{showint};
 	
-	my $condition=join "",map{"$_ and "}@conditions;
-	
 	my $ord=$settings{ord};
 	my $query_ord="timestamp desc";
 	
 	$query_ord="timestamp asc" if $ord eq 'old';
 	
+	my $condition=join "",map{"$_ and "}@conditions;
+	
+	my $index_hint=@index_hint?
+		"use index(".(join ",",@index_hint).")":
+		"";
+	
 	my $query=($text and $ord eq 'rel' and $text!~/[\*\+\-]/)?
 		"select *,match(comment) against(".
 		$dbh->quote($text).
-		") as score from $self->{table} where $condition match(comment) against(".
+		") as score from $self->{table} $index_hint where $condition match(comment) against(".
 		$dbh->quote(join " ",map{"+$_"}split /\s+/,$text).
 		" in boolean mode) order by score desc, timestamp desc limit $limit offset $offset;":
 		
 		$text?
-		"select * from $self->{table} where $condition match(comment) against(".
+		"select * from $self->{table} $index_hint where $condition match(comment) against(".
 		$dbh->quote($text).
 		" in boolean mode) order by $query_ord limit $limit offset $offset;":
 		
-		"select * from $self->{table} where $condition 1 order by $query_ord limit $limit offset $offset";
+		"select * from $self->{table} $index_hint where $condition 1 order by $query_ord limit $limit offset $offset";
 	
 	my($ref)=($self->query($query) or return);
 	
