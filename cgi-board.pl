@@ -913,6 +913,14 @@ sub show_report($){
 					};
 					next;
 				};
+				/^timestamp$/ and do{
+					push @$ref,{
+						name    => $rownames[$num],
+						text    => scalar gmtime(shift @$list),
+						type    => "text",
+					};
+					next;
+				};
 				/^fromto$/ and do{
 					my($avg,$std,$avgp,$stdp)=
 						(shift @$list,shift @$list,shift @$list,shift @$list);
