@@ -1,5 +1,4 @@
-#!/usr/local/bin/perl
-use CGI::Carp qw(fatalsToBrowser);
+#!perl
 
 use strict;
 use utf8;
