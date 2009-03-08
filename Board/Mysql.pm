@@ -165,7 +165,7 @@ sub get_thread($$){
 	my $self=shift;
 	my($thread)=@_;
 
-	$self->_read_thread($self->query(<<HERE,$thread,$thread) or return);
+$self->_read_thread($self->query(<<HERE,$thread,$thread) or return);
 select * from $self->{table} where num=? or parent=? order by num,subnum asc
 HERE
 }

@@ -42,9 +42,13 @@ use constant WARN		=> 2;
 use constant TALK		=> 3;
 sub debug($@){
 	my $level=shift;
-	print "[",scalar keys %threads," ",scalar @newthreads," ",
-			scalar @thread_updates," ",scalar @media_preview_updates,"] ",
-			@_,"\n"
+	print "[",
+			scalar keys %threads," ",
+			scalar @newthreads," ",
+			scalar @thread_updates," ",
+			scalar @media_updates," ",
+			scalar @media_preview_updates," ",
+			"] ",@_,"\n"
 		if $level-1<$debug_level;
 }
 
@@ -64,6 +68,9 @@ sub update_thread($){
 	my(@posts)=@{$thread->{posts}};
 	
 	$_->{preview} and push @media_preview_updates,shared_clone($_)
+		foreach @posts;
+
+	$_->{media_filename} and push @media_updates,shared_clone($_)
 		foreach @posts;
 
 	push @thread_updates,$thread;
@@ -115,6 +122,21 @@ async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(
 	debug ERROR,"Couldn't insert posts into $local_board: ".$board->errstr
 		and next if $local_board->error;
 }} foreach 1..$settings->{"thumb-threads"};
+
+# fetch pics
+async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(1){
+	my $ref;
+	{	lock @media_updates;
+		$ref=shift @media_updates;
+	}
+	
+	sleep 1 and next unless $ref;
+	
+	$local_board->insert_media($ref,$board);
+		
+	debug ERROR,"Couldn't insert posts into $local_board: ".$board->errstr
+		and next if $local_board->error;
+}} foreach 1..$settings->{"media-threads"};
 
 # insert updates into database
 async{my $local_board=SPAWNER->($board_name);while(1){

@@ -7,7 +7,7 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 <head>
 <title><if $board_desc>/<var $board_name>/ - <var $board_desc></if><if $title> - <var $title></if></title>
 <script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js"></script>
-<meta name="description" content="～The Pleasure of Being Cummed Inside" />
+<meta name="description" content="The Pleasure of Being Cummed Inside" />
 <link rel="stylesheet" type="text/css" href="<const MEDIA_LOCATION_HTTP>/fuuka.css" title="Fuuka" />
 <style type="text/css"><!--
 	html,body { background:#eefff2; color:#002200; }

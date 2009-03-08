@@ -1,7 +1,9 @@
-#!/usr/local/bin/perl
+#!perl
 
 use strict;
 use utf8;
+
+binmode *STDOUT,":utf8";
 
 use CGI qw/-utf8/;
 use CGI::Carp qw(fatalsToBrowser);
@@ -62,6 +64,7 @@ our $board				= Board::Mysql->new($board_name,
 	secret			=> SECRET,
 	renzoku			=> RENZOKU,
 	renzoku3		=> RENZOKU3,
+	full_pictures	=> $boards{$board_name}->{"media-threads"}?1:0,
 ) or die "Couldn't use mysql board with table $board_name";
 
 our @navigation=(
@@ -268,9 +271,6 @@ sub format_comment($$$){
 sub simple_format($){
 	local $_=html_encode(shift);
 	
-	s/^\s*//;
-	s/\s*$//;
-	
 	s!\n!<br />!g;
 	
 	$_;
@@ -360,19 +360,18 @@ sub compile_template($%){
 		$html=~s/(['\\])/\\$1/g;
 		$html=~s/^\s*//sg,$skipping_whitespace=0 if $skipping_whitespace;
 		
-		$code.="\$res.='$html';" if length $html;
-		
+		$code.="print '$html';" if length $html;
 		
 		if($tag){
 			if($closing){
 				if   ($name eq 'if'   )		{ $code.='}' }
 				elsif($name eq 'loop' )		{ $code.='$$_=$__ov{$_} for(keys %__ov);}}' }
 			} else{
-				if   ($name eq 'var'  )		{ $code.='$res.=eval{'.$args.'};' }
-				elsif($name eq 'eval' )		{ $code.='eval{'.$args.'};' }
-				elsif($name eq 'const')		{ my $const=eval $args; $const=~s/(['\\])/\\$1/g; $code.='$res.=\''.$const.'\';' }
-				elsif($name eq 'if'   )		{ $code.='if(eval{'.$args.'}){' }
-				elsif($name eq 'elsif')		{ $code.='}elsif(eval{'.$args.'}){' }
+				if   ($name eq 'var'  )		{ $code.="print eval{$args};" }
+				elsif($name eq 'eval' )		{ $code.="eval{$args};" }
+				elsif($name eq 'const')		{ my $const=eval $args; $const=~s/(['\\])/\\$1/g; $code.="print '$const';" }
+				elsif($name eq 'if'   )		{ $code.="if(eval{$args}){" }
+				elsif($name eq 'elsif')		{ $code.="}elsif(eval{$args}){" }
 				elsif($name eq 'else' )		{ $code.='}else{' }
 				elsif($name eq 'loop' )		{ $code.='my $__a=eval{'.$args.'};if($__a){for(@$__a){my %__ov;my %__v;eval{%__v=%{$_}};for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}' }
 				elsif($name eq 'nonl' )		{ $skipping_whitespace=1 }
@@ -388,21 +387,23 @@ sub {
 	my ($path)=$ENV{SCRIPT_NAME}=~m!^(.*/)[^/]+$!;
 	my $absolute_path="http://$ENV{SERVER_NAME}$port$path";
 	my %__v=@_;my %__ov;for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}
-	my $res;
 HERE
 	$$_=$__ov{$_} for(keys %__ov);
-	return $res;
 }
 THERE
 }
 
-sub sendpage(@){
+sub sendpage($@){
+	my($template)=shift;
+	
 	print "Set-Cookie: ",new CGI::Cookie(-name=>'ghost',-value=>$ghost_mode?"yes":"",-expires=>'+3M'),"\n";
 	
-	print <<HERE,@_;
+	print <<HERE;
 Content-type: text/html; charset=utf-8
 
 HERE
+
+	$template->(@_);
 }
 
 sub sendtext(@){
@@ -519,15 +520,22 @@ sub fix_filename($){
 
 sub fix_post($$){
 	my($post,$present_posts,$posts)=@_;
+	my($server_file,$server_fullfile);
 	
 	my $file=$board->get_media_preview_location($post);
+	($server_file=$file)=~s!$loc!$server_loc!i or die;
 	
-	(my $server_file=$file)=~s!$loc!$server_loc!i or die;
+	my $fullfile=$board->get_media_location($post);
+	($server_fullfile=$fullfile)=~s!$loc!$server_loc!i or die if $fullfile;
 	
 	$post->{file}=-f "$file"?
 		"$server_file":
 		"";
 
+	$post->{fullfile}=$fullfile && -f "$fullfile"?
+		"$server_fullfile":
+		"";
+	
 	$post->{comment}=format_comment($post->{comment},$present_posts,$posts);
 	$post->{name}=html_encode($post->{name});
 	$post->{title}=html_encode($post->{title});
@@ -552,7 +560,7 @@ HERE
 
 
 sub error(@){
-	sendpage ERROR_TEMPLATE->(
+	sendpage ERROR_TEMPLATE,(
 		cause=>[map{map{html_encode $_}split /\n/,$_}@_],
 	);
 	exit;
@@ -577,12 +585,11 @@ sub redirect_late($$){
 	my $message=$list->[rand @$list];
 	
 	my $height=scalar(my @list=$message=~/\n/gs);
-
-	print <<HERE,LATE_REDIECT_TEMPLATE->(
-Content-type: text/html; charset=utf-8
+	
+	print <<HERE;
 Refresh: 2;url=$link
-
 HERE
+	sendpage LATE_REDIECT_TEMPLATE,(
 		title		=> $title,
 		link		=> $link,
 		
@@ -611,7 +618,7 @@ HERE
 #
 
 sub show_index(){
-	sendpage INDEX_TEMPLATE->(
+	sendpage INDEX_TEMPLATE,(
 		list		=> [map{ {
 			name				=> "$_",
 			description			=> $board_desc,
@@ -726,7 +733,7 @@ sub show_page($){
 	
 	$pageno=~s/^S//;
 
-	sendpage PAGE_TEMPLATE->(
+	sendpage PAGE_TEMPLATE,(
 		title		=> ($pageno>1)?"Page $pageno":"",
 		
 		threads		=> fix_threads($page->{threads}),
@@ -744,7 +751,7 @@ sub show_thread($){
 	
 	my $thread=$board->content(THREAD $num);
 	
-	sendpage THREAD_TEMPLATE->(
+	sendpage THREAD_TEMPLATE,(
 		threads		=> [fix_thread($thread)],
 		page		=> 0,
 		thread		=> $num,
@@ -779,7 +786,7 @@ sub show_search($$$){
 	
 	error $board->errstr if $board->error;
 	
-	sendpage SEARCH_PAGE_TEMPLATE->(title=>"Search: $text".($offset and ", offset: $offset" or ""),
+	sendpage SEARCH_PAGE_TEMPLATE,(title=>"Search: $text".($offset and ", offset: $offset" or ""),
 		cgi_params,
 		
 		threads			=> [{posts=>[map{
@@ -822,7 +829,7 @@ sub show_reports(){
 	}
 	closedir DIRHANDLE;
 	
-	sendpage REPORT_LIST_TEMPLATE->(title=>"reports",
+	sendpage REPORT_LIST_TEMPLATE,(title=>"reports",
 		reports		=> [sort{$a->{title} cmp $b->{title}} @reports],
 		
 		page		=> 0,
@@ -983,7 +990,7 @@ skip_messing_with_text_data:
 	$opts{query}=~s/%%BOARD%%/$board_name/g;
 	$opts{query}=~s/%%NOW%%/yotsutime/ge;
 
-	sendpage $template->(
+	sendpage $template,(
 		%opts,
 		entries		=> \@entries,
 		rows		=> \@rownames,
@@ -1092,7 +1099,7 @@ if($path){
 		exit;
 	};
 	m!^/advanced-search!x and do{
-		sendpage ADV_SEARCH_TEMPLATE->(
+		sendpage ADV_SEARCH_TEMPLATE,(
 			title		=> "Advanced search",
 			
 			standalone	=> 1,
@@ -1123,6 +1130,9 @@ if($path){
 		$cgi_params{task}='search2';
 	
 		show_search "",0,1;
+	},exit;
+	m!^/redirect(?:/(.*))?! and do{
+		redirect_late "Hi",$1;
 	},exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);

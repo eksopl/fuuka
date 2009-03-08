@@ -23,6 +23,8 @@ sub new($$;%){
 	$self->{path}="$path/$name";
 	$self->{name}=$name;
 	
+	$self->{full}=(delete $info{full_pictures} or "");
+	
 	mkdir $path;
 	mkdir $self->{path};
 
@@ -49,7 +51,7 @@ sub get_dirs($$){
 	my($path)=$self->{path};
 
 	my($subdir,$sub2dir)=$self->get_subdirs($num);
-	("$path/thumb/$subdir/$sub2dir");
+	("$path/thumb/$subdir/$sub2dir","$path/img/$subdir/$sub2dir");
 }
 
 sub make_dirs($;$){
@@ -59,14 +61,19 @@ sub make_dirs($;$){
 	
 	mkdir "$path";
 	mkdir "$path/thumb";
+	mkdir "$path/img" if $self->{full};
 	
 	my($subdir,$sub2dir)=$self->get_subdirs($num);
 	if($subdir){
 		mkdir "$path/thumb/$subdir";
 		mkdir "$path/thumb/$subdir/$sub2dir";
+		if($self->{full}){
+			mkdir "$path/img/$subdir";
+			mkdir "$path/img/$subdir/$sub2dir";
+		}
 	}
 	
-	("$path/thumb/$subdir/$sub2dir");
+	("$path/thumb/$subdir/$sub2dir","$path/img/$subdir/$sub2dir");
 }
 
 sub get_media_preview($$){
@@ -82,6 +89,26 @@ sub get_media_preview($$){
 	close HANDLE;
 	
 	\$content;
+}
+
+sub get_media_location{
+	my $self=shift;
+	my($arg1,$arg2)=@_;
+	
+	for(ref $arg1){
+		/^Board::Post/ and do{
+			$arg2=$arg1->{media_filename};
+			$arg1=($arg1->{parent} or $arg1->{num});
+			last;
+		};
+		/^$/ and last;
+		
+		confess qq{Arguments can be either Board::Post, or two scalars};
+	}
+	
+	my(undef,$dir)=$self->get_dirs($arg1);
+	
+	(0,"$dir/".($arg2 or ""))
 }
 
 sub get_media_preview_location{
@@ -107,7 +134,7 @@ sub get_media_preview_location{
 sub insert($$){
 	my $self=shift;
 
-	$self->error(0);
+	$self->ok;
 }
 
 sub insert_media_preview{
@@ -127,6 +154,32 @@ sub insert_media_preview{
 	
 	open HANDLE,">$thumb_dir/$h->{preview}"
 		or die "$! - $thumb_dir/$h->{preview}";
+	binmode HANDLE;
+	print HANDLE $$ref;
+	close HANDLE;
+	
+	$self->ok;
+	
+	1;
+}
+
+sub insert_media{
+	my $self=shift;
+	my($h,$source)=@_;
+	
+	ref $h eq "Board::Post"
+		or die "Can only insert Board::Post, tried to insert ".ref $h;
+		
+	my(undef,$media_dir)=$self->make_dirs($h->{parent} or $h->{num});
+	
+	return 0 unless $h->{media_filename};
+	return 1 if -e "$media_dir/$h->{media_filename}";
+	
+	my($ref)=$source->get_media($h);
+	return 2 if $source->error;
+	
+	open HANDLE,">$media_dir/$h->{media_filename}"
+		or die "$! - $media_dir/$h->{media_filename}";
 	binmode HANDLE;
 	print HANDLE $$ref;
 	close HANDLE;
