@@ -1,4 +1,5 @@
-#!perl
+#!/usr/local/bin/perl
+use CGI::Carp qw(fatalsToBrowser);
 
 use strict;
 use utf8;
@@ -8,6 +9,8 @@ binmode *STDOUT,":utf8";
 use CGI qw/-utf8/;
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Cookie;
+
+use URI::Escape;
 
 use lib "b:/scripts";
 
@@ -70,7 +73,7 @@ our $board				= Board::Mysql->new($board_name,
 our @navigation=(
 	[
 		map{
-		[$_,			$boards{$board_name}->{name},			"$ENV{SCRIPT_NAME}/$_"]
+		[$_,			$boards{$_}->{name},			"$ENV{SCRIPT_NAME}/$_"]
 		} @boards
 	],[
 		["index",		"Go to front page of archiver",			"$ENV{SCRIPT_NAME}"],
@@ -975,7 +978,7 @@ sub show_report($){
 					
 					push @$ref,{
 						name	=> $rownames[$num],
-						text	=> qq{<a class="invis-link" href="$self?}.link_encode("task=search2&search_username=$name&search_tripcode=$trip").qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
+						text	=> qq{<a class="invis-link" href="$self?}."task=search2&search_username=".uri_escape_utf8($name)."&search_tripcode=".uri_escape_utf8($trip).qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
 						type	=> "text",
 					};
 					next;
@@ -1024,11 +1027,11 @@ our $task=$cgi->param("task");
 $task="delete" if $cgi->param("delposts");
 if($task){for($task){
 	/^reply$/ and do{
-		my($name,$email,$subject,$comment,$parent,$delpass,$fname,$fmail,$fcomment)=
+		my($name,$email,$subject,$comment,$parent,$delpass,$fname,$fcomment)=
 			map{$cgi->param($_)} qw/NAMAE MERU subject KOMENTO parent delpass username comment/;
 		
-		redirect_late "That was /b/ Quality! Please die in a fire~ ($fname or $fmail or $fcomment)",ref_page 1
-			if $fname or $fmail or $fcomment;
+		redirect_late "That was /b/ Quality! Please die in a fire~ ($fname or $fcomment)",ref_page 1
+			if $fname or $fcomment;
 		
 		add_reply($name,$email,$subject,$comment,$parent,$delpass);
 	},exit;
