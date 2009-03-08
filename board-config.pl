@@ -96,7 +96,7 @@ use constant DB_PASSWORD				=> "qwerty";
 # Posting
 #
 
-# Password to actually delete files and not just a trash bun icon next to them.
+# Password to actually delete files and not just put a a trash bin icon next to them.
 use constant DELPASS					=> 'TOPSECRET';				
 
 # Cryptographic secret. It's okay to leave this unchanged, not like anyone cares.

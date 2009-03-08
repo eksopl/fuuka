@@ -235,7 +235,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
 </if>
 
-<var gmtime $date></label>
+<!-- I love 4ch (yes, this is temporary) --><var dqntime($date)></label>
 
 <if $replyform>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>

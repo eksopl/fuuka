@@ -283,6 +283,17 @@ sub mtime($){
 	$stat[9]
 }
 
+sub dqntime($){
+	my($time)=@_;
+	my($diff)=$time-746755200;
+	
+	my $day=int $diff/86400;
+	my $hour=int($diff%86400/60/60);
+	my $min=int($diff%86400/60)%60;
+	
+	sprintf "1993-09-%02d %02d:%02d",$day,$hour,$min
+}
+
 sub make_filesize_string($){
 	my ($size)=@_;
 	
@@ -1062,7 +1073,7 @@ if($task){for($task){
 	/^reports$/ and do{
 		my($name)=$cgi->param("name");
 		
-		show_reports and exit unless $_;
+		show_reports,exit unless $name;
 		
 		show_report($_);
 		exit;
@@ -1118,7 +1129,7 @@ if($path){
 	m!^/reports?(?:/(.*))?!x and do{
 		my($name)=$1;
 		
-		show_reports and exit unless $name;
+		show_reports,exit unless $name;
 		
 		show_report($name);
 		exit;
