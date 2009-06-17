@@ -147,7 +147,7 @@ sub parse_post($$$){
 				(?>.*?</span>) \s*
 				(?:
 					<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \s*
-					<span \s class="filesize">File \s :
+					<span \s class="filesize">File \s : \s*
 					<a \s href="([^"]*/src/(\d+\.\w+))"[^>]*>[^<]*</a> \s*
 					\- \s* \((Spoiler \s Image,)?([\d\sGMKB\.]+)\, \s (\d+)x(\d+)(?:, \s* <span \s title="([^"]*)">[^<]*</span>)?\)
 					</span> \s*
