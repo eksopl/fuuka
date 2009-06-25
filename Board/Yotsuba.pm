@@ -423,24 +423,24 @@ i		cgi		nov		Oekaki
 ic		cgi		nov		Artwork/Critique
 cm		zip		bin		Cute/Male
 y		orz		tmp		Yaoi
-r9k             img             dat             ROBOT9000
+r9k		img		dat		ROBOT9000
 an		zip		bin		Animals & Nature
 cgl		zip		bin		Cosplay & EGL
 ck		zip		bin		Food & Cooking
 co		zip		bin		Comics & Cartoons
-fa              zip             bin             Fashion
-fit             zip             bin             Health & Fitness
-hc              cgi             nov             Hardcore
+fa		zip		bin		Fashion
+fit		zip		bin		Health & Fitness
+hc		cgi		nov		Hardcore
 jp		zip		bin		Japan/General
 mu		zip		bin		Music
 n		zip		bin		Transportation
 po		zip		bin		Papercraft & Origami
-sp              zip             bin             Sports
-tg              zip             bin             Traditional Games
-toy             zip             bin             Toys
-trv             zip             bin             Travel
-tv              zip             bin             Television & Film
-x               zip             bin             Paranormal
+sp		zip		bin		Sports
+tg		zip		bin		Traditional Games
+toy		zip		bin		Toys
+trv		zip		bin		Travel
+tv		zip		bin		Television & Film
+x		zip		bin		Paranormal
 HERE
 
 	$boards_list{$1}={
