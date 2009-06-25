@@ -115,7 +115,7 @@ sub cgi_params(){
 sub x_www_params(@){
 	my(%args)=@_;
 	
-	html_encode(join "&",map{"$_=".link_encode($args{$_})}keys %args)
+	html_encode(join "&",map{"$_=".uri_escape_utf8($args{$_})}keys %args)
 }
 
 sub html_encode($){
@@ -971,7 +971,7 @@ sub show_report($){
 					
 					push @$ref,{
 						name	=> $rownames[$num],
-						text	=> qq{<a class="invis-link" href="$self?}."task=search2&search_username=".uri_escape_utf8($name)."&search_tripcode=".uri_escape_utf8($trip).qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
+						text	=> qq{<a class="invis-link" href="$self?}."task=search2&".x_www_params('search_username', $name, 'search_tripcode', $trip).qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
 						type	=> "text",
 					};
 					next;
