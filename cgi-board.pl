@@ -208,12 +208,14 @@ sub bbcode_encode($){
 sub format_comment($$$){
 	local $_=html_encode(shift);
 	my($present_posts,$posts)=@_;
+
+    s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>$3!g;
 	
 	# >>postno links
 	s!
-		(.?)(&gt;&gt;(\d+(?:&\#44;\d+)?))(?: ([^\r\n]*))?
+		(&gt;&gt;(\d+(?:&\#44;\d+)?))
 	!
-		my($first,$text,$num,$quote)=($1,$2,$3,$4);
+		my($text,$num)=($1,$2);
 		$num=~s/&#44;/_/g;
 		
 		# >>1 >>2 links
@@ -221,27 +223,21 @@ sub format_comment($$$){
 			$num=ref_post_id($posts->[$num-1]->{num},$posts->[$num-1]->{subnum});
 		}
 		
-		$first.($present_posts->{$num}?
+		($present_posts->{$num}?
 			qq{<a href="#p$num" onclick="replyhighlight('p$num')">$text</a>}:
-			qq{<a href="}.(ref_post_far($num)).qq{">$text</a>}).
-				($first?
-					" $quote":
-					($quote?qq{ <span class="unkfunc">$quote</span>}:""))
+			qq{<a href="}.(ref_post_far($num)).qq{">$text</a>});
 	!gemx;
 	
 	# >>>/board/postno links
 	s!
-		(.?)(&gt;&gt;&gt;/(\w+)/(\d+(?:&\#44;\d+)?))(?: ([^\r\n]*))?
+		(&gt;&gt;&gt;/(\w+)/(\d+(?:&\#44;\d+)?))
 	!
-		my($first,$text,$board,$num,$quote)=($1,$2,$3,$4,$5);
+		my($text,$board,$num)=($1,$2,$3);
 		$num=~s/&#44;/_/g;
 		
-		$first.(BOARD_SETTINGS->{$board}?
+		(BOARD_SETTINGS->{$board}?
 			qq{<a href="}.ref_post_far($num,undef,$board).qq{">$text</a>}:
-			qq{<span class="unkfunc">$text</span>}).
-				($first?
-					" $quote":
-					($quote?qq{ <span class="unkfunc">$quote</span>}:""))
+			qq{<span class="unkfunc">$text</span>});
 	!gemx;
 
 	# make URLs into links
@@ -260,8 +256,6 @@ sub format_comment($$$){
 		
 		qq{<a href="$link">$text</a>}
 	!sgixe;
-	
-	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>$3!g;
 	
 	s/^\s*//;
 	s/\s*$//;
