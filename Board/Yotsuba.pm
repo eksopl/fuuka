@@ -399,15 +399,9 @@ sub do_clean($$){
 }
 
 while(<<HERE=~/(\S+)\s+(\S+)\s+(\S+)\s+(.*)/g){
-jp		zip		bin		Japan/General
 a		zip		bin		Anime & Manga
-an		zip		bin		Animals & Nature
 b		img		dat		Random
 c		zip		bin		Anime/Cute
-cgl		orz		tmp		Cosplay & EGL
-ck		zip		bin		Food & Cooking
-cm		zip		bin		Cute/Male
-co		zip		bin		Comics & Cartoons
 d		orz		tmp		Hentai/Alternative
 e		orz		tmp		Ecchi
 g		zip		bin		Technology
@@ -416,22 +410,37 @@ h		cgi		nov		Hentai
 hr		orz		tmp		High Resolution
 k		zip		bin		Weapons
 m		zip		bin		Mecha
-mu		zip		bin		Music
-n		orz		tmp		News
 o		zip		bin		Auto
 p		zip		bin		Photography
-po		zip		bin		Papercraft & Origami
 r		cgi		nov		Request
 s		cgi		nov		Sexy Beautiful Women
 t		cgi		nov		Torrents
-tv		zip		bin		Television & Film
 u		orz		tmp		Yuri
 v		zip		bin		Video Games
 w		zip		bin		Anime/Wallpapers
 wg		orz		tmp		Wallpapers/General
-y		orz		tmp		Yaoi
 i		cgi		nov		Oekaki
 ic		cgi		nov		Artwork/Critique
+cm		zip		bin		Cute/Male
+y		orz		tmp		Yaoi
+r9k             img             dat             ROBOT9000
+an		zip		bin		Animals & Nature
+cgl		zip		bin		Cosplay & EGL
+ck		zip		bin		Food & Cooking
+co		zip		bin		Comics & Cartoons
+fa              zip             bin             Fashion
+fit             zip             bin             Health & Fitness
+hc              cgi             nov             Hardcore
+jp		zip		bin		Japan/General
+mu		zip		bin		Music
+n		zip		bin		Transportation
+po		zip		bin		Papercraft & Origami
+sp              zip             bin             Sports
+tg              zip             bin             Traditional Games
+toy             zip             bin             Toys
+trv             zip             bin             Travel
+tv              zip             bin             Television & Film
+x               zip             bin             Paranormal
 HERE
 
 	$boards_list{$1}={
