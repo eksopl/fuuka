@@ -72,9 +72,6 @@ sub update_thread($){
 			foreach @posts;
 	}
 
-	$_->{media_filename} and push @media_updates,shared_clone($_)
-		foreach @posts;
-
 	push @thread_updates,$thread;
 }
 
