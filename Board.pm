@@ -199,9 +199,10 @@ sub tripcode{
 		
 		if($sectrip){
 			eval{
-			    use Digest::MD5 'md5_base64';
-				
-				$sectrip='!!'.md5_base64($self->{secret}.$sectrip.$self->{secret}.$sectrip);
+				use Digest::SHA1 'sha1_base64';
+				use MIME::Base64;
+			
+				$sectrip='!!'.substr(sha1_base64($sectrip.decode_base64($self->{secret})), 0, 11);	
 			};
 			
 			$sectrip='' if $@;

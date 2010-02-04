@@ -22,7 +22,8 @@ use constant BOARD_SETTINGS			=> {
 #		"thumb-threads"			=> 6,				#     get thumbs
 #		"media-threads"			=> 0,				#     get pictures
 #		
-#		link					=> "http://zip.4chan.org/a",
+#		link					=> "http://boards.4chan.org/a",
+#		img_link 				=> "http://images.4chan.org/a",
 #	},
 #	jp => {
 #		name					=> "Japan/General",
@@ -31,7 +32,8 @@ use constant BOARD_SETTINGS			=> {
 #		"new-thread-threads"	=> 3,
 #		"thumb-threads"			=> 3,
 #		
-#		link					=> "http://zip.4chan.org/jp",
+#		link					=> "http://boards.4chan.org/jp",
+#		img_link				=> "http://images.4chan.org/jp",
 #	},
 	t => {
 		name					=> "Torrents",
@@ -40,7 +42,8 @@ use constant BOARD_SETTINGS			=> {
 		"new-thread-threads"	=> 3,
 		"thumb-threads"			=> 3,
 		
-		link					=> "http://cgi.4chan.org/t",
+		link					=> "http://boards.4chan.org/t",
+		img_link				=> "http://images.4chan.org/t",
 	},
 	hr => {
 		name					=> "High Resolution",
@@ -50,7 +53,8 @@ use constant BOARD_SETTINGS			=> {
 		"thumb-threads"			=>  12,
 		"media-threads"			=> 4,
 		
-		link					=> "http://orz.4chan.org/hr",
+		link					=> "http://boards.4chan.org/hr",
+		img_link				=> "http://images.4chan.org/hr",
 	},
 #	b => {
 #		name					=> "Random",
@@ -59,7 +63,8 @@ use constant BOARD_SETTINGS			=> {
 #		"new-thread-threads"	=> 10,
 #		"thumb-threads"			=> 10,
 #		
-#		link					=> "http://img.4chan.org/b",
+#		link					=> "http://boards.4chan.org/b",
+#		img_link				=> "http://images.4chan.org/b",
 #	},
 
 };
@@ -97,16 +102,28 @@ use constant DB_PASSWORD				=> "qwerty";
 #
 
 # Password to actually delete files and not just put a a trash bin icon next to them.
-use constant DELPASS					=> 'TOPSECRET';				
+use constant DELPASS					=> 'TOPSECRET';
 
-# Cryptographic secret. It's okay to leave this unchanged, not like anyone cares.
-use constant SECRET						=> 'TOPSECRET';				
+# Password to delete images
+use constant IMGDELPASS					=> 'TOPSECRET2';
+
+# Cryptographic secret encoded in base 64, used for secure tripcodes. 
+# Default is world4chan's (dis.4chan.org) secret.
+use constant SECRET						=> '
+FW6I5Es311r2JV6EJSnrR2+hw37jIfGI0FB0XU5+9lua9iCCrwgkZDVRZ+1PuClqC+78FiA6hhhX
+U1oq6OyFx/MWYx6tKsYeSA8cAs969NNMQ98SzdLFD7ZifHFreNdrfub3xNQBU21rknftdESFRTUr
+44nqCZ0wyzVVDySGUZkbtyHhnj+cknbZqDu/wjhX/HjSitRbtotpozhF4C9F+MoQCr3LgKg+CiYH
+s3Phd3xk6UC2BG2EU83PignJMOCfxzA02gpVHuwy3sx7hX4yvOYBvo0kCsk7B5DURBaNWH0srWz4
+MpXRcDletGGCeKOz9Hn1WXJu78ZdxC58VDl20UIT9er5QLnWiF1giIGQXQMqBB+Rd48/suEWAOH2
+H9WYimTJWTrK397HMWepK6LJaUB5GdIk56ZAULjgZB29qx8Cl+1K0JWQ0SI5LrdjgyZZUTX8LB/6
+Coix9e6+3c05Pk6Bi1GWsMWcJUf7rL9tpsxROtq0AAQBPQ0rTlstFEziwm3vRaTZvPRboQfREta0
+9VA+tRiWfN3XP+1bbMS9exKacGLMxR/bmO5A57AgQF+bPjhif5M/OOJ6J/76q0JDHA==';			
 
 # Maximum number of characters in subject, name, and email
 use constant MAX_FIELD_LENGTH			=> 100;
 
 # Maximum number of characters in a comment
-use constant MAX_COMMENT_LENGTH			=> 2048;
+use constant MAX_COMMENT_LENGTH			=> 4096;
 
 # Maximum number of lines in a comment
 use constant MAX_COMMENT_LINES			=> 40;

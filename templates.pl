@@ -174,7 +174,7 @@ Text search
 </form>
 HERE
 
-<form action="<var $self>" method="get">
+<form action="<var $self>/" method="get">
 <div class="postspan" style="float:left">
 <input type="hidden" name="task" value="post" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
@@ -183,7 +183,7 @@ View post&nbsp;
 <input type="submit" value="Submit" />
 </div></form>
 
-<form action="<var $self>" method="get">
+<form action="<var $self>/" method="get">
 <div class="postspan" style="float:left">
 <input type="hidden" name="task" value="page" />
 View page&nbsp;
@@ -235,7 +235,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
 </if>
 
-<!-- I love 4ch (yes, this is temporary) --><var dqntime($date)></label>
+<!-- I love 4ch (yes, this is temporary) --><var scalar gmtime($date)></label>
 
 <if $replyform>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
@@ -252,12 +252,12 @@ use constant POSTS_INCLUDE_FILE => <<'HERE';
 <if $file>
 	<span>File: <var make_filesize_string($media_size)>, <var $media_w>x<var $media_h>, <var $media><!-- <var $media_hash> --></span>
 	
-	[<a href="<var $self>/image/<var $media_hash>">View same</a>]
+	[<a href="<var $self>/image/<var $media_hash>">View same</a>] [<a href="http://iqdb.org/?url=<var $absolute_path><var $file>">iqdb</a>]
 	
 	<br />
 	
 	<if $fullfile><a href="<var $fullfile>">
-	<elsif $media_filename><a href="<var "$yotsuba_link/src/$media_filename">">
+	<elsif $media_filename><a href="<var "$images_link/src/$media_filename">">
 	</if>
 	
 	<if $file><img class="thumb" src="<var $file>" alt="<var $num>" <if $preview_w>width="<var $preview_w>" height="<var $preview_h>"</if> /></if>

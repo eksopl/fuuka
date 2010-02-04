@@ -118,7 +118,7 @@ sub parse_thread($$){
 				<input \s type=checkbox \s name="(\d+)"[^>]*><span \s class="filetitle">(?>(.*?)</span>) \s*
 				<span \s class="postername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
-				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span></span>)?
+				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
 				\s ([^>]*) \s \s* <span[^>]*> \s* 
 				(?>.*?</span>) \s*
 				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
@@ -140,9 +140,9 @@ sub parse_post($$$){
 	my($text,$parent)=@_;
 	$text=~m!	<td \s id="(\d+)"[^>]*> \s*
 				<input[^>]*><span \s class="replytitle">(?>(.*?)</span>) \s*
-				<span \s class="commentpostername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
+				<span \s class="commentpostername">(?:<a \s href="mailto:([^"]*)"[^>]*>)?(?:<span [^>]*>)?([^<]*?)(?:</span>)?(?:</a>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
-				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span></span>)?
+				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
 				\s ([^>]*) \s \s* <span[^>]*> \s* 
 				(?>.*?</span>) \s*
 				(?:
@@ -224,7 +224,7 @@ sub get_media_preview($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
-	my $data=$self->wget("$self->{link}/thumb/$post->{preview}");
+	my $data=$self->wget("$self->{img_link}/thumb/$post->{preview}");
 	
 	\$data;
 }
@@ -398,56 +398,57 @@ sub do_clean($$){
 	$self->_clean_simple($_);
 }
 
-while(<<HERE=~/(\S+)\s+(\S+)\s+(\S+)\s+(.*)/g){
-a		zip		bin		Anime & Manga
-b		img		dat		Random
-c		zip		bin		Anime/Cute
-d		orz		tmp		Hentai/Alternative
-e		orz		tmp		Ecchi
-g		zip		bin		Technology
-gif		cgi		nov		Animated GIF
-h		cgi		nov		Hentai
-hr		orz		tmp		High Resolution
-k		zip		bin		Weapons
-m		zip		bin		Mecha
-o		zip		bin		Auto
-p		zip		bin		Photography
-r		cgi		nov		Request
-s		cgi		nov		Sexy Beautiful Women
-t		cgi		nov		Torrents
-u		orz		tmp		Yuri
-v		zip		bin		Video Games
-w		zip		bin		Anime/Wallpapers
-wg		orz		tmp		Wallpapers/General
-i		cgi		nov		Oekaki
-ic		cgi		nov		Artwork/Critique
-cm		zip		bin		Cute/Male
-y		orz		tmp		Yaoi
-r9k		img		dat		ROBOT9000
-an		zip		bin		Animals & Nature
-cgl		zip		bin		Cosplay & EGL
-ck		zip		bin		Food & Cooking
-co		zip		bin		Comics & Cartoons
-fa		zip		bin		Fashion
-fit		zip		bin		Health & Fitness
-hc		cgi		nov		Hardcore
-jp		zip		bin		Japan/General
-mu		zip		bin		Music
-n		zip		bin		Transportation
-po		zip		bin		Papercraft & Origami
-sp		zip		bin		Sports
-tg		zip		bin		Traditional Games
-toy		zip		bin		Toys
-trv		zip		bin		Travel
-tv		zip		bin		Television & Film
-x		zip		bin		Paranormal
+while(<<HERE=~/(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)/g){
+a		boards	images	sys		Anime & Manga
+b		boards	images	sys		Random
+c		boards	images	sys		Anime/Cute
+d		boards	images	sys		Hentai/Alternative
+e		boards	images	sys		Ecchi
+g		boards	images	sys		Technology
+gif		boards	images	sys		Animated GIF
+h		boards	images	sys		Hentai
+hr		boards	images	sys		High Resolution
+k		boards	images	sys		Weapons
+m		boards	images	sys		Mecha
+o		boards	images	sys		Auto
+p		boards	images	sys		Photography
+r		boards	images	sys		Request
+s		boards	images	sys		Sexy Beautiful Women
+t		boards	images	sys		Torrents
+u		boards	images	sys		Yuri
+v		boards	images	sys		Video Games
+w		boards	images	sys		Anime/Wallpapers
+wg		boards	images	sys		Wallpapers/General
+i		boards	images	sys		Oekaki
+ic		boards	images	sys		Artwork/Critique
+cm		boards	images	sys		Cute/Male
+y		boards	images	sys		Yaoi
+r9k		boards	images	sys		ROBOT9000
+an		boards	images	sys		Animals & Nature
+cgl		boards	images	sys		Cosplay & EGL
+ck		boards	images	sys		Food & Cooking
+co		boards	images	sys		Comics & Cartoons
+fa		boards	images	sys		Fashion
+fit		boards	images	sys		Health & Fitness
+hc		boards	images	sys		Hardcore
+jp		boards	images	sys		Japan/General
+mu		boards	images	sys		Music
+n		boards	images	sys		Transportation
+po		boards	images	sys		Papercraft & Origami
+sp		boards	images	sys		Sports
+tg		boards	images	sys		Traditional Games
+toy		boards	images	sys		Toys
+trv		boards	images	sys		Travel
+tv		boards	images	sys		Television & Film
+x		boards	images	sys		Paranormal
 HERE
 
 	$boards_list{$1}={
-		desc=>"$4",
+		desc=>"$5",
 		link=>"http://$2.4chan.org/$1",
+		img_link=>"http://$3.4chan.org/$1",
 		html=>"http://$2.4chan.org/$1/imgboard.html",
-		script=>"http://$3.4chan.org/$1/imgboard.php",
+		script=>"http://$4.4chan.org/$1/imgboard.php",
 	};
 }
 

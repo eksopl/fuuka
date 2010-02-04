@@ -248,7 +248,7 @@ sub search($$$$){
 	my $ord=$settings{ord};
 	my $query_ord="timestamp desc";
 	
-	$query_ord="timestamp asc" if $ord eq 'old';
+	$query_ord="timestamp asc" if $ord and $ord eq 'old';
 	
 	my $condition=join "",map{"$_ and "}@conditions;
 	
@@ -256,7 +256,7 @@ sub search($$$$){
 		"use index(".(join ",",@index_hint).")":
 		"";
 	
-	my $query=($text and $ord eq 'rel' and $text!~/[\*\+\-]/)?
+	my $query=(0 and $text and $ord eq 'rel' and $text!~/[\*\+\-]/)?
 		"select *,match(comment) against(".
 		$dbh->quote($text).
 		") as score from $self->{table} $index_hint where $condition match(comment) against(".

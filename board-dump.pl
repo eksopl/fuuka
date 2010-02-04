@@ -66,9 +66,11 @@ sub update_thread($){
 	return unless $thread->{posts};
 	
 	my(@posts)=@{$thread->{posts}};
-	
-	$_->{preview} and push @media_preview_updates,shared_clone($_)
-		foreach @posts;
+
+	if($settings->{"media-threads"}){	
+		$_->{preview} and push @media_preview_updates,shared_clone($_)
+			foreach @posts;
+	}
 
 	$_->{media_filename} and push @media_updates,shared_clone($_)
 		foreach @posts;
@@ -205,6 +207,9 @@ async{
 
 # rebuild whole thread, either because it's new or because it's too old
 async{my $board=$board_spawner->();while(1){
+	use threads;
+	use threads::shared;
+
 	local $_;
 	{	lock @newthreads;
 		$_=shift @newthreads;

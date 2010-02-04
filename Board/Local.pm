@@ -163,6 +163,17 @@ sub insert_media_preview{
 	1;
 }
 
+sub delete_media_preview($) {
+	my $self=shift;
+	my ($num) = @_;
+
+	my $h = $self->get_post($num);
+
+	my($thumb_dir)=$self->get_dirs($h->{parent} or $h->{num});
+
+	unlink "$thumb_dir/$h->{preview}" if $h->{preview} and $self->media_preview_exists($h);
+}
+
 sub insert_media{
 	my $self=shift;
 	my($h,$source)=@_;

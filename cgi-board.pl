@@ -37,6 +37,7 @@ our %cgi_params;
 use constant LOCAL		=> $ENV{REMOTE_ADDR} eq '127.0.0.1';
 
 our $yotsuba_link		= $boards{$board_name}->{link};
+our $images_link		= ($boards{$board_name}->{img_link} or $yotsuba_link);
 
 BEGIN{require "templates.pl"}
 BEGIN{require "messages.pl"}
@@ -72,11 +73,11 @@ our $board				= Board::Mysql->new($board_name,
 our @navigation=(
 	[
 		map{
-		[$_,			$boards{$_}->{name},			"$ENV{SCRIPT_NAME}/$_"]
+		[$_,			$boards{$_}->{name},			"$ENV{SCRIPT_NAME}/$_/"]
 		} @boards
 	],[
 		["index",		"Go to front page of archiver",			"$ENV{SCRIPT_NAME}"],
-		["top",			"Go to first page of this board",		"$self"],
+		["top",			"Go to first page of this board",		"$self/"],
 		["reports",		"",										"$self/reports"],
 		["report a bug","Report a bug or suggest a feature",	"http://code.google.com/p/fuuka/issues/list"],
 		
@@ -629,7 +630,7 @@ sub show_index(){
 		list		=> [map{ {
 			name				=> "$_",
 			description			=> $board_desc,
-			link				=> "$ENV{SCRIPT_NAME}/$_",
+			link				=> "$ENV{SCRIPT_NAME}/$_/",
 			
 		} } @boards],
 		
@@ -1035,6 +1036,7 @@ if($task){for($task){
 		
 		for(@postnums){
 			if($pass eq DELPASS) { $board->database_delete($_,$pass) }
+			elsif($pass eq IMGDELPASS) { $board->delete_media_preview($_,$pass) }
 			else                 { $board->delete($_,$pass,$id) }
 			
 			error $board->errstr if $board->error;
