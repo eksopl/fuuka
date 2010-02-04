@@ -67,7 +67,7 @@ sub update_thread($){
 	
 	my(@posts)=@{$thread->{posts}};
 
-	if($settings->{"media-threads"}){
+	if($settings->{"thumb-threads"}){
 		$_->{preview} and push @media_preview_updates,shared_clone($_)
  			foreach @posts;
 	}
