@@ -72,7 +72,7 @@ sub update_thread($){
  			foreach @posts;
 	}
 	if($settings->{"media-threads"}){	
-		$_->{preview} and push @media_preview_updates,shared_clone($_)
+		$_->{media_filename} and push @media_updates,shared_clone($_)
 			foreach @posts;
 	}
 
