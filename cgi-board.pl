@@ -1019,7 +1019,7 @@ skip_messing_with_text_data:
 #
 #
 
-our $cgi->param("task");
+our $task=$cgi->param("task");
 $task="delete" if $cgi->param("delposts");
 if($task){for($task){
 	/^reply$/ and do{
