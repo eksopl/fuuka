@@ -5,12 +5,14 @@ use utf8;
 
 binmode *STDOUT,":utf8";
 
-use CGI qw/-utf8/;
+use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Cookie;
 
 use URI::Escape;
+use Encode;
 
+# Fill in the path to the scripts if you're using mod_perl
 use lib "b:/scripts";
 
 use Board::Request;
@@ -33,6 +35,20 @@ our %cookies			= fetch CGI::Cookie;
 our $id					= unpack "N",pack "C4",split /\./,$ENV{REMOTE_ADDR};
 
 our %cgi_params;
+
+our $cgi_input = {};
+foreach my $name ($cgi->param) {
+  my @val = $cgi->param($name);
+  foreach(@val) {
+    $_ = Encode::decode_utf8($_);
+  }
+  $name = Encode::decode_utf8($name);
+  if (scalar @val == 1) {   
+    $cgi_input->{$name} = $val[0];
+  } else {                      
+    $cgi_input->{$name} = \@val;
+  }
+}
 	
 use constant LOCAL		=> $ENV{REMOTE_ADDR} eq '127.0.0.1';
 
@@ -48,14 +64,14 @@ $boards->{$board_name} or error("Board $board_name does not exist");
 our $ghost_mode			= 0;
 $ghost_mode				= 'yes' if
 	$path=~m!^/(thread|post|page)/S!		or
-	$cgi->param("page")=~/^S/				or
-	$cgi->param("thread")=~/^S/				or
-	$cgi->param("post")=~/^S/				or
-	$cgi->param("ghost")					;
+	$cgi_input->{"page"}=~/^S/				or
+	$cgi_input->{"thread"}=~/^S/				or
+	$cgi_input->{"post"}=~/^S/				or
+	$cgi_input->{"ghost"}					;
 
 $ghost_mode				= 'yes' if
 	$cookies{'ghost'} and $cookies{'ghost'}->value eq 'yes' and
-	$cgi->param("task")!='page';
+	$cgi_input->{"task"}!='page';
 
 our $board				= Board::Mysql->new($board_name,
 	connstr			=> DB_CONNECTION_STRING,
@@ -97,10 +113,10 @@ sub uncrlf($){
 sub cgi_params(){
 	my %params;
 	
-	$cgi->param("$_") and $params{$_}=$cgi->param("$_")
+	$cgi_input->{"$_"} and $params{$_}=$cgi_input->{"$_"}
 		foreach qw/search_text/;
 	
-	$cgi->param("$_") and $params{$_}=$cgi->param("$_")
+	$cgi_input->{"$_"} and $params{$_}=$cgi_input->{"$_"}
 		foreach qw/search_username search_tripcode search_del search_int search_ord task search_media_hash/;
 	
 	$params{$_}=$cgi_params{$_}
@@ -1017,12 +1033,12 @@ skip_messing_with_text_data:
 #
 #
 
-our $task=$cgi->param("task");
-$task="delete" if $cgi->param("delposts");
+our $task=$cgi_input->{"task"};
+$task="delete" if $cgi_input->{"delposts"};
 if($task){for($task){
 	/^reply$/ and do{
 		my($name,$email,$subject,$comment,$parent,$delpass,$fname,$fcomment)=
-			map{$cgi->param($_)} qw/NAMAE MERU subject KOMENTO parent delpass username comment/;
+			map{$cgi_input->{$_}} qw/NAMAE MERU subject KOMENTO parent delpass username comment/;
 		
 		redirect_late "That was /b/ Quality! Please die in a fire~ ($fname or $fcomment)",ref_page 1
 			if $fname or $fcomment;
@@ -1030,8 +1046,8 @@ if($task){for($task){
 		add_reply($name,$email,$subject,$comment,$parent,$delpass);
 	},exit;
 	/^delete$/ and do{
-		my(@postnums)=$cgi->param('delete');
-		my($pass)=$cgi->param('delpass');
+		my(@postnums)=$cgi_input->{'delete'};
+		my($pass)=$cgi_input->{'delpass'};
 		my($succ)=0;
 		
 		for(@postnums){
@@ -1047,18 +1063,18 @@ if($task){for($task){
 		redirect_late "That was VIP quality!",ref_page 1;
 	},exit;
 	/^thread$/ and do{
-		my $num=int $cgi->param("num");
+		my $num=int $cgi_input->{"num"};
 		show_thread($num);
 		exit;
 	};
 	/^page$/ and do{
-		my $page=$cgi->param("page");
+		my $page=$cgi_input->{"page"};
 		
 		show_page($page);
 		exit;
 	};
 	/^post$/ and do{
-		my($num)=$cgi->param("post")=~/.*(?:^|\D)(\d+)/;
+		my($num)=$cgi_input->{"post"}=~/.*(?:^|\D)(\d+)/;
 		
 		int $num or error "Please enter a post number";
 		
@@ -1069,7 +1085,7 @@ if($task){for($task){
 		redirect ref_post $thread,$post->{num},$post->{subnum};
 	};
 	/^reports$/ and do{
-		my($name)=$cgi->param("name");
+		my($name)=$cgi_input->{"name"};
 		
 		show_reports,exit unless $name;
 		
@@ -1077,15 +1093,15 @@ if($task){for($task){
 		exit;
 	};
 	/^search(2)?$/ and do{
-		my($text)=$cgi->param("search_text");
-		my($offset)=$cgi->param("offset");
+		my($text)=$cgi_input->{"search_text"};
+		my($offset)=$cgi_input->{"offset"};
 		my($advanced)=$1;
 		
 		show_search $text,$offset,$advanced;
 		exit;
 	};
 	/^redirect?$/ and do{
-		my($link)=$cgi->param("link");
+		my($link)=$cgi_input->{"link"};
 		
 		redirect $link;
 	},exit;

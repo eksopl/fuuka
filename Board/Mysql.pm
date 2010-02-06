@@ -90,7 +90,7 @@ create table if not exists $self->{table} (
 	index trip_index(trip),
 	index fullname_index(name,trip),
 	fulltext index comment_index(comment)
-) engine=myisam;
+) engine=myisam default charset=utf8;
 HERE
 }
 
