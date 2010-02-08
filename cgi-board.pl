@@ -1019,6 +1019,9 @@ skip_messing_with_text_data:
 #
 #
 
+# Clean that dirty global variable
+%cgi_params = {};
+
 our $task=$cgi->param("task");
 $task="delete" if $cgi->param("delposts");
 if($task){for($task){
