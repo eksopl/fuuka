@@ -25,38 +25,37 @@ use constant BOARD_SETTINGS			=> {
 #		link					=> "http://boards.4chan.org/a",
 #		img_link 				=> "http://images.4chan.org/a",
 #	},
-	jp => {
-		name					=> "Japan/General",
-		pages					=> [[[0],30],[[1..10],7200]],
-		"thread-refresh-rate"	=> 12,
-		"new-thread-threads"	=> 3,
-		"thumb-threads"			=> 3,
-		"media-threads"			=> 0,
-		
-		link					=> "http://boards.4chan.org/jp",
-		img_link				=> "http://images.4chan.org/jp",
-	},
-#	t => {
-#		name					=> "Torrents",
-#		pages					=> [[[0..10],3600]],
-#		"thread-refresh-rate"	=> 120,
+#	jp => {
+#		name					=> "Japan/General",
+#		pages					=> [[[0],30],[[1..10],7200]],
+#		"thread-refresh-rate"	=> 12,
 #		"new-thread-threads"	=> 3,
 #		"thumb-threads"			=> 3,
 #		
-#		link					=> "http://boards.4chan.org/t",
-#		img_link				=> "http://images.4chan.org/t",
+#		link					=> "http://boards.4chan.org/jp",
+#		img_link				=> "http://images.4chan.org/jp",
 #	},
-#	hr => {
-#		name					=> "High Resolution",
-#		pages					=> [[[0],240],[[0..10],3600]],
-#		"thread-refresh-rate"	=> 120,
-#		"new-thread-threads"	=> 3,
-#		"thumb-threads"			=>  12,
-#		"media-threads"			=> 4,
-#		
-#		link					=> "http://boards.4chan.org/hr",
-#		img_link				=> "http://images.4chan.org/hr",
-#	},
+	t => {
+		name					=> "Torrents",
+		pages					=> [[[0..10],3600]],
+		"thread-refresh-rate"	=> 120,
+		"new-thread-threads"	=> 3,
+		"thumb-threads"			=> 3,
+		
+		link					=> "http://boards.4chan.org/t",
+		img_link				=> "http://images.4chan.org/t",
+	},
+	hr => {
+		name					=> "High Resolution",
+		pages					=> [[[0],240],[[0..10],3600]],
+		"thread-refresh-rate"	=> 120,
+		"new-thread-threads"	=> 3,
+		"thumb-threads"			=>  12,
+		"media-threads"			=> 4,
+		
+		link					=> "http://boards.4chan.org/hr",
+		img_link				=> "http://images.4chan.org/hr",
+	},
 #	b => {
 #		name					=> "Random",
 #		pages					=> [[[0],0],[[1],0],[[2],0],[[3],0]],
@@ -70,21 +69,18 @@ use constant BOARD_SETTINGS			=> {
 
 };
 
-# path to the scripts
-use constant SCRIPT_LOCATION		=> "/Users/miguel/Sites/fuuka";
-
 # where to put images and thumbs from archived boards
-use constant IMAGES_LOCATION		=> "/Users/miguel/Sites/fuuka/boards";
-use constant IMAGES_LOCATION_HTTP	=> "/~miguel/fuuka/boards";
+use constant IMAGES_LOCATION		=> "f:/board";
+use constant IMAGES_LOCATION_HTTP	=> "/board";
 
 # where your files with reports located
-use constant REPORTS_LOCATION		=> "/Users/miguel/Sites/fuuka/reports";
+use constant REPORTS_LOCATION		=> "b:/server-data/board/reports";
 
 # where all web files (pictures, js, css, etc.) are located
-use constant MEDIA_LOCATION_HTTP	=> "/~miguel/fuuka/media";
+use constant MEDIA_LOCATION_HTTP	=> "/media";
 
 # how to run the program for plotting
-use constant GNUPLOT				=> '/opt/local/bin/gnuplot';
+use constant GNUPLOT				=> 'wgnuplot';
 
 #
 # Database
@@ -96,20 +92,20 @@ use constant DB_CONNECTION_STRING	=> "";
 # these will be used to construct connection string if you leave it empty,
 # and will be ignored if you provide connection string)
 use constant DB_HOST					=> "localhost";
-use constant DB_DATABSE_NAME			=> "archive";
+use constant DB_DATABSE_NAME			=> "Yotsuba";
 
 use constant DB_USERNAME				=> "root";
-use constant DB_PASSWORD				=> "";
+use constant DB_PASSWORD				=> "qwerty";
 
 #
 # Posting
 #
 
 # Password to actually delete files and not just put a a trash bin icon next to them.
-use constant DELPASS					=> 'loldongs';
+use constant DELPASS					=> 'TOPSECRET';
 
 # Password to delete images
-use constant IMGDELPASS					=> 'loldongs2';
+use constant IMGDELPASS					=> 'TOPSECRET2';
 
 # Cryptographic secret encoded in base 64, used for secure tripcodes. 
 # Default is world4chan's (dis.4chan.org) secret.
