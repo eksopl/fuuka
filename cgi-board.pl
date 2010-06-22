@@ -69,6 +69,7 @@ our $board				= Board::Mysql->new($board_name,
 	secret			=> SECRET,
 	renzoku			=> RENZOKU,
 	renzoku3		=> RENZOKU3,
+	sage			=> ENABLE_SAGE,
 	full_pictures	=> $boards{$board_name}->{"media-threads"}?1:0,
 ) or die "Couldn't use mysql board with table $board_name";
 
@@ -394,7 +395,7 @@ no strict;
 sub {
 	my $port=$ENV{SERVER_PORT}==80?"":":$ENV{SERVER_PORT}";
 	my $absolute_self="http://$ENV{SERVER_NAME}$port$ENV{SCRIPT_NAME}";
-	my ($path)=$ENV{SCRIPT_NAME}=~m!^(.*/)[^/]+$!;
+	my ($path)=$ENV{SCRIPT_NAME}=~m!^(.*)/[^/]+$!;
 	my $absolute_path="http://$ENV{SERVER_NAME}$port$path";
 	my %__v=@_;my %__ov;for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}
 HERE
@@ -1020,7 +1021,7 @@ skip_messing_with_text_data:
 #
 
 # Clean that dirty global variable
-%cgi_params = {};
+%cgi_params = ();
 
 our $task=$cgi->param("task");
 $task="delete" if $cgi->param("delposts");
@@ -1063,7 +1064,8 @@ if($task){for($task){
 		exit;
 	};
 	/^post$/ and do{
-		my($num)=$cgi->param("post")=~/.*(?:^|\D)(\d+)/;
+		my($num,$subnum)=$cgi->param("post")=~/(?:^|\/)(\d+)(?:[_,]([0-9]*))?/;
+		$subnum = "" if not $subnum;
 		
 		int $num or error "Please enter a post number";
 		
@@ -1071,7 +1073,7 @@ if($task){for($task){
 		$board->error and error $board->errstr;
 
 		my($thread)=($post->{parent} or $post->{num});
-		redirect ref_post $thread,$post->{num},$post->{subnum};
+		redirect ref_post $thread,$post->{num},$subnum;
 	};
 	/^reports$/ and do{
 		my($name)=Encode::decode_utf8($cgi->param("name"));

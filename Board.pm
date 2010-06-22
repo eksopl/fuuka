@@ -216,7 +216,7 @@ sub tripcode{
 				# 2ch trips are processed as Shift_JIS whenever possible
 				use Encode qw/decode encode/;
 				
-				$trip=encode("Shift_JIS",$trippart);
+				$trip=encode("Shift_JIS",$trip);
 			};
 			
 			my $salt=substr $trip."H..",1,2;

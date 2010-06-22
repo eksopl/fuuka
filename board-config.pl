@@ -135,6 +135,8 @@ use constant RENZOKU => 5;
 # Seconds between identical posts (floodcheck)
 use constant RENZOKU3 => 900;
 
+Set to 1 to enable the sage feature in ghost posts
+use constant ENABLE_SAGE => 0;
 
 #
 # that's it folks, move along, nothing to see here.
@@ -152,6 +154,10 @@ use constant SPAWNER => sub{my $board_name=shift;Board::Mysql->new($board_name,
 	full_pictures	=> BOARD_SETTINGS->{$board_name}->{"media-threads"}?1:0,
 ) or die "Couldn't use mysql board with table $board_name"};
 
-sub yotsutime(){time-5*60*60}
+sub yotsutime(){
+	use DateTime;
+	use DateTime::TimeZone;
+	time+DateTime::TimeZone->new(name => 'America/New_York')->offset_for_datetime(DateTime->now())
+}
 
 1;

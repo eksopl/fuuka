@@ -195,8 +195,9 @@ sub get_page($$){
 
 	my @results=@{ $self->query($shadow?<<HERE:<<THERE,$self->{threads_per_page},$self->{threads_per_page}*$page) or return };
 select * from $self->{table}, 
-	(select parent from $self->{table}_local order by timestamp desc limit ? offset ?) as j 
-	where $self->{table}.parent = j.parent or $self->{table}.num = j.parent;
+	(select parent,timestamp from $self->{table}_local order by timestamp desc limit ? offset ?) as j 
+	where $self->{table}.parent = j.parent or $self->{table}.num = j.parent
+	order by j.timestamp desc, num, subnum asc;
 HERE
 select $self->{table}.* from
 	(select num from $self->{table} where parent=0 order by num desc limit ? offset ?) as threads join $self->{table}
@@ -226,7 +227,7 @@ sub search($$$$){
 	my $dbh=$self->{dbh};
 	
 	$limit=int $limit;
-	$offset=int $offset;
+	$offset=defined $offset ? int $offset : 0;
 	
 	my @conditions;
 	my @index_hint;
@@ -345,12 +346,16 @@ sub database_delete{
 	if($subnum) {
 		$self->query("delete from $self->{table}_local where parent = (select case when max(parent) = 0 then num else max(parent) end from $self->{table} where num=$num)");
 		$self->query("replace into $self->{table}_local (num,parent,subnum,`timestamp`) 
-			select num,case when parent = 0 then num else parent end,max(subnum),max(`timestamp`) from $self->{table}
-				where num = (select max(num) from $self->{table} where parent=(select max(parent) from $self->{table} where num=$num))");
+			select num,case when parent = 0 then num else parent end,max(subnum) as maxsub,max(`timestamp`) from $self->{table}
+				where num = (select max(num) from $self->{table} where parent=(select max(parent) from $self->{table} where num=$num)) having maxsub != 0");
 	}
 }
 
 sub insert{
+	# That sprintf below spouts a billion of uninitialized value warnings
+	# really needs to be fixed, my error logs can't take it easy like this
+	no warnings;
+
 	my $self=shift;
 	my($thread)=@_;
 	my $dbh=$self->{dbh};
@@ -367,9 +372,11 @@ sub insert{
 	}
 	
 	$num or $parent or $self->error(FORGET_IT,"Must specify a thread number for this board"),return 0;
+	my $sage = 0;
 	
 	$self->query("replace $self->{table} values ".join ",",map{
 		my $h=$_;
+		$sage = 1 if $h->{email} eq 'sage' and $self->{sage};
 		
 		my($location)=$num?
 			# insert a post with specified number
@@ -409,7 +416,7 @@ sub insert{
 	# update board_local table if we're inserting a ghost post
 	$self->query("replace into $self->{table}_local (num,parent,subnum,`timestamp`) 
 		select num,case when parent = 0 then num else parent end as parent,max(subnum),max(`timestamp`) from $self->{table} 
-			where num = (select max(num) from $self->{table} where parent=$parent)") if !$num;
+			where num = (select max(num) from $self->{table} where parent=$parent)") if !$num and !$sage;
 
 	$self->ok;
 

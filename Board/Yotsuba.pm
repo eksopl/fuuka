@@ -386,6 +386,8 @@ sub do_clean($$){
 	s!<span class="abbr">.*?</span>!!g;
 	
 	s!<b style="color:red;">(.*?)</b>![banned]${1}[/banned]!g;
+
+	s!<b>(.*?)</b>![b]${1}[/b]!g;
 	
 	s!<font class="unkfunc">(.*?)</font>!$1!g;
 	s!<a[^>]*>(.*?)</a>!$1!g;
@@ -424,17 +426,22 @@ ic		boards	images	sys		Artwork/Critique
 cm		boards	images	sys		Cute/Male
 y		boards	images	sys		Yaoi
 r9k		boards	images	sys		ROBOT9000
+3		boards	images	sys		3DCG
+adv		boards	images	sys		Advice
 an		boards	images	sys		Animals & Nature
 cgl		boards	images	sys		Cosplay & EGL
 ck		boards	images	sys		Food & Cooking
 co		boards	images	sys		Comics & Cartoons
 fa		boards	images	sys		Fashion
 fit		boards	images	sys		Health & Fitness
-hc		boards	images	sys		Hardcore
-jp		boards	images	sys		Japan/General
+int		boards	images	sys		International
+jp		boards	images	sys		Otaku Culture
+lit		boards	images	sys		Literature
 mu		boards	images	sys		Music
 n		boards	images	sys		Transportation
+new		boards	images	sys		News
 po		boards	images	sys		Papercraft & Origami
+sci		boards	images	sys		Science & Math
 sp		boards	images	sys		Sports
 tg		boards	images	sys		Traditional Games
 toy		boards	images	sys		Toys

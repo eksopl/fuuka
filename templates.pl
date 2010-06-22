@@ -235,7 +235,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
 </if>
 
-<!-- I love 4ch (yes, this is temporary) --><var scalar gmtime($date)></label>
+<var scalar gmtime($date)></label>
 
 <if $replyform>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
@@ -286,7 +286,7 @@ use constant POSTS_INCLUDE => q{
 			
 			}.POSTS_INCLUDE_POST_HEADER.q{
 			
-			[<a href="<var ref_thread($num)>">Reply</a>]&nbsp;[<a href="<var $yotsuba_link>/res/<var $num>.html">Original</a>]
+			[<a href="<var ref_thread($num)>">Reply</a>]&nbsp;[<a href="<var $yotsuba_link>/res/<var $num>">Original</a>]
 			<blockquote><p><var $comment></p></blockquote>
 			<if $count>
 				<span class="omittedposts"><var $count> replies omitted. Click Reply to view.</span>
