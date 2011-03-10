@@ -1,4 +1,4 @@
-set terminal png  transparent size 800,600
+set terminal %%TERM%%  transparent size 800,600
 set output "%%OUTFILE%%"
 show terminal
 
@@ -7,7 +7,8 @@ set style data fsteps
 set timefmt "%s"
 set yrange [ 0 : ]
 set xdata time
-set format x "%y/%m/%d"
+set xrange [ "%%XSTART%%" : "%%XEND%%" ]
+set format x "%m/%y"
 set grid
 set key left
 

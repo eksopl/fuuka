@@ -22,6 +22,7 @@ my $board_names=[keys %$settings];
 my @boards=map{SPAWNER->($_)} @$board_names;
 my $loc=REPORTS_LOCATION;
 my $imgloc=IMAGES_LOCATION;
+my $term=GNUPLOT_TERMINAL;
 my @reports;
 my @report_files;
 my %mtimes;
@@ -134,6 +135,8 @@ sub do_report{
 	die $board->errstr if $board->error;
 	
 	if($ref->{mode} eq 'graph' and GNUPLOT){
+		my $xstart = $list->[0][0];
+		my $xend   = $list->[-1][0];
 		open HANDLE,">$loc/graphs/$name.data" or die "$! - $loc/graphs/$name.data";
 		print HANDLE (join "\t",@$_),"\n" foreach @$list;
 		close HANDLE;
@@ -144,7 +147,9 @@ sub do_report{
 		while(defined(local $_=<INFILE>)){
 			s!%%INFILE%%!$loc/graphs/$name.data!g;
 			s!%%OUTFILE%%!$ref->{'result-location'}/$board->{name}/$ref->{result}!g;
-			
+			s!%%XSTART%%!$xstart!g;
+			s!%%XEND%%!$xend!g;
+			s!%%TERM%%!$term!g;
 			print OUTFILE $_;
 		}
 		

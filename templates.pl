@@ -103,7 +103,7 @@ use constant INDEX_INCLUDE => <<'HERE';
 HERE
 
 use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
-<form action="<var $self>" method="get">
+<form action="<var $self>/" method="get">
 <div id="advanced-search" class="postspan" style="float:left;<if not $standalone>display:none;</if>">
 <input type="hidden" name="task" value="search2" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
@@ -161,7 +161,7 @@ use constant SIDEBAR_INCLUDE => <<'HERE'.SIDEBAR_ADVANCED_SEARCH.<<'THERE';
 <hr />
 <div style="overflow:hidden;">
 
-<form action="<var $self>" method="get">
+<form action="<var $self>/" method="get">
 <div id="simple-search" class="postspan" style="float:left">
 <input type="hidden" name="task" value="search" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
@@ -252,12 +252,12 @@ use constant POSTS_INCLUDE_FILE => <<'HERE';
 <if $file>
 	<span>File: <var make_filesize_string($media_size)>, <var $media_w>x<var $media_h>, <var $media><!-- <var $media_hash> --></span>
 	
-	[<a href="<var $self>/image/<var $media_hash>">View same</a>] [<a href="http://iqdb.org/?url=<var $absolute_path><var $file>">iqdb</a>]
+	[<a href="<var $self>/image/<var urlsafe_b64encode(urlsafe_b64decode($media_hash))>">View same</a>] [<a href="http://iqdb.org/?url=<var $absolute_path><var $file>">iqdb</a>]
 	
 	<br />
 	
 	<if $fullfile><a href="<var $fullfile>">
-	<elsif $media_filename><a href="<var "$images_link/src/$media_filename">">
+	<elsif $media_filename><a rel="noreferrer" href="<var "$images_link/$media_filename">">
 	</if>
 	
 	<if $file><img class="thumb" src="<var $file>" alt="<var $num>" <if $preview_w>width="<var $preview_w>" height="<var $preview_h>"</if> /></if>
@@ -269,7 +269,7 @@ use constant POSTS_INCLUDE_FILE => <<'HERE';
 HERE
 
 use constant POSTS_INCLUDE => q{
-<form id="postform" action="<var $self>" method="post" enctype="multipart/form-data">
+<form id="postform" action="<var $self>/" method="post" enctype="multipart/form-data">
 <div class="content">
 
 <loop $threads>

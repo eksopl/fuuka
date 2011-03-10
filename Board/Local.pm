@@ -67,9 +67,13 @@ sub make_dirs($;$){
 	if($subdir){
 		mkdir "$path/thumb/$subdir";
 		mkdir "$path/thumb/$subdir/$sub2dir";
+		chmod 0775, "$path/thumb/$subdir", "$path/thumb/$subdir/$sub2dir";
+		#chown $<, 80, "$path/thumb/$subdir", "$path/thumb/$subdir/$sub2dir";
 		if($self->{full}){
 			mkdir "$path/img/$subdir";
 			mkdir "$path/img/$subdir/$sub2dir";
+			chmod 0775, "$path/img/$subdir", "$path/img/$subdir/$sub2dir";
+			#chown $<, 80, "$path/img/$subdir", "$path/img/$subdir/$sub2dir";
 		}
 	}
 	
@@ -157,7 +161,10 @@ sub insert_media_preview{
 	binmode HANDLE;
 	print HANDLE $$ref;
 	close HANDLE;
-	
+
+	chmod 0664, "$thumb_dir/$h->{preview}";
+	#chown $<, 80, "$thumb_dir/$h->{preview}";
+
 	$self->ok;
 	
 	1;
@@ -194,7 +201,10 @@ sub insert_media{
 	binmode HANDLE;
 	print HANDLE $$ref;
 	close HANDLE;
-	
+
+	chmod 0664, "$media_dir/$h->{preview}";
+	#chown $<, 80, "$media_dir/$h->{preview}";
+
 	$self->ok;
 	
 	1;

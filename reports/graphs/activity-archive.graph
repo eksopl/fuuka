@@ -2,15 +2,13 @@ set terminal %%TERM%%  transparent size 800,600
 set output "%%OUTFILE%%"
 show terminal
 
-set title 'Per day'
+set title 'Per five minutes'
 set style data fsteps
 set timefmt "%s"
 set yrange [ 0 : ]
 set xdata time
-set xrange [ "%%XSTART%%" : "%%XEND%%" ]
-set format x "%m/%y"
+set format x "%H:%M"
 set grid
 set key left
 plot	'%%INFILE%%' using 1:2 t 'Posts'	lt rgb "#008000" with filledcurve x1, \
-		'%%INFILE%%' using 1:3 t 'Images'	lt rgb "#0000ff" with filledcurve x1, \
-		'%%INFILE%%' using 1:4 t 'Sages'	lt rgb "#ff0000" with filledcurve x1
+		'%%INFILE%%' using 1:3 t 'Sages'	lt rgb "#ff0000" with filledcurve x1

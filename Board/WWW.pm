@@ -14,7 +14,7 @@ use HTTP::Request::Common;
 sub new{
 	my $class=shift;
 	my(%info)=@_;
-	
+
 	my $ua=LWP::UserAgent->new;
 	$ua->agent(delete $info{agent} or "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)");
 	$ua->proxy('http', "http://".($info{proxy})) if $info{proxy};

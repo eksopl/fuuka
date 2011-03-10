@@ -111,7 +111,7 @@ sub content($$){
 	
 	confess "arg '$ref' is not a valid reference"
 		unless ref $ref and (ref $ref)=~/^Board::Request::(THREAD|PAGE|POST)$/;
-	
+
 	my $sub;
 	for($1){
 		/THREAD/	and $sub=sub{$self->get_thread($$ref)},last;

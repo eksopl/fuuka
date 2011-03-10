@@ -12,6 +12,9 @@ use CGI::Cookie;
 use URI::Escape;
 use Encode;
 
+use MIME::Base64;
+use MIME::Base64::URLSafe;
+
 # Fill in the path to the scripts if you're using mod_perl
 use lib "b:/scripts";
 
@@ -28,10 +31,11 @@ our($board_name,$path)	= $ENV{PATH_INFO}=~m!^/(\w+)(/.*)?!;
 our $board_desc			= html_encode($boards{$board_name}->{name});
 our $loc				= IMAGES_LOCATION;
 our $server_loc			= IMAGES_LOCATION_HTTP;
+our $script_path		= LOCATION_HTTP;
 our $limit				= 20;
-our $self				= "$ENV{SCRIPT_NAME}/$board_name";
-our $cgi				= new CGI;
-our %cookies			= fetch CGI::Cookie;
+our $self				= "$script_path/$board_name";
+our	$cgi				= new CGI;
+our	%cookies			= fetch CGI::Cookie;
 our $id					= unpack "N",pack "C4",split /\./,$ENV{REMOTE_ADDR};
 
 our %cgi_params;
@@ -39,7 +43,17 @@ our %cgi_params;
 use constant LOCAL		=> $ENV{REMOTE_ADDR} eq '127.0.0.1';
 
 our $yotsuba_link		= $boards{$board_name}->{link};
-our $images_link		= ($boards{$board_name}->{img_link} or $yotsuba_link);
+
+# Defeat referers; let rel="nofollow" do its work for Webkit browsers
+# use a refresh otherwise
+our $original_img_link = ($boards{$board_name}->{img_link} or $yotsuba_link) . "/src";
+our $images_link;
+
+if($ENV{"HTTP_USER_AGENT"} =~ "WebKit|Opera") {
+	our $images_link		= $original_img_link;
+} else {
+	our $images_link		= "$self/image_redirect";
+}
 
 BEGIN{require "templates.pl"}
 BEGIN{require "messages.pl"}
@@ -59,7 +73,9 @@ $ghost_mode				= 'yes' if
 	$cookies{'ghost'} and $cookies{'ghost'}->value eq 'yes' and
 	$cgi->param("task")!='page';
 
-our $board				= Board::Mysql->new($board_name,
+my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or 'Mysql');
+
+our $board				= $board_engine->new($board_name,
 	connstr			=> DB_CONNECTION_STRING,
 	host			=> DB_HOST,
 	database		=> DB_DATABSE_NAME,
@@ -76,14 +92,13 @@ our $board				= Board::Mysql->new($board_name,
 our @navigation=(
 	[
 		map{
-		[$_,			$boards{$_}->{name},			"$ENV{SCRIPT_NAME}/$_/"]
+		[$_,			$boards{$_}->{name},			"$script_path/$_/"]
 		} @boards
 	],[
-		["index",		"Go to front page of archiver",			"$ENV{SCRIPT_NAME}"],
+		["index",		"Go to front page of archiver",			"$script_path/"],
 		["top",			"Go to first page of this board",		"$self/"],
 		["reports",		"",										"$self/reports"],
 		["report a bug","Report a bug or suggest a feature",	"http://code.google.com/p/fuuka/issues/list"],
-		
 	]
 );
 
@@ -256,7 +271,7 @@ sub format_comment($$$){
 	)!
 		my($link,$text)=($1,$1);
 		
-		$text=~s~^(https?://$ENV{SERVER_NAME}(:$ENV{SERVER_PORT})?$ENV{SCRIPT_NAME})~>><img src="/media/favicon.png" alt="$1" />~;
+		$text=~s~^(https?://$ENV{SERVER_NAME}(:$ENV{SERVER_PORT})?($ENV{SCRIPT_NAME}|$script_path))~>><img src="/media/favicon.png" alt="$1" />~;
 		
 		qq{<a href="$link">$text</a>}
 	!sgixe;
@@ -319,7 +334,7 @@ sub ref_post_far($;$$){
 	
 	return "$self/post/$shadow$num" unless $board;
 	
-	"$ENV{SCRIPT_NAME}/$board/post/$shadow$num";
+	"$script_path/$board/post/$shadow$num";
 }
 sub ref_post_text($$){
 	my($num,$subnum)=(@_,0);
@@ -394,8 +409,8 @@ sub compile_template($%){
 no strict;
 sub {
 	my $port=$ENV{SERVER_PORT}==80?"":":$ENV{SERVER_PORT}";
-	my $absolute_self="http://$ENV{SERVER_NAME}$port$ENV{SCRIPT_NAME}";
-	my ($path)=$ENV{SCRIPT_NAME}=~m!^(.*)/[^/]+$!;
+	my $absolute_self="http://$ENV{SERVER_NAME}$port$script_path";
+	my ($path)=$script_path=~m!^(.*)/[^/]+$!;
 	my $absolute_path="http://$ENV{SERVER_NAME}$port$path";
 	my %__v=@_;my %__ov;for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}
 HERE
@@ -546,7 +561,7 @@ sub fix_post($$){
 	$post->{fullfile}=$fullfile && -f "$fullfile"?
 		"$server_fullfile":
 		"";
-	
+
 	$post->{comment}=format_comment($post->{comment},$present_posts,$posts);
 	$post->{name}=html_encode($post->{name});
 	$post->{title}=html_encode($post->{title});
@@ -633,7 +648,7 @@ sub show_index(){
 		list		=> [map{ {
 			name				=> "$_",
 			description			=> $board_desc,
-			link				=> "$ENV{SCRIPT_NAME}/$_/",
+			link				=> "$script_path/$_/",
 			
 		} } @boards],
 		
@@ -731,13 +746,13 @@ sub add_reply($$$$$$){
 	print "Set-Cookie: ",new CGI::Cookie(-name=>'name',		-value=>$name,		-expires=>'+3M'),"\n" unless $no_email_cookie;
 	print "Set-Cookie: ",new CGI::Cookie(-name=>'email',	-value=>$email,		-expires=>'+3M'),"\n";
 	print "Set-Cookie: ",new CGI::Cookie(-name=>'delpass',	-value=>$delpass,	-expires=>'+3M'),"\n";
-	
+
 	redirect_late "That was VIP quality!",$nokoru?ref_post_far $num:ref_page 1,$num;
 }
 
 sub show_page($){
 	my($pageno)=(@_);
-	
+
 	$pageno="S$pageno" if $ghost_mode and $pageno!~/^S/;
 	
 	my $page=$board->content(PAGE $pageno);
@@ -783,7 +798,9 @@ sub show_search($$$){
 	
 	my $del=$keys{search_del};
 	my $int=$keys{search_int};
-	
+
+	$keys{search_media_hash} = encode_base64(urlsafe_b64decode($keys{search_media_hash}), '') if $keys{search_media_hash};
+
 	my @list=$board->search($text,24,$offset,$advanced?(
 		name		=> ($keys{search_username} or ""),
 		tripcode	=> ($keys{search_tripcode} or ""),
@@ -910,7 +927,7 @@ sub show_report($){
 					push @$ref,{
 						name	=> $rownames[$num],
 						file	=> fix_filename($board->get_media_preview_location(($parent or $num),$preview)),
-						hash	=> $media_hash,
+						hash	=> urlsafe_b64encode(urlsafe_b64decode($media_hash)),
 						type	=> "thumb",
 					};
 					next;
@@ -1066,9 +1083,9 @@ if($task){for($task){
 	/^post$/ and do{
 		my($num,$subnum)=$cgi->param("post")=~/(?:^|\/)(\d+)(?:[_,]([0-9]*))?/;
 		$subnum = "" if not $subnum;
-		
+
 		int $num or error "Please enter a post number";
-		
+
 		my $post=$board->content(POSTNO $num);
 		$board->error and error $board->errstr;
 
@@ -1150,6 +1167,9 @@ if($path){
 	m!^/redirect(?:/(.*))?! and do{
 		redirect_late "Hi",$1;
 	},exit;
+    m!^/image_redirect/(.*)! and do{
+        redirect_quick $original_img_link . "/src/$1";
+    },exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
 		error "You are trying to do dangerous things" unless $ENV{REMOTE_ADDR} eq '127.0.0.1';

@@ -1,4 +1,4 @@
-set terminal png  transparent size 800,600
+set terminal %%TERM%%  transparent size 800,600
 set output "%%OUTFILE%%"
 show terminal
 

@@ -1,0 +1,6 @@
+Query:			select * from (select name,trip,min(timestamp) as firstseen, count(num) as postcount FROM %%BOARD%% group by trip) as l where l.postcount > 30 order by firstseen desc;
+Title:			Tripfriends by date of first post 
+Rows:			Name,First seen,Total posts
+Row-Types:		username,timestamp,text
+Mode:			table
+Refresh-Rate:	345600

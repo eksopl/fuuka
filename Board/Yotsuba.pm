@@ -22,7 +22,7 @@ sub new{
 		foreach keys %{$boards_list{$board}};
 	
 	$self->{opts}=[{@_},$board];
-	
+
 
 	bless $self,$class;
 }
@@ -388,7 +388,7 @@ sub do_clean($$){
 	s!<b style="color:red;">(.*?)</b>![banned]${1}[/banned]!g;
 
 	s!<b>(.*?)</b>![b]${1}[/b]!g;
-	
+
 	s!<font class="unkfunc">(.*?)</font>!$1!g;
 	s!<a[^>]*>(.*?)</a>!$1!g;
 	
@@ -425,7 +425,6 @@ i		boards	images	sys		Oekaki
 ic		boards	images	sys		Artwork/Critique
 cm		boards	images	sys		Cute/Male
 y		boards	images	sys		Yaoi
-r9k		boards	images	sys		ROBOT9000
 3		boards	images	sys		3DCG
 adv		boards	images	sys		Advice
 an		boards	images	sys		Animals & Nature
@@ -439,14 +438,15 @@ jp		boards	images	sys		Otaku Culture
 lit		boards	images	sys		Literature
 mu		boards	images	sys		Music
 n		boards	images	sys		Transportation
-new		boards	images	sys		News
 po		boards	images	sys		Papercraft & Origami
 sci		boards	images	sys		Science & Math
+soc		boards	images	sys		NORMALFRIENDS
 sp		boards	images	sys		Sports
 tg		boards	images	sys		Traditional Games
 toy		boards	images	sys		Toys
 trv		boards	images	sys		Travel
 tv		boards	images	sys		Television & Film
+vp		boards	images	sys		Pokémon
 x		boards	images	sys		Paranormal
 HERE
 

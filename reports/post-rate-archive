@@ -1,0 +1,6 @@
+Query:			select count(*),count(*)/60 from %%BOARD%% where timestamp>%%NOW%%-3600 and subnum != 0;
+Title:			Post rate (Archive)
+Rows:			Posts in last hour,Posts per minute
+Row-Types:		text,text
+Mode:			table
+Refresh-Rate:	180

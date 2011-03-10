@@ -28,12 +28,13 @@ sub new($$;%){
 	
 	my $self=$class->SUPER::new($path,%info);
 	
-	my $dbh = DBI->connect(
-		($connstr or "DBI:mysql:database=$database;host=$host"),
-		$name,
-		$password,
-		{AutoCommit=>1,PrintError=>0,mysql_enable_utf8=>1},
-	) or die $DBI::errstr;
+	$self->{db_name}			= $database;
+	$self->{db_host}			= $host;
+	$self->{db_connstr} 		= $connstr;
+	$self->{db_username} 		= $name;
+	$self->{db_password} 		= $password;
+
+    my $dbh = $self->_connect or die $DBI::errstr;
 
 	$self->{dbh}				= $dbh;
 	$self->{table}				= $table;
@@ -44,6 +45,17 @@ sub new($$;%){
 	$self->_create_table if $create_new;
 
 	bless $self,$class;
+}
+
+sub _connect {
+	my $self=shift;
+
+	return DBI->connect(
+        ($self->{db_connstr} or "DBI:mysql:database=$self->{db_name};host=$self->{db_host}"),
+        $self->{db_username},
+        $self->{db_password},
+        {AutoCommit=>1,PrintError=>0,mysql_enable_utf8=>1},
+    )
 }
 
 sub _create_table($){
@@ -280,7 +292,7 @@ sub search($$$$){
 		" in boolean mode) order by $query_ord limit $limit offset $offset;":
 		
 		"select * from $self->{table} $index_hint where $condition 1 order by $query_ord limit $limit offset $offset";
-	
+
 	my($ref)=($self->query($query) or return);
 	
 	map{$self->_read_post($_)} @$ref
@@ -292,7 +304,7 @@ sub post($;%){
 	my($thread)=($info{parent} or die "can only post replies to threads, not create new threads");
 	my $date=($info{date} or time);
 	my($ref);
-	
+
 	$ref=$self->query("select count(*) from $self->{table} where id=? and timestamp>?",$info{id},$date-$self->{renzoku});
 	$self->error(TRY_AGAIN,"You can't post that fast"),return
 		if $ref->[0]->[0];
@@ -373,7 +385,7 @@ sub insert{
 	
 	$num or $parent or $self->error(FORGET_IT,"Must specify a thread number for this board"),return 0;
 	my $sage = 0;
-	
+
 	$self->query("replace $self->{table} values ".join ",",map{
 		my $h=$_;
 		$sage = 1 if $h->{email} eq 'sage' and $self->{sage};
@@ -425,8 +437,12 @@ sub insert{
 
 sub query($$;@){
 	my($self,$query)=(shift,shift);
+ 	unless($self->{dbh} and $self->{dbh}->ping) {
+		$self->{dbh} = $self->_connect or ($self->error(FORGET_IT,"Lost connection, cannot reconnect to database."),return 0);
+	}
+
 	my $dbh=$self->{dbh};
-	
+
 	my $sth=$dbh->prepare($query) or ($self->error(FORGET_IT,$dbh->errstr),return 0);
 	
 	$sth->execute(@_) or ($self->error(FORGET_IT,$dbh->errstr),return 0);
