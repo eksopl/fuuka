@@ -1168,7 +1168,7 @@ if($path){
 		redirect_late "Hi",$1;
 	},exit;
     m!^/image_redirect/(.*)! and do{
-        redirect_quick $original_img_link . "/src/$1";
+        redirect_quick $original_img_link . "/$1";
     },exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
