@@ -309,7 +309,13 @@ sub get_page($$){
 	my $t;
 	my $p=$self->new_page($page);
 	while($res=~m!(
-			(?:<(span) \s class="filesize">(?>.*?</blockquote>)
+			(?:
+				(
+				    <span \s class="filesize">
+				    |
+				    <img \s src="[^"]*" \s alt="File \s deleted\.">
+				)
+				(?>.*?</blockquote>) 
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
 				(?:<span \s class="omittedposts">[^<]*</span>)?)
 			|

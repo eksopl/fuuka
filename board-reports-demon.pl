@@ -57,6 +57,7 @@ sub reload_reports(){
 	opendir DIRHANDLE,$loc or die "$! - $loc";
 MAINLOOP:
 	while($_=readdir DIRHANDLE){
+		next if $_ =~ /^\./;
 		my $filename="$loc/$_";
 		
 		next unless -f $filename;

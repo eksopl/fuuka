@@ -85,7 +85,7 @@ use constant MEDIA_LOCATION_HTTP    => "/media";
 use constant GNUPLOT                => 'wgnuplot';
 
 # path to script, relative to HTTP root. Use together with mod_rewrite rules
-use constant LOCATION_HTTP          => $ENV{SCRIPT_NAME}
+use constant LOCATION_HTTP          => $ENV{SCRIPT_NAME};
 
 # terminal type for gnuplot. If you have gnuplot 4.4+ compiled with cairo
 # support, switch this to pngcairo for prettier graphs.

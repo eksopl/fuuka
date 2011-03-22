@@ -1,4 +1,4 @@
-#!perl
+#!/usr/bin/perl
 
 use strict;
 use utf8;
@@ -50,9 +50,9 @@ our $original_img_link = ($boards{$board_name}->{img_link} or $yotsuba_link) . "
 our $images_link;
 
 if($ENV{"HTTP_USER_AGENT"} =~ "WebKit|Opera") {
-	our $images_link		= $original_img_link;
+	$images_link		= $original_img_link;
 } else {
-	our $images_link		= "$self/image_redirect";
+	$images_link		= "$self/image_redirect";
 }
 
 BEGIN{require "templates.pl"}
@@ -837,6 +837,7 @@ sub show_reports(){
 	
 	opendir DIRHANDLE,$loc or error "$! - $loc";
 	while($_=readdir DIRHANDLE){
+		next if $_ =~ /^\./;
 		my $filename="$loc/$_";
 		next unless -f $filename;
 		my %opts;
