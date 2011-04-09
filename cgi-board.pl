@@ -604,6 +604,16 @@ use constant REPORT_THUMBS_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDE
 use constant REPORT_TABLE_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.REPORT_HEADER_INCLUDE.REPORT_TABLE_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant REPORT_GRAPH_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.REPORT_HEADER_INCLUDE.REPORT_GRAPH_INCLUDE.NORMAL_FOOT_INCLUDE);
 
+sub redirect_quick($) {
+    my($link)=@_;
+
+    print <<HERE;
+Refresh: 0;url=$link
+HERE
+
+    sendtext("");
+    exit;
+}
 
 sub redirect_late($$){
 	my($title,$link)=@_;
