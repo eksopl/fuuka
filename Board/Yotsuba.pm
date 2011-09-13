@@ -119,7 +119,7 @@ sub parse_thread($$){
 				<span \s class="postername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
 				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
-				\s ([^>]*) \s \s* <span[^>]*> \s* 
+				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s* <span[^>]*> \s*
 				(?>.*?</span>) \s*
 				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
