@@ -24,7 +24,8 @@ use constant BOARD_SETTINGS         => {
 #        
 #        link                    => "http://boards.4chan.org/a",
 #        img_link                => "http://images.4chan.org/a",
-#        "database"              => "Mysql",
+#        "database"              => "Sphinx_Mysql",
+#        "disable-posting"       => 0,
 #    },
 #    jp => {
 #        name                    => "Otaku Culture",
@@ -95,6 +96,9 @@ use constant GNUPLOT_TERMINAL       => 'png';
 # Database
 #
 
+# default db engine
+use constant DEFAULT_ENGINE         => "Sphinx_Mysql";
+
 # it's ok to leave this empty
 use constant DB_CONNECTION_STRING   => "";
 
@@ -105,6 +109,12 @@ use constant DB_DATABSE_NAME            => "Yotsuba";
 
 use constant DB_USERNAME                => "root";
 use constant DB_PASSWORD                => "qwerty";
+
+
+# Fill this to use Sphinx for searching.
+# You must have Sphinx configured with MySQL protocol support (mysql41 listener)
+use constant SPHINX_HOST                => "localhost";
+use constant SPHINX_PORT                => 9306;
 
 #
 # Posting
@@ -153,7 +163,7 @@ use constant ENABLE_SAGE => 0;
 #
 
 use constant SPAWNER => sub{my $board_name=shift;
-    my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or 'Mysql');
+    my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or DEFAULT_ENGINE);
     $board_engine->new($board_name,
     connstr         => DB_CONNECTION_STRING,
     host            => DB_HOST,

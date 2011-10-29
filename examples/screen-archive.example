@@ -1,0 +1,6 @@
+screen -t "Board reports demon" sh -c "cd /usr/local/www/data/; while true; do perl ./board-reports-demon.pl; done"
+screen -t "/a/ archiver" sh -c "cd /usr/local/www/data/; while true; do perl ./board-dump.pl a; done"
+screen -t "/jp/ archiver" sh -c "cd /usr/local/www/data/; while true; do perl ./board-dump.pl jp; done"
+screen -t "/m/ archiver" sh -c "cd /usr/local/www/data/; while true; do perl ./board-dump.pl m; done"
+screen -t "/tg/ archiver" sh -c "cd /usr/local/www/data/; while true; do perl ./board-dump.pl tg; done"
+select 0

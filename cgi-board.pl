@@ -20,6 +20,7 @@ use lib "b:/scripts";
 
 use Board::Request;
 use Board::Mysql;
+use Board::Sphinx_Mysql;
 use Board::Yotsuba;
 
 BEGIN{require "board-config.pl"}
@@ -37,6 +38,7 @@ our $self				= "$script_path/$board_name";
 our	$cgi				= new CGI;
 our	%cookies			= fetch CGI::Cookie;
 our $id					= unpack "N",pack "C4",split /\./,$ENV{REMOTE_ADDR};
+our $disableposting     = $boards{$board_name}->{"disable-posting"};
 
 our %cgi_params;
 	
@@ -73,7 +75,7 @@ $ghost_mode				= 'yes' if
 	$cookies{'ghost'} and $cookies{'ghost'}->value eq 'yes' and
 	$cgi->param("task")!='page';
 
-my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or 'Mysql');
+my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or DEFAULT_ENGINE);
 
 our $board				= $board_engine->new($board_name,
 	connstr			=> DB_CONNECTION_STRING,
@@ -81,6 +83,8 @@ our $board				= $board_engine->new($board_name,
 	database		=> DB_DATABSE_NAME,
 	name			=> DB_USERNAME,
 	password		=> DB_PASSWORD,
+	sx_host			=> SPHINX_HOST,
+	sx_port 		=> SPHINX_PORT,
 	images			=> IMAGES_LOCATION,
 	secret			=> SECRET,
 	renzoku			=> RENZOKU,
@@ -358,6 +362,12 @@ sub ref_thread($){
 	
 	"$self/thread/$shadow$num"
 }
+sub ref_thread_50($){
+    my($num)=@_;
+    my($shadow)=$ghost_mode?"S":"";
+
+    "$self/last50/$shadow$num"
+}
 sub ref_page($;$$){
 	my($pageno,$num,$subnum)=(@_);
 	my($shadow)=$ghost_mode?"S":"";
@@ -517,6 +527,7 @@ sub fix_threads($){
 		for my $post($head,@rest){
 			push @posts,fix_post($post,$present_posts,$thread->{posts});
 		}
+        $thread->{toobig} = $thread->{count} > 100;
 		
 		$thread->{posts}=\@posts;
 	}
@@ -586,6 +597,7 @@ HERE
 
 
 sub error(@){
+	print "Status: 404 Not Found\n";
 	sendpage ERROR_TEMPLATE,(
 		cause=>[map{map{html_encode $_}split /\n/,$_}@_],
 	);
@@ -763,6 +775,7 @@ sub add_reply($$$$$$){
 sub show_page($){
 	my($pageno)=(@_);
 
+	error "That's too far!" if $pageno > 500;
 	$pageno="S$pageno" if $ghost_mode and $pageno!~/^S/;
 	
 	my $page=$board->content(PAGE $pageno);
@@ -780,12 +793,17 @@ sub show_page($){
 	);
 }
 
-sub show_thread($){
-	my($num)=(@_);
+sub show_thread($$){
+	my($num,$limit)=(@_);
 	
 	$num=~/^\d+$/ and $num>0 or error "You didn't enter the thread number?!";
-	
-	my $thread=$board->content(THREAD $num);
+
+    my $thread;
+    if($limit > 0) {    
+        $thread=$board->content(RANGE($num, $limit));
+    } else {
+        $thread=$board->content(THREAD $num);
+   }
 	
 	sendpage THREAD_TEMPLATE,(
 		threads		=> [fix_thread($thread)],
@@ -1060,6 +1078,9 @@ if($task){for($task){
 		
 		redirect_late "That was /b/ Quality! Please die in a fire~ ($fname or $fcomment)",ref_page 1
 			if $fname or $fcomment;
+
+		redirect_late "Can't let you do that, Star Fox!", ref_page 1
+			if $boards{$board_name}->{"disable-posting"} eq 1;
 		
 		add_reply($name,$email,$subject,$comment,$parent,$delpass);
 	},exit;
@@ -1082,7 +1103,7 @@ if($task){for($task){
 	},exit;
 	/^thread$/ and do{
 		my $num=int $cgi->param("num");
-		show_thread($num);
+		show_thread($num, 0);
 		exit;
 	};
 	/^page$/ and do{
@@ -1136,12 +1157,44 @@ if($path){
 		show_page($page);
 		exit;
 	};
-	m!^/thread/S?(.*)!x and do{
+	m!^/thread/S?([^/]*)(?:/(.*))?!x and do{
 		my($num)=int $1;
-		
-		show_thread($num);
-		exit;
+        my(@posts)=split(/,/, $2); 
+
+        if(@posts) {
+            my $thread=$board->new_thread(
+                omposts     => 0,
+                omimages    => 0,
+                posts       => [],
+                num         => $num,
+            );
+
+            foreach(@posts) {
+                my $post = $board->get_post(int $_);
+                ref $post or error $board->errstr;
+                push @{$thread->{posts}},$post;
+            }
+           
+            sendpage THREAD_TEMPLATE,(
+                threads     => [fix_thread($thread)],
+                page        => 0,
+                thread      => $num,
+
+                replyform   => 1,
+
+                cgi_params,
+            );  
+        } else { 
+            show_thread($num, 0);
+        }
+        exit;
 	};
+    m!^/last50/S?(.*)!x and do{
+        my($num)=int $1;
+
+        show_thread($num, 50);
+        exit;
+    };
 	m!^/advanced-search!x and do{
 		sendpage ADV_SEARCH_TEMPLATE,(
 			title		=> "Advanced search",

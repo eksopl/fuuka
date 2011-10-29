@@ -67,6 +67,7 @@ sub get_media_preview($$){not_supported}
 sub get_media($$){not_supported}
 sub get_post($$){not_supported}
 sub get_thread($$){not_supported}
+sub get_thread_range($$$){not_supported}
 sub get_page($$){not_supported}
 
 sub post($;%){not_supported}
@@ -105,15 +106,20 @@ sub errstr{
 	$self->{errstr}
 }
 
-sub content($$){
+sub content($){
 	my $self=shift;
-	my($ref)=@_;
+	my($ref,$ref2)=@_;
 	
 	confess "arg '$ref' is not a valid reference"
-		unless ref $ref and (ref $ref)=~/^Board::Request::(THREAD|PAGE|POST)$/;
+        unless ref $ref and (ref $ref)=~/^Board::Request::(THREAD|RANGE|PAGE|POST)$/;
+
+    #TODO: Never got this sanity check working! Someone who actually understands perl do it for me :V
+    #confess "arg '$ref2' is not a valid reference"
+    #unless (ref $ref)=~/^Board::Request::(THREAD|PAGE|POST)$/ or (ref $ref2 and (ref $ref2)=~/^Board::Request::RANGE$/);
 
 	my $sub;
 	for($1){
+        /RANGE/     and $sub=sub{$self->get_thread_range($$ref, $$ref2)},last;
 		/THREAD/	and $sub=sub{$self->get_thread($$ref)},last;
 		/PAGE/		and $sub=sub{$self->get_page($$ref)},last;
 		/POST/		and $sub=sub{$self->get_post($$ref)},last;

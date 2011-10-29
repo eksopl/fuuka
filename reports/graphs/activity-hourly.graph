@@ -12,5 +12,6 @@ set grid
 set key left
 set boxwidth 3600
 set style fill solid border -1
-plot   '%%INFILE%%' using 1:2 t 'Posts' with boxes lt rgb "#008000", \
-       '%%INFILE%%' using 1:3 t 'Sages' with boxes lt rgb "#ff0000"
+plot	'%%INFILE%%' using 1:2 t 'Posts' with boxes lt rgb "#008000", \
+		'%%INFILE%%' using 1:3 t 'Images' with boxes lt rgb "#0000ff", \
+		'%%INFILE%%' using 1:4 t 'Sages' with boxes lt rgb "#ff0000"

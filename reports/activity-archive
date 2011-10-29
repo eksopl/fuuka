@@ -1,4 +1,4 @@
-Query:			select (floor(timestamp/300)%288)*300,count(*),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% where timestamp>%%NOW%%-2592000 and subnum != 0 group by floor(timestamp/300)%288 order by floor(timestamp/300)%288;
-Title:			Daily activity (Archive)
+Query:         select ((floor(timestamp/3600)%24)*3600)+1800,count(*),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% use index(timestamp_index) where timestamp>%%NOW%%-86400 and subnum != 0 group by floor(timestamp/3600)%24 order by floor(timestamp/3600)%24;
+Title:			Daily activity (Hourly, archive)
 Mode:			graph
-Refresh-Rate:	21600
+Refresh-Rate:	3600

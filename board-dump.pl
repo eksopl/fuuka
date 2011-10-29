@@ -10,13 +10,15 @@ use Board::Request;
 use Board::Errors;
 use Board::Yotsuba;
 use Board::Mysql;
+use Board::Sphinx_Mysql;
 $|++;
 
 BEGIN{require "board-config.pl"}
 my $board_name=shift or usage();
+my $bind_ip=shift;
 (my $settings=BOARD_SETTINGS->{$board_name}) or die "Can't archive $board_name until you add it to board-config.pl";
 
-my $board_spawner=sub{Board::Yotsuba->new($board_name,timeout=>12) or die "No such board: $board_name"};
+my $board_spawner=sub{Board::Yotsuba->new($board_name,timeout=>12,ipaddr=>$bind_ip) or die "No such board: $board_name"};
 
 sub usage{
 	print <<HERE;

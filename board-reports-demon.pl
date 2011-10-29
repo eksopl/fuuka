@@ -6,8 +6,9 @@ use utf8;
 
 sub info(@);
 
-BEGIN{require "board-config.pl"}
+BEGIN{require "board-config-local.pl"}
 use Board::Mysql;
+use Board::Sphinx_Mysql;
 
 binmode *STDOUT,":utf8";
 

@@ -135,7 +135,7 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 
 <tr>
 <td class="postblock">Deleted posts</td>
-<td><input type="radio" <if $search_del eq 'dontcare' or not $search_del>checked="checked" </if>name="search_del" value="dontcare" />Show all posts<br /><input type="radio" <if $search_del eq 'yes'>checked="checked" </if>name="search_del" value="yes" />Show only deleted posts<br /><input type="radio" <if $search_del eq 'no'>checked="checked" </if>name="search_del" value="no" />Only show non deleted posts.</td>
+<td><input type="radio" <if $search_del eq 'dontcare' or not $search_del>checked="checked" </if>name="search_del" value="dontcare" />Show all posts<br /><input type="radio" <if $search_del eq 'yes'>checked="checked" </if>name="search_del" value="yes" />Show only deleted posts<br /><input type="radio" <if $search_del eq 'no'>checked="checked" </if>name="search_del" value="no" />Only show non-deleted posts</td>
 </tr>
 
 <tr>
@@ -145,7 +145,7 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 
 <tr>
 <td class="postblock">Order</td>
-<td><input type="radio" <if $search_ord eq 'new'>checked="checked" </if>name="search_ord" value="new" />New post first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /><input type="radio" <if $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" value="rel" />Relevant posts first <a class="tooltip" href="#">[?]<span>Can only order by relevancy if query contains none of <tt>*</tt>, <tt>+</tt>, or <tt>-</tt> characters.</span></a></td>
+<td><input type="radio" <if $search_ord eq 'new' or $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" value="new" />New posts first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /></td>
 </tr>
 
 <tr>
@@ -166,7 +166,7 @@ use constant SIDEBAR_INCLUDE => <<'HERE'.SIDEBAR_ADVANCED_SEARCH.<<'THERE';
 <input type="hidden" name="task" value="search" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
 Text search
-<a class="tooltip" href="#">[?]<span>Place a <tt>+</tt> before a word to have it included, e.g. <tt>+tripcode</tt> to locate posts that contain word tripcode in them.<br />Place a <tt>-</tt> before a word to exlude pages containing that word: <tt>-tripcode</tt><br />Place quotes around phrases to find pages containing the phrase: <tt>"I am a filthy tripcode user"</tt></span></a>&nbsp;
+<a class="tooltip" href="#">[?]<span>Place a <tt>|</tt> in between expressions to get one of them in results, e.g. <tt>tripcode|email</tt> to locate posts that contain either the word tripcode or email in them.<br />Place a <tt>-</tt> before a word to exclude posts containing that word: <tt>-tripcode</tt><br />Place quotes around phrases to find pages containing the phrase: <tt>"I am a filthy tripcode user"</tt></span></a>&nbsp;
 <input type="text" name="search_text" size="24" value="<var html_encode($search_text)>" />&nbsp;
 <input type="submit" value="Go" />&nbsp;
 <a href="<var $self>/advanced-search" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Advanced ]</a>
@@ -189,8 +189,10 @@ View post&nbsp;
 View page&nbsp;
 <input type="text" name="page" size="6" value="<var $page or 1>" />&nbsp;
 <input type="submit" value="View" />&nbsp;
+<if not $disableposting>
 <a class="tooltip" href="#">[?]<span>In ghost mode, only threads with non-archived posts will be shown</span></a>
 <input type="submit" name="ghost" value="View in Ghost mode" />
+</if>
 </div></form>
 
 </div>
@@ -198,21 +200,33 @@ View page&nbsp;
 THERE
 
 use constant POST_PANEL_INCLUDE => <<'HERE';
+<if not $disableposting>
 	<div class="theader">Reply to thread <a class="tooltip-red" href="#">[?]<span>Don't expect anything heroic. Your post will not be uploaded to original board.</span></a></div>
+<else>
+   <div class="theader">Delete posts</div>
+</if>
+<if not $disableposting>
 	<div><input type="hidden" name="task" value="reply" />
 	<input type="hidden" name="ghost" value="<var $ghost>" /></div>
 	<if $thread><div><input type="hidden" name="parent" value="<var $thread>" /></div></if>
+</if>
 
 	<table><tbody>
 	
+<if not $disableposting>
 	<tr style="display:none"><td class="postblock">Name (leave empty)</td><td><input type="text" name="username" size="63" /></td></tr>
 	<tr style="display:none"><td class="postblock">Comment (leave empty)</td><td><textarea name="comment" cols="48" rows="4"></textarea></td></tr>
 	<tr><td class="postblock">Name</td><td><input type="text" name="NAMAE" size="63" /></td></tr>
 	<tr><td class="postblock">E-mail</td><td><input type="text" name="MERU" size="63" /></td></tr>
 	<tr><td class="postblock">Subject</td><td><input type="text" name="subject" size="63" /></td></tr>
 	<tr><td class="postblock">Comment</td><td><textarea name="KOMENTO" cols="48" rows="4"></textarea></td></tr>
+</if>
 	<tr><td class="postblock">Password <a href="#" class="tooltip">[?]<span>Password used for file deletion.</span></a></td><td><input type="password" value="" size="24" name="delpass"/></td></tr>
-	<tr><td class="postblock">Action</td><td><input type="submit" value="Submit" /> <input type="submit" name="delposts" value="Delete selected posts" /></td></tr>
+   <tr><td class="postblock">Action</td><td>
+<if not $disableposting>
+   <input type="submit" value="Submit" /> 
+</if>  
+   <input type="submit" name="delposts" value="Delete selected posts" /></td></tr>
 
 	</tbody></table>
 HERE
@@ -237,7 +251,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 
 <var scalar gmtime($date)></label>
 
-<if $replyform>
+<if $replyform and not $disableposting>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
 <else>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.<var ref_post_text($num,$subnum)></a>
@@ -285,8 +299,10 @@ use constant POSTS_INCLUDE => q{
 			}.POSTS_INCLUDE_FILE.qq{
 			
 			}.POSTS_INCLUDE_POST_HEADER.q{
-			
-			[<a href="<var ref_thread($num)>">Reply</a>]&nbsp;[<a href="<var $yotsuba_link>/res/<var $num>">Original</a>]
+		
+            [<a href="<var ref_thread($num)>">Reply</a>]
+            <if $toobig>[<a href="<var ref_thread_50($num)>">Last 50</a>]</if>
+            [<a href="<var $yotsuba_link>/res/<var $num>">Original</a>]	
 			<blockquote><p><var $comment></p></blockquote>
 			<if $count>
 				<span class="omittedposts"><var $count> replies omitted. Click Reply to view.</span>

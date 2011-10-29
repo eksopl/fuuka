@@ -63,6 +63,7 @@ sub _create_table($){
 
 	$self->{dbh}->do(<<HERE);
 create table if not exists $self->{table} (
+	doc_id int unsigned not null auto_increment,
 	id int unsigned,
 	num int unsigned not null,
 	subnum int unsigned not null,
@@ -89,8 +90,9 @@ create table if not exists $self->{table} (
 	comment text,
 	delpass tinytext,
 	
-	primary key (num,subnum),
+	primary key (doc_id),
 	
+	unique num_subnum_index (num, subnum),
 	index id_index(id),
 	index num_index(num),
 	index subnum_index(subnum),
@@ -119,7 +121,7 @@ HERE
 
 sub _read_post($$){
 	my $self=shift;
-	my(	$id,$num,$subnum,$parent,$date,$preview,$preview_w,$preview_h,
+	my($doc_id,$id,$num,$subnum,$parent,$date,$preview,$preview_w,$preview_h,
 		$media,$media_w,$media_h,$media_size,$media_hash,$media_filename,
 		$spoiler,$deleted,$capcode,$email,$name,$trip,$title,$comment,$delpass
 	)=@{ $_[0] };
@@ -189,7 +191,19 @@ sub get_thread($$){
 	my($thread)=@_;
 
 $self->_read_thread($self->query(<<HERE,$thread,$thread) or return);
-select * from $self->{table} where num=? or parent=? order by num,subnum asc
+select * from $self->{table} where num=? union select * from $self->{table} where parent=? order by num,subnum asc
+HERE
+}
+
+sub get_thread_range($$$){
+    my $self=shift;
+    my($thread,$limit)=@_;
+
+$self->_read_thread($self->query(<<HERE,$thread,$thread,$limit) or return);
+select * from
+   (select * from $self->{table} where num=? union 
+       select * from $self->{table} where parent=? order by num desc,subnum desc limit ?) as tbl 
+order by tbl.num asc,subnum asc
 HERE
 }
 
@@ -217,7 +231,7 @@ select $self->{table}.* from
 			order by case parent when 0 then $self->{table}.num else parent end desc,num,subnum asc
 THERE
 	for my $ref(@results){
-		my($id,$num,$subnum,$parent)=@$ref;
+		my($doc_id,$id,$num,$subnum,$parent)=@$ref;
 		
 		unless($parent){
 			push @{$p->{threads}},$self->_read_thread(\@list) if @list;
@@ -386,7 +400,7 @@ sub insert{
 	$num or $parent or $self->error(FORGET_IT,"Must specify a thread number for this board"),return 0;
 	my $sage = 0;
 
-	$self->query("replace $self->{table} values ".join ",",map{
+	$self->query("insert into $self->{table} values ".join(",",map{
 		my $h=$_;
 		$sage = 1 if $h->{email} eq 'sage' and $self->{sage};
 		
@@ -399,7 +413,7 @@ sub insert{
 			"(select max(subnum)+1 from (select * from $self->{table} where num=(select max(num) from $self->{table} where parent=%d or num=%d)) as x)",
 			$parent,$parent,$parent,$parent;
 		
-		sprintf "(%u,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s)",
+		sprintf "(NULL, %u,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s)",
 			($h->{id} or 0),
 			$h->{parent},
 			$h->{date},
@@ -422,7 +436,7 @@ sub insert{
 			$dbh->quote($h->{comment}),
 			$dbh->quote($h->{password});
 		
-		}@posts
+		}@posts) . " on duplicate key update comment = VALUES(comment), deleted = VALUES(deleted), media = VALUES(media)"
 	) or return 0;
 
 	# update board_local table if we're inserting a ghost post
