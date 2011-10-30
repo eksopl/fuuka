@@ -124,6 +124,13 @@ sub _sphinx_escape($) {
     return $query;
 }
 
+sub _log_bad_query($) {
+    my ($self,$query) = (shift,shift);
+    open HANDLE,">>bad_queries.txt";
+    print HANDLE "Bad query: $query\n";
+    close HANDLE;
+}
+
 sub query_sphinx($$;@){
     my($self,$query)=(shift,shift);
     my $dbh_sphinx = $self->_connect_sphinx or ($self->error(FORGET_IT,"Search backend seems to be offline. Contact website admin?"),return 0);;
@@ -134,7 +141,7 @@ sub query_sphinx($$;@){
 
     my $sth=$dbh_sphinx->prepare($query) or return [];
 
-    $sth->execute(@_) or ($self->error(FORGET_IT,"I can't figure your search query out! Try reading the search FAQ. Report a new bug or send an email if you think your query should have worked."),$self->log_bad_query($query),return 0);
+    $sth->execute(@_) or ($self->error(FORGET_IT,"I can't figure your search query out! Try reading the search FAQ. Report a new bug or send an email if you think your query should have worked."),return 0);
 
     my $ref=($sth->fetchall_arrayref() or []);
     $sth->finish;
