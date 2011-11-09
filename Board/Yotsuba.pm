@@ -224,7 +224,7 @@ sub get_media_preview($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
-	my $data=$self->wget("$self->{img_link}/thumb/$post->{preview}");
+	my $data=$self->wget("$self->{preview_link}/thumb/$post->{preview}");
 	
 	\$data;
 }
@@ -460,6 +460,7 @@ HERE
 		desc=>"$5",
 		link=>"http://$2.4chan.org/$1",
 		img_link=>"http://$3.4chan.org/$1",
+		preview_link=>"http://0.thumbs.4chan.org/$1",
 		html=>"http://$2.4chan.org/$1/imgboard.html",
 		script=>"http://$4.4chan.org/$1/imgboard.php",
 	};
