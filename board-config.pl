@@ -113,7 +113,10 @@ use constant DB_PASSWORD                => "qwerty";
 
 # Fill this to use Sphinx for searching.
 # You must have Sphinx configured with MySQL protocol support (mysql41 listener)
-use constant SPHINX_HOST                => "localhost";
+# Do not use 'localhost'; use an IP address (or any other FQDN, really). Otherwise
+# it will not work, as the MySQL drivers will attempt to use the default Unix domain 
+# MySQL socket if you input 'localhost'.
+use constant SPHINX_HOST                => "127.0.0.1";
 use constant SPHINX_PORT                => 9306;
 
 #
