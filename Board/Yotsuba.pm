@@ -113,7 +113,7 @@ sub parse_thread($$){
 					)
 					|
 					<img [^>]* alt="File \s deleted\." [^>]* > \s*
-				)
+				)?
 				<a[^>]*></a> \s*
 				<input \s type=checkbox \s name="(\d+)"[^>]*><span \s class="filetitle">(?>(.*?)</span>) \s*
 				<span \s class="postername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
@@ -272,12 +272,13 @@ sub get_thread($$){
 	my $t;
 	while($res=~m!(
 			(?:
-				(
-					<span \s class="filesize">
+				(?:
+					<span \s class="filesize">.*?
 					|
-					<img \s src="[^"]*" \s alt="File \s deleted\.">
-				)
-				(?>.*?</blockquote>)
+					<img \s src="[^"]*" \s alt="File \s deleted\.">.*?
+				)?
+				(<a \s name="[^"]*"></a> \s* <input [^>]*><span \s class="filetitle">)
+                (?>.*?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
 				(?:<span \s class="omittedposts">[^<]*</span>)?
 			)
@@ -310,12 +311,13 @@ sub get_page($$){
 	my $p=$self->new_page($page);
 	while($res=~m!(
 			(?:
-				(
-				    <span \s class="filesize">
+				(?:
+				    <span \s class="filesize">.*?
 				    |
-				    <img \s src="[^"]*" \s alt="File \s deleted\.">
-				)
-				(?>.*?</blockquote>) 
+				    <img \s src="[^"]*" \s alt="File \s deleted\.">.*?
+				)?
+				(<a \s name="[^"]*"></a> \s* <input [^>]*><span \s class="filetitle">)
+				(?>.*?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
 				(?:<span \s class="omittedposts">[^<]*</span>)?)
 			|
