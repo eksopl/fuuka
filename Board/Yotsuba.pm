@@ -278,7 +278,7 @@ sub get_thread($$){
 					<img \s src="[^"]*" \s alt="File \s deleted\.">.*?
 				)?
 				(<a \s name="[^"]*"></a> \s* <input [^>]*><span \s class="filetitle">)
-                (?>.*?</blockquote>)
+				(?>.*?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
 				(?:<span \s class="omittedposts">[^<]*</span>)?
 			)
