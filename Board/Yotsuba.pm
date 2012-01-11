@@ -325,8 +325,8 @@ sub get_page($$){
 	)!gxs){
 		my($text,$type)=($1,$2);
 		if($type){
-			push @{$p->{threads}},$t if $t;
 			$t=$self->parse_thread($text);
+			push @{$p->{threads}},$t if $t;
 		}else{
 			push @{$t->{posts}},$self->parse_post($text,$t->{num});
 		}
