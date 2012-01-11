@@ -173,9 +173,9 @@ sub link_page($$){
 	my $self=shift;
 	my($page)=@_;
 
-	$page||="imgboard";
+	$page||="";
 
-	"$self->{link}/$page.html";
+	"$self->{link}/$page";
 }
 
 sub link_thread($$){
@@ -183,7 +183,7 @@ sub link_thread($$){
 	my($thread)=@_;
 
 	$thread?
-		"$self->{link}/res/$thread.html":
+		"$self->{link}/res/$thread":
 		$self->link_page(0);
 }
 
@@ -463,7 +463,7 @@ HERE
 		link=>"http://$2.4chan.org/$1",
 		img_link=>"http://$3.4chan.org/$1",
 		preview_link=>"http://0.thumbs.4chan.org/$1",
-		html=>"http://$2.4chan.org/$1/imgboard.html",
+		html=>"http://$2.4chan.org/$1/",
 		script=>"http://$4.4chan.org/$1/imgboard.php",
 	};
 }
