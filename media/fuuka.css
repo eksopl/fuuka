@@ -167,5 +167,12 @@ a img { vertical-align: top; }
 .aa { font-family:Mona,'MS PGothic' !important; }
 .s { text-decoration: line-through; }
 .banned { font-weight: bold; color: red; }
+.moot { 
+	padding: 5px;
+	margin-left: .5em;
+	border-color: #faa;
+	border: 2px dashed rgba(255,0,0,.1);
+	border-radius: 2px 
+}
 .admin{ color: #c00000 !important; }
 .mod{ color: #800080 !important; }

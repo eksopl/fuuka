@@ -391,9 +391,13 @@ sub _clean_simple($$){
 sub do_clean($$){
 	(my($self),local($_))=@_;
 
+	s!\[(banned|moot)\]![${1}:lit]!g;
+
 	s!<span class="abbr">.*?</span>!!g;
 	
 	s!<b style="color:red;">(.*?)</b>![banned]${1}[/banned]!g;
+
+	s!<div style="padding: 5px;margin-left: \.5em;border-color: #faa;border: 2px dashed rgba\(255,0,0,\.1\);border-radius: 2px">(.*?)</div>![moot]${1}[/moot]!g;
 
 	s!<b>(.*?)</b>![b]${1}[/b]!g;
 

@@ -180,6 +180,7 @@ use constant BBCODE => {
 	s			=> ["<span class='s'>",						"</span>"],
 	EXPERT		=> ["<b><span class='u'><span class='o'>",	"</span></span></b>"],
 	banned		=> ["<span class='banned'>",				"</span>"],
+	moot		=> ["<div class='moot'>",					"</div>"],
 };
 
 sub bbcode_encode($){
@@ -188,12 +189,13 @@ sub bbcode_encode($){
 	my(@tags);
 	my $quoting=0;
 	
-	while($line=~m!(.*?)(\[(/?)([\w]+)\])?!g){
-		my($text,$fulltag,$closing,$tag)=($1,$2,$3,$4);
+	while($line=~m!(.*?)(\[(/?)([\w]+)(:\w+)?\])?!g){
+		my($text,$fulltag,$closing,$tag,$ext)=($1,$2,$3,$4,$5);
 		$res.=$text;
 		
 		$tag or $res.=$fulltag,next;
 		(my $html=BBCODE->{$tag}) or $res.=$fulltag,next;
+		$ext ne ':lit' or $res.='['.$closing.$tag.']',next;
 		
 		if($quoting and $tag eq 'code'){
 			if(not $closing){
@@ -740,7 +742,7 @@ sub add_reply($$$$$$){
 	
 	# check for special bbcode tags no one is allwed to use
 	error "You can't use that tag"
-		if $comment=~/\[banned\]/;
+		if $comment=~/\[(banned|moot)\]/;
 	
 	my $no_email_cookie=($email eq 'noko' or $email eq 'sage');
 	$email='',$nokoru=1 if $email eq 'noko';
