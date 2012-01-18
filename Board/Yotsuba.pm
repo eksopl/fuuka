@@ -406,6 +406,7 @@ sub do_clean($$){
 	
 	s!<span class="spoiler"[^>]*>![spoiler]!g;
 	s!</span>![/spoiler]!g;
+	s!</spoiler>![/spoiler]!g;  # seriously, moot?
 
 	s!<br \s* /?>!\n!gx;
 	
