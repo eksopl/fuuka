@@ -391,6 +391,9 @@ sub _clean_simple($$){
 sub do_clean($$){
 	(my($self),local($_))=@_;
 
+	# SOPA spoilers
+	s!<span class="spoiler"[^>]*>(.*?)</spoiler>(</span>)?!$1!g;
+
 	s!\[(banned|moot)\]![${1}:lit]!g;
 
 	s!<span class="abbr">.*?</span>!!g;
@@ -406,7 +409,6 @@ sub do_clean($$){
 	
 	s!<span class="spoiler"[^>]*>![spoiler]!g;
 	s!</span>![/spoiler]!g;
-	s!</spoiler>![/spoiler]!g;  # seriously, moot?
 
 	s!<br \s* /?>!\n!gx;
 	
