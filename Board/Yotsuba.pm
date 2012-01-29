@@ -224,7 +224,7 @@ sub get_media_preview($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
-	my $data=$self->wget("$self->{preview_link}/thumb/$post->{preview}");
+	my $data=$self->wget("$self->{preview_link}/thumb/$post->{preview}?" . time);
 	
 	\$data;
 }
@@ -236,7 +236,7 @@ sub get_media($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
 	
-	my $data=$self->wget($post->{link});
+	my $data=$self->wget("$post->{link}?" . time);
 	
 	\$data;
 }
