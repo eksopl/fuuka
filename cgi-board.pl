@@ -249,7 +249,7 @@ sub format_comment($$$){
 		}
 		
 		($present_posts->{$num}?
-			qq{<a href="#p$num" onclick="replyhighlight('p$num')">$text</a>}:
+			qq{<a href="#p$num" data-backlink="p$num" onclick="replyhighlight('p$num')">$text</a>}:
 			qq{<a href="}.(ref_post_far($num)).qq{">$text</a>});
 	!gemx;
 	

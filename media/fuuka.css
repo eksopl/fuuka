@@ -148,6 +148,18 @@ a.tooltip-red:hover{
 	color: white !important;
 }
 
+#q-p {
+	position: absolute;
+	color: #002200;
+}
+#q-p-s {
+	border: 1px solid #888;
+	padding: 3px;
+}
+.q-p-op {
+	background-color: #EEFFF2;
+}
+
 .trip{
 	font-weight:normal !important;
 }
