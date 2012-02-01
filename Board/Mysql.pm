@@ -417,26 +417,26 @@ sub insert{
 			($h->{id} or 0),
 			$h->{parent},
 			$h->{date},
-			$dbh->quote($h->{preview}),
+			$h->{preview} ? $dbh->quote($h->{preview}) : 'NULL',
 			$h->{preview_w},
 			$h->{preview_h},
-			$dbh->quote($h->{media}),
+			$h->{media} ? $dbh->quote($h->{media}) : 'NULL',
 			$h->{media_w},
 			$h->{media_h},
 			$h->{media_size},
-			$dbh->quote($h->{media_hash}),
-			$dbh->quote($h->{media_filename}),
+			$h->{media_hash} ? $dbh->quote($h->{media_hash}) : 'NULL',
+			$h->{media_filename} ? $dbh->quote($h->{media_filename}) : 'NULL',
 			$h->{spoiler},
 			$h->{deleted},
-			$dbh->quote($h->{capcode} or 'N'),
-			$dbh->quote($h->{email}),
-			$dbh->quote($h->{name}),
-			$dbh->quote($h->{trip}),
-			$dbh->quote($h->{title}),
-			$dbh->quote($h->{comment}),
-			$dbh->quote($h->{password});
+			$h->{capcode} ? $dbh->quote($h->{capcode}) : 'N',
+			$h->{name} ? $dbh->quote($h->{email}) : 'NULL',
+			$h->{name} ? $dbh->quote($h->{name}) : 'NULL',
+			$h->{trip} ? $dbh->quote($h->{trip}) : 'NULL',
+			$h->{title} ? $dbh->quote($h->{title}) : 'NULL',
+			$h->{comment} ? $dbh->quote($h->{comment}) : 'NULL',
+			$h->{password} ? $dbh->quote($h->{password}) : 'NULL';
 		
-		}@posts) . " on duplicate key update comment = VALUES(comment), deleted = VALUES(deleted), media = VALUES(media)"
+		}@posts) . " on duplicate key update comment = values(comment), deleted = values(deleted), media = coalesce(values(media), media)"
 	) or return 0;
 
 	# update board_local table if we're inserting a ghost post
