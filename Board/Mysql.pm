@@ -429,7 +429,7 @@ sub insert{
 			$h->{spoiler},
 			$h->{deleted},
 			$h->{capcode} ? $dbh->quote($h->{capcode}) : 'N',
-			$h->{name} ? $dbh->quote($h->{email}) : 'NULL',
+			$h->{email} ? $dbh->quote($h->{email}) : 'NULL',
 			$h->{name} ? $dbh->quote($h->{name}) : 'NULL',
 			$h->{trip} ? $dbh->quote($h->{trip}) : 'NULL',
 			$h->{title} ? $dbh->quote($h->{title}) : 'NULL',
