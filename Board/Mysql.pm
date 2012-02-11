@@ -106,17 +106,6 @@ create table if not exists $self->{table} (
 	fulltext index comment_index(comment)
 ) engine=myisam default charset=utf8;
 HERE
-
-$self->{dbh}->do(<<HERE);
-	create table if not exists $self->{table}_local (
-		num int unsigned not null,
-		subnum int unsigned not null,
-		timestamp int unsigned,
-		parent int unsigned,
-		primary key (parent),
-		index timestamp_index(timestamp)
-	) engine=myisam default charset=utf8;
-HERE
 }
 
 sub _read_post($$){
@@ -220,10 +209,16 @@ sub get_page($$){
 	my @list;
 
 	my @results=@{ $self->query($shadow?<<HERE:<<THERE,$self->{threads_per_page},$self->{threads_per_page}*$page) or return };
-select * from $self->{table}, 
-	(select parent,timestamp from $self->{table}_local order by timestamp desc limit ? offset ?) as j 
-	where $self->{table}.parent = j.parent or $self->{table}.num = j.parent
-	order by j.timestamp desc, num, subnum asc;
+select * from $self->{table},
+    (select unq_parent, max_timestamp from
+        (select parent as unq_parent, max(b.timestamp) as max_timestamp, b.num from
+            (select num, parent, subnum, timestamp, email from $self->{table}
+                where subnum > 0 and (email <> 'sage' or email is null or (email = 'sage' and parent = 0))
+                order by timestamp desc limit 0, 100000) as b
+            group by unq_parent order by max(b.timestamp) desc limit ? offset ?) as t
+    left join $self->{table} as g on g.num = t.unq_parent and g.subnum = 0) as j
+where $self->{table}.parent = j.unq_parent or $self->{table}.num = j.unq_parent
+order by j.max_timestamp desc, num, subnum asc;
 HERE
 select $self->{table}.* from
 	(select num from $self->{table} where parent=0 order by num desc limit ? offset ?) as threads join $self->{table}
@@ -369,12 +364,6 @@ sub database_delete{
 	($num,my $subnum)=((split /,/,$num),0);
 	
 	$self->query("delete from $self->{table} where num=? and subnum=?",$num,$subnum);
-	if($subnum) {
-		$self->query("delete from $self->{table}_local where parent = (select case when max(parent) = 0 then num else max(parent) end from $self->{table} where num=$num)");
-		$self->query("replace into $self->{table}_local (num,parent,subnum,`timestamp`) 
-			select num,case when parent = 0 then num else parent end,max(subnum) as maxsub,max(`timestamp`) from $self->{table}
-				where num = (select max(num) from $self->{table} where parent=(select max(parent) from $self->{table} where num=$num)) having maxsub != 0");
-	}
 }
 
 sub insert{
@@ -428,7 +417,7 @@ sub insert{
 			$h->{media_filename} ? $dbh->quote($h->{media_filename}) : 'NULL',
 			$h->{spoiler},
 			$h->{deleted},
-			$h->{capcode} ? $dbh->quote($h->{capcode}) : 'N',
+			$h->{capcode} ? $dbh->quote($h->{capcode}) : "'N'",
 			$h->{email} ? $dbh->quote($h->{email}) : 'NULL',
 			$h->{name} ? $dbh->quote($h->{name}) : 'NULL',
 			$h->{trip} ? $dbh->quote($h->{trip}) : 'NULL',
@@ -438,11 +427,6 @@ sub insert{
 		
 		}@posts) . " on duplicate key update comment = values(comment), deleted = values(deleted), media = coalesce(values(media), media)"
 	) or return 0;
-
-	# update board_local table if we're inserting a ghost post
-	$self->query("replace into $self->{table}_local (num,parent,subnum,`timestamp`) 
-		select num,case when parent = 0 then num else parent end as parent,max(subnum),max(`timestamp`) from $self->{table} 
-			where num = (select max(num) from $self->{table} where parent=$parent)") if !$num and !$sage;
 
 	$self->ok;
 
