@@ -5,6 +5,8 @@ use warnings;
 use Carp qw/confess cluck/;
 use DBI;
 
+use Date::Parse;
+
 use Board::Local;
 use Board::Errors;
 our @ISA = qw/Board::Local/;
@@ -260,6 +262,12 @@ sub search($$$$){
 	push @conditions,"trip=".$dbh->quote($settings{tripcode}) and
 	push @index_hint,"trip_index"
 		if $settings{tripcode};
+
+	push @conditions,"timestamp > " . str2time($settings{datefrom})
+		if str2time($settings{datefrom});
+
+	push @conditions,"timestamp < " . str2time($settings{dateto})
+		if str2time($settings{dateto});
 	
 	push @conditions,"media_hash=".$dbh->quote($settings{media_hash}) and
 	push @index_hint,"media_hash_index"

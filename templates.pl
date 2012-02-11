@@ -103,6 +103,8 @@ use constant INDEX_INCLUDE => <<'HERE';
 HERE
 
 use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
+<link href="<const MEDIA_LOCATION_HTTP>/calendar.css" rel="stylesheet" type="text/css">
+<script src="<const MEDIA_LOCATION_HTTP>/calendar.js" language="javascript"></script>
 <form action="<var $self>/" method="get">
 <div id="advanced-search" class="postspan" style="float:left;<if not $standalone>display:none;</if>">
 <input type="hidden" name="task" value="search2" />
@@ -124,6 +126,16 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <tr>
 <td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> tripcode. Leave empty for any.</span></a></td>
 <td><input type="text" name="search_tripcode" size="32" value="<var $search_tripcode>" /></td>
+</tr>
+
+<tr>
+<td class="postblock">From Date <a class="tooltip" href="#">[?]<span>Enter what date to start searching from. Format is YYYY-MM-DD</span></a></td>
+<td><input type="text" name="search_datefrom" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_datefrom>" /></td>
+</tr>
+
+<tr>
+<td class="postblock">To Date <a class="tooltip" href="#">[?]<span>Enter what date to start searching until. Format is YYYY-MM-DD</span></a></td>
+<td><input type="text" name="search_dateto" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_dateto>" /></td>
 </tr>
 
 <if $search_media_hash>
