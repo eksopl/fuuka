@@ -96,6 +96,10 @@ sub search($$$$){
 
     $query_ord="timestamp asc" if $ord and $ord eq 'old';
 
+    my $res = $settings{res};
+    my $op = 0;
+    $op = 1 if $res and $res eq 'op';
+
     my $condition=join "",map{" and $_"}@conditions;
     my $match=$dbh->quote(join "",@matches);
 
@@ -105,14 +109,23 @@ sub search($$$$){
         "";
         
     my $query;
-    if($match eq "''") {
+    if($match eq "''" and !$op) {
         $query = "select * from $self->{table} $index_hint where $sql_condition 1 order by $query_ord limit $offset, $limit";
     } else {
-        my $squery="select id from $self->{table}_ancient, $self->{table}_main, $self->{table}_delta
-                        where match($match) $condition order by $query_ord limit $offset, $limit option max_matches=5000;";
+        my $sel_id = "id";
+        my $query_grp = "";
+        $sel_id = "tnum" and $query_grp = "group by tnum" if($op);
+        
+        my $squery="select $sel_id from $self->{table}_ancient, $self->{table}_main, $self->{table}_delta
+                        where match($match) $condition $query_grp order by $query_ord limit $offset, $limit option max_matches=5000;";
         my($sref)=($self->query_sphinx($squery) or return);
         return if !@$sref;
-        $query = "select * from $self->{table} where doc_id in (". join(",",map{@$_[0]} @$sref) . ") order by $query_ord;";
+
+        if(!$op) {
+            $query = "select * from $self->{table} where doc_id in (". join(",",map{@$_[0]} @$sref) . ") order by $query_ord;";
+        } else {
+            $query = "select * from $self->{table} where num in (". join(",",map{@$_[0]} @$sref) . ") and subnum = 0 order by $query_ord;";
+        }
     }
 
     my($ref)=($self->query($query) or return);

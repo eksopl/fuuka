@@ -23,16 +23,20 @@ source main
 	#sql_query_range = SELECT MIN(doc_id), MAX(doc_id) FROM a
 	sql_range_step = 10000
     sql_query       = \
-        SELECT doc_id, num, subnum, name, trip, email, media, (media != '') as has_image, \
-        (subnum != 0) as is_internal, deleted as is_deleted, timestamp, title, comment \
+        SELECT doc_id, num, subnum, name, trip, email, media, (media != '' OR media IS NOT NULL) as has_image, \
+        (subnum != 0) as is_internal, spoiler AS is_spoiler, deleted as is_deleted, timestamp, title, comment \
+        (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum \
         FROM a LIMIT 1
 
 	sql_attr_uint = num
 	sql_attr_uint = subnum
 	sql_attr_bool = has_image
 	sql_attr_bool = is_internal
+	sql_attr_bool = is_spoiler
 	sql_attr_bool = is_deleted
-    sql_attr_timestamp = timestamp
+	sql_attr_timestamp = timestamp
+	sql_attr_uint = tnum
+
 
 	sql_query_post_index	=
 	sql_query_info		=
@@ -43,8 +47,9 @@ source main
 source a_main : main
 {
     sql_query       = \
-        SELECT doc_id, num, subnum, name, trip, email, media, (media != '') as has_image, \
-        (subnum != 0) as is_internal, deleted as is_deleted, timestamp, title, comment \
+        SELECT doc_id, num, subnum, name, trip, email, media, (media != '' OR media IS NOT NULL) as has_image, \
+        (subnum != 0) as is_internal, spoiler AS is_spoiler, deleted as is_deleted, timestamp, title, comment \
+        (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum \
         FROM a WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info      = SELECT * FROM a WHERE doc_id=$id
 
@@ -71,8 +76,9 @@ source a_delta : a_main
 source jp_main : main
 {
     sql_query       = \
-        SELECT doc_id, num, subnum, name, trip, email, media, (media != '') as has_image, \
-        (subnum != 0) as is_internal, deleted as is_deleted, timestamp, title, comment \
+        SELECT doc_id, num, subnum, name, trip, email, media, (media != '' OR media IS NOT NULL) as has_image, \
+        (subnum != 0) as is_internal, spoiler AS is_spoiler, deleted as is_deleted, timestamp, title, comment \
+        (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum \
         FROM jp WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info      = SELECT * FROM jp WHERE doc_id=$id
 
@@ -100,8 +106,9 @@ source m_ancient : main
 {
 	sql_query_range = SELECT MIN(doc_id), MAX(doc_id) FROM m
     sql_query       = \
-        SELECT doc_id, num, subnum, name, trip, email, media, (media != '') as has_image, \
-		(subnum != 0) as is_internal, deleted as is_deleted, timestamp, title, comment \
+        SELECT doc_id, num, subnum, name, trip, email, media, (media != '' OR media IS NOT NULL) as has_image, \
+		(subnum != 0) as is_internal, spoiler AS is_spoiler, deleted as is_deleted, timestamp, title, comment \
+        (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum \
 		FROM m WHERE doc_id >= $start AND doc_id <= $end
     sql_query_post_index    = REPLACE INTO index_counters (id, val) \
         VALUES ('max_ancient_id_m', $maxid)
@@ -126,8 +133,9 @@ source m_delta : m_main
 source tg_main : main
 {
     sql_query       = \
-        SELECT doc_id, num, subnum, name, trip, email, media, (media != '') as has_image, \
-        (subnum != 0) as is_internal, deleted as is_deleted, timestamp, title, comment \
+        SELECT doc_id, num, subnum, name, trip, email, media, (media != '' OR media IS NOT NULL) as has_image, \
+        (subnum != 0) as is_internal, spoiler AS is_spoiler, deleted as is_deleted, timestamp, title, comment \
+        (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum \
         FROM tg WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info      = SELECT * FROM tg WHERE doc_id=$id
 

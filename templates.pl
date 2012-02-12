@@ -160,6 +160,13 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <td><input type="radio" <if $search_ord eq 'new' or $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" value="new" />New posts first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /></td>
 </tr>
 
+<if $board_engine eq 'Board::Sphinx_Mysql'>
+<tr>
+<td class="postblock">Results</td>
+<td><input type="radio" <if $search_res eq 'post' or not $search_res>checked="checked" </if>name="search_res" value="post" />Posts<br /><input type="radio" <if $search_res eq 'op'>checked="checked" </if>name="search_res" value="op" />Threads<br /></td>
+</tr>
+</if>
+
 <tr>
 <td class="postblock">Action</td>
 <td><input type="submit" value="Search" /> <a href="#" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Simple ]</a></td>
