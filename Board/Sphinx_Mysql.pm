@@ -114,7 +114,10 @@ sub search($$$$){
     } else {
         my $sel_id = "id";
         my $query_grp = "";
-        $sel_id = "tnum" and $query_grp = "group by tnum" if($op);
+        if($op) {
+            $sel_id = "tnum"; 
+            $query_grp = "group by tnum";
+        }
         
         my $squery="select $sel_id from $self->{table}_ancient, $self->{table}_main, $self->{table}_delta
                         where match($match) $condition $query_grp order by $query_ord limit $offset, $limit option max_matches=5000;";
