@@ -1,4 +1,4 @@
-Query:         select floor(timestamp/86400)*86400 as days,count(*),count(case media_hash when '' or media_hash is NULL then NULL else 1 end),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% force index(timestamp_index) where timestamp>%%NOW%%-31536000 group by days order by days;
+Query:         select floor(timestamp/86400)*86400 as days,count(*),count(case when media_hash = '' or media_hash is NULL then NULL else 1 end),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% force index(timestamp_index) where timestamp>%%NOW%%-31536000 group by days order by days;
 Title:			Karma
 Mode:			graph
 Refresh-Rate:	604800
