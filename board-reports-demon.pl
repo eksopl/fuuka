@@ -1,8 +1,10 @@
-#!perl
+#!/usr/bin/perl
 
 use strict;
 use warnings;
 use utf8;
+
+use 5.010;
 
 sub info(@);
 
@@ -166,7 +168,7 @@ sub do_report{
 		binmode HANDLE,":utf8";
 		print HANDLE time,"\n";
 		for(@$list){
-			print HANDLE (join "|",map{s !\|!\\v!g;$_}@$_),"\n";
+			print HANDLE (join "|",map{$_ //= '';s !\|!\\v!g;$_}@$_),"\n";
 		}
 		close HANDLE;
 	}

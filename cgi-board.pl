@@ -1,7 +1,10 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
 use utf8;
+
+use 5.010;
 
 binmode *STDOUT,":utf8";
 
@@ -13,7 +16,6 @@ use URI::Escape;
 use Encode;
 
 use MIME::Base64;
-use MIME::Base64::URLSafe;
 
 # Fill in the path to the scripts if you're using mod_perl
 use lib "b:/scripts";
@@ -25,30 +27,34 @@ use Board::Yotsuba;
 
 BEGIN{require "board-config.pl"}
 
+sub html_encode($);
+sub show_index();
+sub error(@);
+
 our $boards				= BOARD_SETTINGS;
 our @boards				= sort keys %$boards;
 our %boards				= %$boards;
-our($board_name,$path)	= $ENV{PATH_INFO}=~m!^/(\w+)(/.*)?!;
-our $board_desc			= html_encode($boards{$board_name}->{name});
+our($board_name,$path)			= ($ENV{PATH_INFO} // '/')=~m!^/(\w*)(/.*)?!;
+our $board_desc				= $board_name ? html_encode($boards{$board_name}->{name}) : '';
 our $loc				= IMAGES_LOCATION;
-our $server_loc			= IMAGES_LOCATION_HTTP;
-our $script_path		= LOCATION_HTTP;
+our $server_loc				= IMAGES_LOCATION_HTTP;
+our $script_path			= LOCATION_HTTP;
 our $limit				= 20;
 our $self				= "$script_path/$board_name";
-our	$cgi				= new CGI;
-our	%cookies			= fetch CGI::Cookie;
+our $cgi				= new CGI;
+our %cookies				= fetch CGI::Cookie;
 our $id					= unpack "N",pack "C4",split /\./,$ENV{REMOTE_ADDR};
-our $disableposting     = $boards{$board_name}->{"disable-posting"};
+our $disableposting			= $boards{$board_name}->{"disable-posting"};
 
 our %cgi_params;
 	
 use constant LOCAL		=> $ENV{REMOTE_ADDR} eq '127.0.0.1';
 
-our $yotsuba_link		= $boards{$board_name}->{link};
+our $yotsuba_link		= $boards{$board_name}->{link} // '';
 
 # Defeat referers; let rel="nofollow" do its work for Webkit browsers
 # use a refresh otherwise
-our $original_img_link = ($boards{$board_name}->{img_link} or $yotsuba_link) . "/src";
+our $original_img_link 		= ($boards{$board_name}->{img_link} or $yotsuba_link) . "/src";
 our $images_link;
 
 if($ENV{"HTTP_USER_AGENT"} =~ "WebKit|Opera") {
@@ -65,14 +71,14 @@ $boards->{$board_name} or error("Board $board_name does not exist");
 
 our $ghost_mode			= 0;
 $ghost_mode				= 'yes' if
-	$path=~m!^/(thread|post|page)/S!		or
-	$cgi->param("page")=~/^S/				or
-	$cgi->param("thread")=~/^S/				or
-	$cgi->param("post")=~/^S/				or
-	$cgi->param("ghost")					;
+	$path=~m!^/(thread|post|page)/S!	//
+	$cgi->param("page")=~/^S/		//
+	$cgi->param("thread")=~/^S/		//
+	$cgi->param("post")=~/^S/		//
+	$cgi->param("ghost")			;
 
 $ghost_mode				= 'yes' if
-	$cookies{'ghost'} and $cookies{'ghost'}->value eq 'yes' and
+	$cookies{'ghost'} and ($cookies{'ghost'}->value // 'no') eq 'yes' and
 	$cgi->param("task")!='page';
 
 my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or DEFAULT_ENGINE);
@@ -99,10 +105,10 @@ our @navigation=(
 		[$_,			$boards{$_}->{name},			"$script_path/$_/"]
 		} @boards
 	],[
-		["index",		"Go to front page of archiver",			"$script_path/"],
-		["top",			"Go to first page of this board",		"$self/"],
-		["reports",		"",										"$self/reports"],
-		["report a bug","Report a bug or suggest a feature",	"http://code.google.com/p/fuuka/issues/list"],
+		["index",		"Go to front page of archiver",		"$script_path/"],
+		["top",			"Go to first page of this board",	"$self/"],
+		["reports",		"",					"$self/reports"],
+		["report a bug",	"Report a bug or suggest a feature",	"http://code.google.com/p/fuuka/issues/list"],
 	]
 );
 
@@ -143,6 +149,8 @@ sub x_www_params(@){
 
 sub html_encode($){
 	local $_=shift;
+	return '' if !defined $_;
+
 	s/&/&amp;/g;
 	s/\</&lt;/g;
 	s/\>/&gt;/g;
@@ -166,21 +174,39 @@ sub link_encode($){
 	$_
 }
 
+sub urlsafe_b64encode($) {
+	my $data = encode_base64($_[0], '');
+	$data =~ tr|+/=|\-_|d;
+	$data;
+}
+
+sub urlsafe_b64decode($) {
+	my $data = $_[0];
+	# +/ should not be handled, so convert them to invalid chars
+	# also, remove spaces (\t..\r and SP) so as to calc padding len
+	$data =~ tr|\-_\t-\x0d |+/|d;
+	my $mod4 = length($data) % 4;
+	if($mod4) {
+		$data .= substr('====', $mod4);
+	}
+	decode_base64($data);
+}
+
 use constant BBCODE => {
-	aa			=> ["<span class='aa'>",					"</span>"],
-	spoiler		=> ["<span class='spoiler'>",				"</span>"],
-	sup			=> ["<sup>",								"</sup>"],
-	sub			=> ["<sub>",								"</sub>"],
-	b			=> ["<b>",									"</b>"],
-	i			=> ["<em>",									"</em>"],
-	code		=> ["<code>",								"</code>"],
-	m			=> ["<tt class='code'>",					"</tt>"],
-	u			=> ["<span class='u'>",						"</span>"],
-	o			=> ["<span class='o'>",						"</span>"],
-	s			=> ["<span class='s'>",						"</span>"],
+	aa		=> ["<span class='aa'>",			"</span>"],
+	spoiler		=> ["<span class='spoiler'>",			"</span>"],
+	sup		=> ["<sup>",					"</sup>"],
+	sub		=> ["<sub>",					"</sub>"],
+	b		=> ["<b>",					"</b>"],
+	i		=> ["<em>",					"</em>"],
+	code		=> ["<code>",					"</code>"],
+	m		=> ["<tt class='code'>",			"</tt>"],
+	u		=> ["<span class='u'>",				"</span>"],
+	o		=> ["<span class='o'>",				"</span>"],
+	s		=> ["<span class='s'>",				"</span>"],
 	EXPERT		=> ["<b><span class='u'><span class='o'>",	"</span></span></b>"],
-	banned		=> ["<span class='banned'>",				"</span>"],
-	moot		=> ["<div class='moot'>",					"</div>"],
+	banned		=> ["<span class='banned'>",			"</span>"],
+	moot		=> ["<div class='moot'>",			"</div>"],
 };
 
 sub bbcode_encode($){
@@ -192,10 +218,11 @@ sub bbcode_encode($){
 	while($line=~m!(.*?)(\[(/?)([\w]+)(:\w+)?\])?!g){
 		my($text,$fulltag,$closing,$tag,$ext)=($1,$2,$3,$4,$5);
 		$res.=$text;
-		
+		$fulltag //= ''; $ext //= '';
+	
 		$tag or $res.=$fulltag,next;
 		(my $html=BBCODE->{$tag}) or $res.=$fulltag,next;
-		$ext ne ':lit' or $res.='['.$closing.$tag.']',next;
+		$res.='['.$closing.$tag.']',next if $ext eq ':lit';
 		
 		if($quoting and $tag eq 'code'){
 			if(not $closing){
@@ -234,7 +261,8 @@ sub format_comment($$$){
 	local $_=html_encode(shift);
 	my($present_posts,$posts)=@_;
 
-    s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>$3!g;
+	# format quotes
+	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>!g;
 	
 	# >>postno links
 	s!
@@ -275,16 +303,19 @@ sub format_comment($$$){
 			[\w\d_/'()\$\-\~\.\+\!\*\?\&=%:#;]*
 		)?
 	)!
-		my($link,$text)=($1,$1);
-		
+		my($link,$text);
+		$link = $text = $1 // '';
+			
 		$text=~s~^(https?://$ENV{SERVER_NAME}(:$ENV{SERVER_PORT})?($ENV{SCRIPT_NAME}|$script_path))~>><img src="/media/favicon.png" alt="$1" />~;
 		
 		qq{<a href="$link">$text</a>}
 	!sgixe;
-	
+
+	# strip whitespace at beginning and end of lines	
 	s/^\s*//;
 	s/\s*$//;
-	
+
+	# turn newlines in <br />s	
 	s!\r?\n!<br />!g;
 	
 	bbcode_encode($_)
@@ -411,7 +442,7 @@ sub compile_template($%){
 				elsif($name eq 'if'   )		{ $code.="if(eval{$args}){" }
 				elsif($name eq 'elsif')		{ $code.="}elsif(eval{$args}){" }
 				elsif($name eq 'else' )		{ $code.='}else{' }
-				elsif($name eq 'loop' )		{ $code.='my $__a=eval{'.$args.'};if($__a){for(@$__a){my %__ov;my %__v;eval{%__v=%{$_}};for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}' }
+				elsif($name eq 'loop' )		{ $code.='$__a=eval{'.$args.'};if($__a){for(@$__a){my %__ov;my %__v;eval{%__v=%{$_}};for(keys %__v){$__ov{$_}=$$_;$$_=$__v{$_};}' }
 				elsif($name eq 'nonl' )		{ $skipping_whitespace=1 }
 			}
 		}
@@ -419,6 +450,7 @@ sub compile_template($%){
 
 	eval <<'HERE'.$code.<<'THERE' or die "Template format error";
 no strict;
+no warnings;
 sub {
 	my $port=$ENV{SERVER_PORT}==80?"":":$ENV{SERVER_PORT}";
 	my $absolute_self="http://$ENV{SERVER_NAME}$port$script_path";
@@ -521,6 +553,7 @@ sub fix_threads($){
 	for my $thread(@$ref){
 		my @posts;
 		my($head,@rest)=(shift @{$thread->{posts}},@{$thread->{posts}});
+		$thread->{count} = 0;
 		while(@rest>5){
 			$thread->{count}++;
 			shift @rest;
@@ -607,8 +640,8 @@ sub error(@){
 }
 	
 use constant LATE_REDIECT_TEMPLATE	=> compile_template(CENTER_HEAD_INCLUDE.LATE_REDIRECT_INCLUDE.CENTER_FOOT_INCLUDE);
-use constant INDEX_TEMPLATE			=> compile_template(CENTER_HEAD_INCLUDE.INDEX_INCLUDE.CENTER_FOOT_INCLUDE);
-use constant PAGE_TEMPLATE			=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.POSTS_INCLUDE.NORMAL_FOOT_INCLUDE);
+use constant INDEX_TEMPLATE		=> compile_template(CENTER_HEAD_INCLUDE.INDEX_INCLUDE.CENTER_FOOT_INCLUDE);
+use constant PAGE_TEMPLATE		=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.POSTS_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant THREAD_TEMPLATE		=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.POSTS_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant SEARCH_PAGE_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_INCLUDE.SEARCH_INCLUDE.NORMAL_FOOT_INCLUDE);
 use constant ADV_SEARCH_TEMPLATE	=> compile_template(NORMAL_HEAD_INCLUDE.SIDEBAR_ADVANCED_SEARCH.NORMAL_FOOT_INCLUDE);
@@ -734,7 +767,7 @@ sub add_reply($$$$$$){
 		length($comment)>MAX_COMMENT_LENGTH;
 	
 	error "Too many lines in comment (you can only have ".MAX_COMMENT_LINES.")" if
-		(split /\n/,$comment)>MAX_COMMENT_LINES;
+		(() = split /\n/,$comment,-1)>MAX_COMMENT_LINES;
 	
 	# check for empty reply or empty text-only post
 	error "You didn't write a reply!?"
@@ -761,13 +794,13 @@ sub add_reply($$$$$$){
 		comment		=> $comment,
 		parent		=> $parent,
 		date		=> yotsutime,
-		id			=> $id,
+		id		=> $id,
 		password	=> $delpass,
 	);
 	
 	error $board->errstr if $board->error;
 	
-	print "Set-Cookie: ",new CGI::Cookie(-name=>'name',		-value=>$name,		-expires=>'+3M'),"\n" unless $no_email_cookie;
+	print "Set-Cookie: ",new CGI::Cookie(-name=>'name',	-value=>$name,		-expires=>'+3M'),"\n" unless $no_email_cookie;
 	print "Set-Cookie: ",new CGI::Cookie(-name=>'email',	-value=>$email,		-expires=>'+3M'),"\n";
 	print "Set-Cookie: ",new CGI::Cookie(-name=>'delpass',	-value=>$delpass,	-expires=>'+3M'),"\n";
 
@@ -800,12 +833,12 @@ sub show_thread($$){
 	
 	$num=~/^\d+$/ and $num>0 or error "You didn't enter the thread number?!";
 
-    my $thread;
-    if($limit > 0) {    
-        $thread=$board->content(RANGE($num, $limit));
-    } else {
-        $thread=$board->content(THREAD $num);
-   }
+	my $thread;
+	if($limit > 0) {    
+		$thread=$board->content(RANGE($num, $limit));
+	} else {
+        	$thread=$board->content(THREAD $num);
+	}
 	
 	sendpage THREAD_TEMPLATE,(
 		threads		=> [fix_thread($thread)],
@@ -941,7 +974,7 @@ sub show_report($){
 	binmode HANDLE,":utf8";
 	<HANDLE>;
 	my @list=map{
-		[map{s!^\s*!!;s!\s*$!!;$_}split /\|/,$_]
+		[map{s/^\s*//;s/\s*$//;$_}split /\|/,$_]
 	}<HANDLE>;
 	close HANDLE;
 
