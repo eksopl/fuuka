@@ -163,7 +163,7 @@ sub do_report{
 		system(GNUPLOT,"$loc/graphs/$name.graph+");
 		
 #		unlink "$loc/graphs/$name.graph+","$loc/graphs/$name.data";
-	} else{
+	} else {
 		open HANDLE,">$ref->{'result-location'}/$board->{name}/$ref->{result}" or die "$! - $ref->{'result-location'}/$board->{name}/$ref->{result}";
 		binmode HANDLE,":utf8";
 		print HANDLE time,"\n";

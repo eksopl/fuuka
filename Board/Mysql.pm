@@ -66,7 +66,7 @@ sub _create_table($){
 	$self->{dbh}->do(<<HERE);
 create table if not exists $self->{table} (
 	doc_id int unsigned not null auto_increment,
-	id int unsigned,
+	id decimal(39,0) unsigned not null default '0',
 	num int unsigned not null,
 	subnum int unsigned not null,
 	parent int unsigned,
@@ -77,7 +77,7 @@ create table if not exists $self->{table} (
 	media text,
 	media_w smallint unsigned,
 	media_h smallint unsigned,
-	media_size INT unsigned,
+	media_size int unsigned,
 	media_hash varchar(64),
 	media_filename tinytext,
 
@@ -321,7 +321,7 @@ sub post($;%){
 	my($thread)=($info{parent} or die "can only post replies to threads, not create new threads");
 	my $date=($info{date} or time);
 	my($ref);
-
+	
 	$ref=$self->query("select count(*) from $self->{table} where id=? and timestamp>?",$info{id},$date-$self->{renzoku});
 	$self->error(TRY_AGAIN,"You can't post that fast"),return
 		if $ref->[0]->[0];
@@ -410,8 +410,8 @@ sub insert{
 			"(select max(subnum)+1 from (select * from $self->{table} where num=(select max(num) from $self->{table} where parent=%d or num=%d)) as x)",
 			$parent,$parent,$parent,$parent;
 		
-		sprintf "(NULL, %u,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s)",
-			($h->{id} or 0),
+		sprintf "(NULL, %s,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s)",
+			defined $h->{id} ? $h->{id}->bstr() : 0,
 			$h->{parent},
 			$h->{date},
 			$h->{preview} ? $dbh->quote($h->{preview}) : 'NULL',

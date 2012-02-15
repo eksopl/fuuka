@@ -14,8 +14,8 @@ use CGI::Cookie;
 
 use URI::Escape;
 use Encode;
-
 use MIME::Base64;
+use Net::IP;
 
 # Fill in the path to the scripts if you're using mod_perl
 use lib "b:/scripts";
@@ -31,36 +31,36 @@ sub html_encode($);
 sub show_index();
 sub error(@);
 
-our $boards				= BOARD_SETTINGS;
-our @boards				= sort keys %$boards;
-our %boards				= %$boards;
-our($board_name,$path)			= ($ENV{PATH_INFO} // '/')=~m!^/(\w*)(/.*)?!;
-our $board_desc				= $board_name ? html_encode($boards{$board_name}->{name}) : '';
-our $loc				= IMAGES_LOCATION;
-our $server_loc				= IMAGES_LOCATION_HTTP;
-our $script_path			= LOCATION_HTTP;
-our $limit				= 20;
-our $self				= "$script_path/$board_name";
-our $cgi				= new CGI;
-our %cookies				= fetch CGI::Cookie;
-our $id					= unpack "N",pack "C4",split /\./,$ENV{REMOTE_ADDR};
-our $disableposting			= $boards{$board_name}->{"disable-posting"};
+our $boards             = BOARD_SETTINGS;
+our @boards             = sort keys %$boards;
+our %boards             = %$boards;
+our($board_name,$path)  = ($ENV{PATH_INFO} // '/')=~m!^/(\w*)(/.*)?!;
+our $board_desc         = $board_name ? html_encode($boards{$board_name}->{name}) : '';
+our $loc                = IMAGES_LOCATION;
+our $server_loc         = IMAGES_LOCATION_HTTP;
+our $script_path        = LOCATION_HTTP;
+our $limit              = 20;
+our $self               = "$script_path/$board_name";
+our $cgi                = new CGI;
+our %cookies            = fetch CGI::Cookie;
+our $id                 = (new Net::IP($ENV{REMOTE_ADDR}))->intip();
+our $disableposting     = $boards{$board_name}->{"disable-posting"};
 
 our %cgi_params;
 	
-use constant LOCAL		=> $ENV{REMOTE_ADDR} eq '127.0.0.1';
+use constant LOCAL      => $ENV{REMOTE_ADDR} eq '127.0.0.1';
 
-our $yotsuba_link		= $boards{$board_name}->{link} // '';
+our $yotsuba_link       = $boards{$board_name}->{link} // '';
 
 # Defeat referers; let rel="nofollow" do its work for Webkit browsers
 # use a refresh otherwise
-our $original_img_link 		= ($boards{$board_name}->{img_link} or $yotsuba_link) . "/src";
+our $original_img_link  = ($boards{$board_name}->{img_link} or $yotsuba_link) . "/src";
 our $images_link;
 
 if($ENV{"HTTP_USER_AGENT"} =~ "WebKit|Opera") {
-	$images_link		= $original_img_link;
+	$images_link = $original_img_link;
 } else {
-	$images_link		= "$self/image_redirect";
+	$images_link = "$self/image_redirect";
 }
 
 BEGIN{require "templates.pl"}
@@ -69,16 +69,16 @@ BEGIN{require "messages.pl"}
 show_index() unless $board_name;
 $boards->{$board_name} or error("Board $board_name does not exist");
 
-our $ghost_mode			= 0;
-$ghost_mode				= 'yes' if
-	$path=~m!^/(thread|post|page)/S!	//
-	$cgi->param("page")=~/^S/		//
-	$cgi->param("thread")=~/^S/		//
-	$cgi->param("post")=~/^S/		//
-	$cgi->param("ghost")			;
+our $ghost_mode         = 0;
+$ghost_mode             = 'yes' if
+	$path=~m!^/(thread|post|page)/S!                               or
+	defined $cgi->param("page")   and $cgi->param("page")=~/^S/    or
+	defined $cgi->param("thread") and $cgi->param("thread")=~/^S/  or
+	defined $cgi->param("post")   and $cgi->param("post")=~/^S/    or
+	defined $cgi->param("ghost")                                   ;
 
 $ghost_mode				= 'yes' if
-	$cookies{'ghost'} and ($cookies{'ghost'}->value // 'no') eq 'yes' and
+	defined $cookies{'ghost'} and $cookies{'ghost'}->value eq 'yes' and
 	$cgi->param("task")!='page';
 
 my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or DEFAULT_ENGINE);
@@ -193,20 +193,20 @@ sub urlsafe_b64decode($) {
 }
 
 use constant BBCODE => {
-	aa		=> ["<span class='aa'>",			"</span>"],
-	spoiler		=> ["<span class='spoiler'>",			"</span>"],
-	sup		=> ["<sup>",					"</sup>"],
-	sub		=> ["<sub>",					"</sub>"],
-	b		=> ["<b>",					"</b>"],
-	i		=> ["<em>",					"</em>"],
-	code		=> ["<code>",					"</code>"],
-	m		=> ["<tt class='code'>",			"</tt>"],
-	u		=> ["<span class='u'>",				"</span>"],
-	o		=> ["<span class='o'>",				"</span>"],
-	s		=> ["<span class='s'>",				"</span>"],
-	EXPERT		=> ["<b><span class='u'><span class='o'>",	"</span></span></b>"],
-	banned		=> ["<span class='banned'>",			"</span>"],
-	moot		=> ["<div class='moot'>",			"</div>"],
+	aa      => ["<span class='aa'>",                    "</span>"],
+	spoiler => ["<span class='spoiler'>",               "</span>"],
+	sup     => ["<sup>",                                "</sup>"],
+	sub     => ["<sub>",                                "</sub>"],
+	b       => ["<b>",                                  "</b>"],
+	i       => ["<em>",                                 "</em>"],
+	code    => ["<code>",                               "</code>"],
+	m       => ["<tt class='code'>",                    "</tt>"],
+	u       => ["<span class='u'>",                     "</span>"],
+	o       => ["<span class='o'>",                     "</span>"],
+	s       => ["<span class='s'>",                     "</span>"],
+	EXPERT  => ["<b><span class='u'><span class='o'>",  "</span></span></b>"],
+	banned  => ["<span class='banned'>",                "</span>"],
+	moot    => ["<div class='moot'>",                   "</div>"],
 };
 
 sub bbcode_encode($){
@@ -466,7 +466,7 @@ THERE
 sub sendpage($@){
 	my($template)=shift;
 	
-	print "Set-Cookie: ",new CGI::Cookie(-name=>'ghost',-value=>$ghost_mode?"yes":"",-expires=>'+3M'),"\n";
+#	print "Set-Cookie: ",new CGI::Cookie(-name=>'ghost',-value=>$ghost_mode?"yes":"",-expires=>'+3M'),"\n";
 	
 	print <<HERE;
 Content-type: text/html; charset=utf-8
@@ -788,21 +788,21 @@ sub add_reply($$$$$$){
 	}
 
 	my $num=$board->post(
-		name		=> $name,
-		email		=> $email,
-		title		=> $subject,
-		comment		=> $comment,
-		parent		=> $parent,
-		date		=> yotsutime,
-		id		=> $id,
-		password	=> $delpass,
+		name        => $name,
+		email       => $email,
+		title       => $subject,
+		comment     => $comment,
+		parent      => $parent,
+		date        => yotsutime,
+		id          => $id,
+		password    => $delpass,
 	);
 	
 	error $board->errstr if $board->error;
 	
-	print "Set-Cookie: ",new CGI::Cookie(-name=>'name',	-value=>$name,		-expires=>'+3M'),"\n" unless $no_email_cookie;
-	print "Set-Cookie: ",new CGI::Cookie(-name=>'email',	-value=>$email,		-expires=>'+3M'),"\n";
-	print "Set-Cookie: ",new CGI::Cookie(-name=>'delpass',	-value=>$delpass,	-expires=>'+3M'),"\n";
+	print "Set-Cookie: ",new CGI::Cookie(-name=>'name',    -value=>$name,       -expires=>'+3M'),"\n" unless $no_email_cookie;
+	print "Set-Cookie: ",new CGI::Cookie(-name=>'email',   -value=>$email,      -expires=>'+3M'),"\n";
+	print "Set-Cookie: ",new CGI::Cookie(-name=>'delpass', -value=>$delpass,    -expires=>'+3M'),"\n";
 
 	redirect_late "That was VIP quality!",$nokoru?ref_post_far $num:ref_page 1,$num;
 }
@@ -1279,7 +1279,7 @@ if($path){
 		for($act){
 		/^update-report$/ and do{
 			my(%opts)=get_report $args;
-			
+
 			utime 0, 0, "$opts{'result-location'}/$board_name/$opts{'result'}";
 			redirect "$self/report/$args";
 		};

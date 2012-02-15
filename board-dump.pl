@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use threads;
-use threads::shared;
+use threads::shared 1.21;
 use Carp qw/confess/;
 use Data::Dumper;
 use Board::Request;
