@@ -8,7 +8,7 @@ use 5.010;
 
 sub info(@);
 
-BEGIN{require "board-config-local.pl"}
+BEGIN{require "board-config.pl"}
 use Board::Mysql;
 use Board::Sphinx_Mysql;
 
