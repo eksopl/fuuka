@@ -1,4 +1,4 @@
-Query:         select floor(timestamp/86400)*86400 as days,count(case when trip!='' then 1 else NULL end),count(case when name!='Anonymous' and (trip='' or trip is NULL) then 1 else NULL end),count(case when name='Anonymous' and (trip='' or trip is NULL) then 1 else NULL end) from %%BOARD%% force index(timestamp_index) where timestamp>%%NOW%%-31536000 group by days order by days
+Query:         select floor(timestamp/86400)*86400 as days,count(trip),count(case when (name!='Anonymous' and trip is NULL) then 1 else NULL end),count(case when (name='Anonymous' and trip is NULL) then 1 else NULL end) from %%BOARD%% force index(timestamp_index) where timestamp>%%NOW%%-31536000 group by days order by days
 Title:			Population
 Mode:			graph
 Refresh-Rate:	84600

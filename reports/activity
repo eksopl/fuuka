@@ -1,4 +1,4 @@
-Query:         select (floor(timestamp/300)%288)*300,count(*),count(case media_hash when '' or media_hash is NULL then NULL else 1 end),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% use index(timestamp_index) where timestamp>%%NOW%%-86400 group by floor(timestamp/300)%288 order by floor(timestamp/300)%288;
+Query:         select (floor(timestamp/300)%288)*300,count(*),count(media_hash),count(case email when 'sage' then 1 else NULL end) from %%BOARD%% use index(timestamp_index) where timestamp>%%NOW%%-86400 group by floor(timestamp/300)%288 order by floor(timestamp/300)%288;
 Title:			Daily activity
 Mode:			graph
 Refresh-Rate:	21600
