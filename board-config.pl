@@ -36,7 +36,7 @@ use constant BOARD_SETTINGS         => {
 #        "media-threads"         => 0,
 #        
 #        link                    => "http://boards.4chan.org/jp",
-#		img_link                => "http://images.4chan.org/jp",
+#       img_link                => "http://images.4chan.org/jp",
 #        "database"              => "Mysql",
 #    },
 #   hr => {
@@ -110,6 +110,14 @@ use constant DB_DATABSE_NAME            => "Yotsuba";
 use constant DB_USERNAME                => "root";
 use constant DB_PASSWORD                => "qwerty";
 
+# The charset to use for all text fields in the database. Leave it as utf8mb4
+# if you are running MySQL 5.5 or above. If you're running a lower version,
+# you will have to set it to utf8, but you will not be able to archive some
+# (very rare) non-BMP Unicode characters, so consider upgrading.
+# Setting it to anything other than utf8mb4 or utf8 will break things in
+# very unexpected ways, so don't do it.
+use constant DB_CHARSET                 => "utf8mb4";
+
 
 # Fill this to use Sphinx for searching.
 # You must have Sphinx configured with MySQL protocol support (mysql41 listener)
@@ -131,7 +139,7 @@ use constant IMGDELPASS                 => 'TOPSECRET2';
 
 # Cryptographic secret encoded in base 64, used for secure tripcodes. 
 # Default is world4chan's (dis.4chan.org) former secret.
-use constant SECRET						=> '
+use constant SECRET                     => '
 FW6I5Es311r2JV6EJSnrR2+hw37jIfGI0FB0XU5+9lua9iCCrwgkZDVRZ+1PuClqC+78FiA6hhhX
 U1oq6OyFx/MWYx6tKsYeSA8cAs969NNMQ98SzdLFD7ZifHFreNdrfub3xNQBU21rknftdESFRTUr
 44nqCZ0wyzVVDySGUZkbtyHhnj+cknbZqDu/wjhX/HjSitRbtotpozhF4C9F+MoQCr3LgKg+CiYH
@@ -139,13 +147,13 @@ s3Phd3xk6UC2BG2EU83PignJMOCfxzA02gpVHuwy3sx7hX4yvOYBvo0kCsk7B5DURBaNWH0srWz4
 MpXRcDletGGCeKOz9Hn1WXJu78ZdxC58VDl20UIT9er5QLnWiF1giIGQXQMqBB+Rd48/suEWAOH2
 H9WYimTJWTrK397HMWepK6LJaUB5GdIk56ZAULjgZB29qx8Cl+1K0JWQ0SI5LrdjgyZZUTX8LB/6
 Coix9e6+3c05Pk6Bi1GWsMWcJUf7rL9tpsxROtq0AAQBPQ0rTlstFEziwm3vRaTZvPRboQfREta0
-9VA+tRiWfN3XP+1bbMS9exKacGLMxR/bmO5A57AgQF+bPjhif5M/OOJ6J/76q0JDHA==';			
+9VA+tRiWfN3XP+1bbMS9exKacGLMxR/bmO5A57AgQF+bPjhif5M/OOJ6J/76q0JDHA==';          
 
 # Maximum number of characters in subject, name, and email
 use constant MAX_FIELD_LENGTH           => 100;
 
 # Maximum number of characters in a comment
-use constant MAX_COMMENT_LENGTH			=> 4096;
+use constant MAX_COMMENT_LENGTH         => 4096;
 
 # Maximum number of lines in a comment
 use constant MAX_COMMENT_LINES          => 40;
@@ -173,15 +181,16 @@ use constant SPAWNER => sub{my $board_name=shift;
     database        => DB_DATABSE_NAME,
     name            => DB_USERNAME,
     password        => DB_PASSWORD,
+    charset         => DB_CHARSET,
     images          => IMAGES_LOCATION,
     create          => 1,
     full_pictures   => BOARD_SETTINGS->{$board_name}->{"media-threads"}?1:0,
 ) or die "Couldn't use mysql board with table $board_name"};
 
 sub yotsutime(){
-	use DateTime;
-	use DateTime::TimeZone;
-	time+DateTime::TimeZone->new(name => 'America/New_York')->offset_for_datetime(DateTime->now())
+    use DateTime;
+    use DateTime::TimeZone;
+    time+DateTime::TimeZone->new(name => 'America/New_York')->offset_for_datetime(DateTime->now())
 }
 
 1;

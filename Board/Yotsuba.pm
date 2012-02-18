@@ -58,7 +58,8 @@ sub parse_date($$){
 sub new_yotsuba_post($$$$$$$$$$$$){
 	my $self=shift;
 	my($link,$media_filename,$spoiler,$filesize,$width,$height,$filename,$twidth,$theight,
-		$md5base64,$num,$title,$email,$name,$trip,$capcode,$date,$comment,$omitted,$parent)=@_;
+		$md5base64,$num,$title,$email,$name,$trip,$capcode,$date,$sticky,$comment,$omitted,
+		$parent)=@_;
 	
 	my($type,$media,$preview,$timestamp,$md5);
 	if($link){
@@ -94,6 +95,7 @@ sub new_yotsuba_post($$$$$$$$$$$$){
 		comment		=> $self->do_clean($comment),
 		spoiler		=>($spoiler?1:0),
 		deleted		=> 0,
+		sticky		=> ($sticky?1:0),
 		capcode		=>($capcode or 'N'),
 		omitted		=> $omitted,
 	);
@@ -119,18 +121,18 @@ sub parse_thread($$){
 				<span \s class="postername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
 				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
-				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s* <span[^>]*> \s*
-				(?>.*?</span>) \s*
+				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s*
+				<span[^>]*> (?> .*?</a>.*?</a>) \s* (?:<img [^>]* alt="(sticky)">)? (?> .*?</span>) \s* 
 				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
 				(?:<span \s class="omittedposts">(\d+).*?(\d+)?.*?</span>)?
 	!xs or $self->troubles("error parsing thread\n------\n$text\n------\n") and return;
 	$self->new_thread(
 		num			=> $11,
-		omposts		=>($20 or 0),
-		omimages	=>($21 or 0),
+		omposts		=>($21 or 0),
+		omimages	=>($22 or 0),
 		posts		=>[$self->new_yotsuba_post(
-			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,0
+			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,0
 		)],
 	)
 }
@@ -165,7 +167,7 @@ sub parse_post($$$){
 	!xs or $self->troubles("error parsing post\n------\n$text\n------\n") and return;
 	
 	$self->new_yotsuba_post(
-		$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$1,$2,$3,$4,$5,$6,$7,$18,$19,$parent
+		$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$1,$2,$3,$4,$5,$6,$7,0,$18,$19,$parent
 	)
 }
 

@@ -20,29 +20,31 @@ sub new($$;%){
 	
 	my($tname)=$path=~/(\w+)$/;
 	
-	my $database	=(delete $info{database}	or "Yotsuba");
-	my $table		=(delete $info{table}		or $tname or "proast");
-	my $host		=(delete $info{host}		or "localhost");
-	my $name		=(delete $info{name}		or "root");
-	my $password	=(delete $info{password}	or "");
-	my $connstr		=(delete $info{connstr}		or "");
-	my $create_new	= delete $info{create};
+	my $database    =(delete $info{database}  or "Yotsuba");
+	my $table       =(delete $info{table}     or $tname or "proast");
+	my $host        =(delete $info{host}      or "localhost");
+	my $name        =(delete $info{name}      or "root");
+	my $password    =(delete $info{password}  or "");
+	my $connstr     =(delete $info{connstr}   or "");
+	my $charset     =(delete $info{charset}   or "utf8");
+	my $create_new  = delete $info{create};
 	
 	my $self=$class->SUPER::new($path,%info);
 	
-	$self->{db_name}			= $database;
-	$self->{db_host}			= $host;
-	$self->{db_connstr} 		= $connstr;
-	$self->{db_username} 		= $name;
-	$self->{db_password} 		= $password;
+	$self->{db_name}        = $database;
+	$self->{db_host}        = $host;
+	$self->{db_connstr}     = $connstr;
+	$self->{db_username}    = $name;
+	$self->{db_password}    = $password;
+	$self->{db_charset}     = $charset;
 
-    my $dbh = $self->_connect or die $DBI::errstr;
+	my $dbh = $self->_connect or die $DBI::errstr;
 
-	$self->{dbh}				= $dbh;
-	$self->{table}				= $table;
-	$self->{spam_table}			= "${table}_spam";
-	$self->{threads_per_page}	= 20;
-	$self->{opts}				= $opts;
+	$self->{dbh}              = $dbh;
+	$self->{table}            = $table;
+	$self->{spam_table}       = "${table}_spam";
+	$self->{threads_per_page} = 20;
+	$self->{opts}             = $opts;
 	
 	$self->_create_table if $create_new;
 
@@ -52,12 +54,16 @@ sub new($$;%){
 sub _connect {
 	my $self=shift;
 
-	return DBI->connect(
+	my $dbh = DBI->connect(
         ($self->{db_connstr} or "DBI:mysql:database=$self->{db_name};host=$self->{db_host}"),
         $self->{db_username},
         $self->{db_password},
         {AutoCommit=>1,PrintError=>0,mysql_enable_utf8=>1},
-    )
+	);
+	return if !$dbh;
+	$dbh->do("set names $self->{db_charset}");
+	
+	$dbh
 }
 
 sub _create_table($){
@@ -69,28 +75,29 @@ create table if not exists $self->{table} (
 	id decimal(39,0) unsigned not null default '0',
 	num int unsigned not null,
 	subnum int unsigned not null,
-	parent int unsigned,
-	timestamp int unsigned,
-	preview text,
-	preview_w smallint unsigned,
-	preview_h smallint unsigned,
+	parent int unsigned not null default '0',
+	timestamp int unsigned not null,
+	preview varchar(20),
+	preview_w smallint unsigned not null default '0',
+	preview_h smallint unsigned not null default '0',
 	media text,
-	media_w smallint unsigned,
-	media_h smallint unsigned,
-	media_size int unsigned,
-	media_hash varchar(64),
-	media_filename tinytext,
+	media_w smallint unsigned not null default '0',
+	media_h smallint unsigned not null default '0',
+	media_size int unsigned not null default '',
+	media_hash varchar(25),
+	media_filename varchar(20),
 
-	spoiler bool,
-	deleted bool,
+	spoiler bool not null default '0',
+	deleted bool not null default '0',
 	capcode enum('N', 'M', 'A', 'G') not null default 'N',
 
-	email varchar(64),
-	name varchar(256),
-	trip varchar(64),
-	title text,
+	email varchar(100),
+	name varchar(100),
+	trip varchar(25),
+	title varchar(100),
 	comment text,
 	delpass tinytext,
+	sticky bool not null default '0',
 	
 	primary key (doc_id),
 	
@@ -106,15 +113,16 @@ create table if not exists $self->{table} (
 	index trip_index(trip),
 	index fullname_index(name,trip),
 	fulltext index comment_index(comment)
-) engine=myisam default charset=utf8;
+) engine=myisam 
+collate $self->{db_charset}_general_ci;
 HERE
 }
 
 sub _read_post($$){
 	my $self=shift;
 	my($doc_id,$id,$num,$subnum,$parent,$date,$preview,$preview_w,$preview_h,
-		$media,$media_w,$media_h,$media_size,$media_hash,$media_filename,
-		$spoiler,$deleted,$capcode,$email,$name,$trip,$title,$comment,$delpass
+		$media,$media_w,$media_h,$media_size,$media_hash,$media_filename,$spoiler,
+		$deleted,$capcode,$email,$name,$trip,$title,$comment,$delpass,$sticky
 	)=@{ $_[0] };
 
 	$self->new_post(
@@ -139,6 +147,7 @@ sub _read_post($$){
 		password	=> $delpass,
 		spoiler		=> $spoiler,
 		deleted		=> $deleted,
+		sticky		=> $sticky,
 		capcode		=> $capcode,
 		userid		=> $id,
 	)
@@ -410,7 +419,7 @@ sub insert{
 			"(select max(subnum)+1 from (select * from $self->{table} where num=(select max(num) from $self->{table} where parent=%d or num=%d)) as x)",
 			$parent,$parent,$parent,$parent;
 		
-		sprintf "(NULL, %s,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s)",
+		sprintf "(NULL, %s,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%d)",
 			defined $h->{id} ? $h->{id}->bstr() : 0,
 			$h->{parent},
 			$h->{date},
@@ -431,9 +440,11 @@ sub insert{
 			$h->{trip} ? $dbh->quote($h->{trip}) : 'NULL',
 			$h->{title} ? $dbh->quote($h->{title}) : 'NULL',
 			$h->{comment} ? $dbh->quote($h->{comment}) : 'NULL',
-			$h->{password} ? $dbh->quote($h->{password}) : 'NULL';
+			$h->{password} ? $dbh->quote($h->{password}) : 'NULL',
+			$h->{sticky};
 		
-		}@posts) . " on duplicate key update comment = values(comment), deleted = values(deleted), media = coalesce(values(media), media)"
+		}@posts) . " on duplicate key update comment = values(comment), deleted = values(deleted),
+					 	media = coalesce(values(media), media), sticky = (values(sticky) || sticky)"
 	) or return 0;
 
 	$self->ok;

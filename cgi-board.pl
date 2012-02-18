@@ -6,7 +6,7 @@ use utf8;
 
 use 5.010;
 
-binmode *STDOUT,":utf8";
+binmode STDOUT, ":encoding(UTF-8)";
 
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
@@ -89,6 +89,7 @@ our $board				= $board_engine->new($board_name,
 	database		=> DB_DATABSE_NAME,
 	name			=> DB_USERNAME,
 	password		=> DB_PASSWORD,
+	charset			=> DB_CHARSET,
 	sx_host			=> SPHINX_HOST,
 	sx_port 		=> SPHINX_PORT,
 	images			=> IMAGES_LOCATION,
