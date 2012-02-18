@@ -83,7 +83,7 @@ create table if not exists $self->{table} (
 	media text,
 	media_w smallint unsigned not null default '0',
 	media_h smallint unsigned not null default '0',
-	media_size int unsigned not null default '',
+	media_size int unsigned not null default '0',
 	media_hash varchar(25),
 	media_filename varchar(20),
 
