@@ -121,9 +121,9 @@ use constant DB_CHARSET                 => "utf8mb4";
 
 # Fill this to use Sphinx for searching.
 # You must have Sphinx configured with MySQL protocol support (mysql41 listener)
-# Do not use 'localhost'; use an IP address (or any other FQDN, really). Otherwise
-# it will not work, as the MySQL drivers will attempt to use the default Unix domain 
-# MySQL socket if you input 'localhost'.
+# Do not use 'localhost'; use an IP address (or any other FQDN, really).
+# Otherwise it will not work, as the MySQL drivers will attempt to use the 
+# default Unix domain MySQL socket if you input 'localhost'.
 use constant SPHINX_HOST                => "127.0.0.1";
 use constant SPHINX_PORT                => 9306;
 
@@ -168,6 +168,16 @@ use constant RENZOKU3 => 900;
 # Set to 1 to enable the sage feature in ghost posts
 use constant ENABLE_SAGE => 0;
 
+# Set to the group your webserver perl processes run as, so image/thumbs stored
+# locally can be deleted with the thumbnail deletion password.
+# You will need to add the user that is running the dumper daemon as a 
+# member of said group.
+#
+# Leave blank to disable changing the group on downloaded images.
+#
+# See ThumbnailDeletionSupport on the wiki for more info.
+use constant WEBSERVER_GROUP            => 'www';
+
 #
 # that's it folks, move along, nothing to see here.
 # I am putting code into config file
@@ -185,6 +195,7 @@ use constant SPAWNER => sub{my $board_name=shift;
     images          => IMAGES_LOCATION,
     create          => 1,
     full_pictures   => BOARD_SETTINGS->{$board_name}->{"media-threads"}?1:0,
+    web_group       => WEBSERVER_GROUP,
 ) or die "Couldn't use mysql board with table $board_name"};
 
 sub yotsutime(){

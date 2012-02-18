@@ -15,6 +15,7 @@ sub new($$;%){
 	my(%info)=(@_);
 	
 	my $path=(delete $info{images}	or die);
+	my $web_group=(delete $info{web_group} or "");
 	my $self=$class->SUPER::new(@_);
 	
 	$path=~s!\\!/!g;
@@ -24,7 +25,8 @@ sub new($$;%){
 	$self->{name}=$name;
 	
 	$self->{full}=(delete $info{full_pictures} or "");
-	
+	$self->{webgid} = getgrnam($web_group);
+
 	mkdir $path;
 	mkdir $self->{path};
 
@@ -68,12 +70,12 @@ sub make_dirs($;$){
 		mkdir "$path/thumb/$subdir";
 		mkdir "$path/thumb/$subdir/$sub2dir";
 		chmod 0775, "$path/thumb/$subdir", "$path/thumb/$subdir/$sub2dir";
-		#chown $<, 80, "$path/thumb/$subdir", "$path/thumb/$subdir/$sub2dir";
+		chown $<, $self->{webgid}, "$path/thumb/$subdir", "$path/thumb/$subdir/$sub2dir" if $self->{webgid};
 		if($self->{full}){
 			mkdir "$path/img/$subdir";
 			mkdir "$path/img/$subdir/$sub2dir";
 			chmod 0775, "$path/img/$subdir", "$path/img/$subdir/$sub2dir";
-			#chown $<, 80, "$path/img/$subdir", "$path/img/$subdir/$sub2dir";
+			chown $<, $self->{webgid}, "$path/img/$subdir", "$path/img/$subdir/$sub2dir" if $self->{webgid};
 		}
 	}
 	
@@ -163,8 +165,8 @@ sub insert_media_preview{
 	close HANDLE;
 
 	chmod 0664, "$thumb_dir/$h->{preview}";
-	#chown $<, 80, "$thumb_dir/$h->{preview}";
-
+	chown $<, $self->{webgid}, "$thumb_dir/$h->{preview}" if $self->{webgid};
+	
 	$self->ok;
 	
 	1;
