@@ -36,37 +36,36 @@ UPDATE `a` SET media_filename = CONCAT(SUBSTRING_INDEX(preview,'s.',1),
 
 -- Perform DB schema changes
 --
--- Change the ID field to support IPv6
-ALTER TABLE `a` CHANGE id id DECIMAL(39, 0) UNSIGNED NOT NULL DEFAULT '0';
-
 -- Adjust fields to new charset (utf8mb4) and new sizes
 -- utf8mb4 requires MySQL 5.5 or later. Upgrade or change it to utf8mb4_general_ci.
 -- See DB_CHARSET in board-config.pl for more info.
-ALTER TABLE `a` CHANGE preview preview VARCHAR(20) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE media media TEXT COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE media_hash media_hash VARCHAR(25) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE media_filename media_filename VARCHAR(20) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE email email VARCHAR(100) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE name name VARCHAR(100) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE trip trip VARCHAR(25) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE title title VARCHAR(100) COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE comment comment TEXT COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-ALTER TABLE `a` CHANGE delpass delpass TINYTEXT COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
-
--- And the default charset for the table
-ALTER TABLE `a` COLLATE utf8mb4_general_ci;
-
--- Make numeric fields not null
-ALTER TABLE `a` CHANGE preview_w preview_w SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `a` CHANGE preview_h preview_h SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `a` CHANGE media_w media_w SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `a` CHANGE media_h media_h SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `a` CHANGE media_size media_size INT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `a` CHANGE spoiler spoiler BOOL NOT NULL DEFAULT '0';
-ALTER TABLE `a` CHANGE deleted deleted BOOL NOT NULL DEFAULT '0';
-
--- Add sticky field
-ALTER TABLE `a` ADD sticky BOOL NOT NULL DEFAULT '0';
+-- Perform DB schema changes
+--
+-- Adjust fields and table default charset to the to new one (utf8mb4).
+-- Adjust sizes and types as well.
+-- Change the ID field to support IPv6.
+-- Make numeric fields not null.
+-- Add sticky field.
+ALTER TABLE `a` COLLATE utf8mb4_general_ci,
+CHANGE preview preview VARCHAR(20) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE media media TEXT COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE media_hash media_hash VARCHAR(25) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE media_filename media_filename VARCHAR(20) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE email email VARCHAR(100) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE name name VARCHAR(100) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE trip trip VARCHAR(25) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE title title VARCHAR(100) COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE comment comment TEXT COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE delpass delpass TINYTEXT COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+CHANGE id id DECIMAL(39, 0) UNSIGNED NOT NULL DEFAULT '0',
+CHANGE preview_w preview_w SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE preview_h preview_h SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE media_w media_w SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE media_h media_h SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE media_size media_size INT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE spoiler spoiler BOOL NOT NULL DEFAULT '0',
+CHANGE deleted deleted BOOL NOT NULL DEFAULT '0',
+ADD sticky BOOL NOT NULL DEFAULT '0';
 
 -- Re-enable keys.
 ALTER TABLE `a` ENABLE KEYS;

@@ -77,35 +77,31 @@ HERE
 
 -- Perform DB schema changes
 --
--- Change the ID field to support IPv6
-ALTER TABLE `$_` CHANGE id id DECIMAL(39, 0) UNSIGNED NOT NULL DEFAULT '0';
-
--- Adjust fields to new charset (utf8mb4) and new sizes
-ALTER TABLE `$_` CHANGE preview preview VARCHAR(20) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE media media TEXT COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE media_hash media_hash VARCHAR(25) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE media_filename media_filename VARCHAR(20) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE email email VARCHAR(100) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE name name VARCHAR(100) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE trip trip VARCHAR(25) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE title title VARCHAR(100) COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE comment comment TEXT COLLATE $charset\_general_ci NULL DEFAULT NULL;
-ALTER TABLE `$_` CHANGE delpass delpass TINYTEXT COLLATE $charset\_general_ci NULL DEFAULT NULL;
-
--- And the default charset for the table
-ALTER TABLE `$_` COLLATE $charset\_general_ci;
-
--- Make numeric fields not null
-ALTER TABLE `$_` CHANGE preview_w preview_w SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `$_` CHANGE preview_h preview_h SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `$_` CHANGE media_w media_w SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `$_` CHANGE media_h media_h SMALLINT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `$_` CHANGE media_size media_size INT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `$_` CHANGE spoiler spoiler BOOL NOT NULL DEFAULT '0';
-ALTER TABLE `$_` CHANGE deleted deleted BOOL NOT NULL DEFAULT '0';
-
--- Add sticky field
-ALTER TABLE `$_` ADD sticky BOOL NOT NULL DEFAULT '0';
+-- Adjust fields and table default charset to the to new one (utf8mb4).
+-- Adjust sizes and types as well.
+-- Change the ID field to support IPv6.
+-- Make numeric fields not null.
+-- Add sticky field.
+ALTER TABLE `$_` COLLATE $charset\_general_ci,
+CHANGE preview preview VARCHAR(20) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE media media TEXT COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE media_hash media_hash VARCHAR(25) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE media_filename media_filename VARCHAR(20) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE email email VARCHAR(100) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE name name VARCHAR(100) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE trip trip VARCHAR(25) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE title title VARCHAR(100) COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE comment comment TEXT COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE delpass delpass TINYTEXT COLLATE $charset\_general_ci NULL DEFAULT NULL,
+CHANGE id id DECIMAL(39, 0) UNSIGNED NOT NULL DEFAULT '0',
+CHANGE preview_w preview_w SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE preview_h preview_h SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE media_w media_w SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE media_h media_h SMALLINT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE media_size media_size INT UNSIGNED NOT NULL DEFAULT '0',
+CHANGE spoiler spoiler BOOL NOT NULL DEFAULT '0',
+CHANGE deleted deleted BOOL NOT NULL DEFAULT '0',
+ADD sticky BOOL NOT NULL DEFAULT '0';
 
 -- Re-enable keys.
 ALTER TABLE `$_` ENABLE KEYS;
