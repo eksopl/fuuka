@@ -98,6 +98,56 @@ function remove_quote_preview(e) {
 	}
 }
 
+function quotePreview() {
+	var quotes = document.forms.postform.getElementsByClassName('backlink');
+	for (i = 0, j = quotes.length; i < j; ++i) {
+		quotes[i].addEventListener('mouseover', who_are_you_quoting, false);
+		quotes[i].addEventListener('mouseout', remove_quote_preview, false);
+	}
+}
+
+function backlink() {
+	var i, j, ii, jj, tid, bl, qb, t, form, backlinks, linklist, replies;
+	
+	form = document.forms.postform;
+	
+	if (!(replies = form.getElementsByClassName('reply'))) {
+		return;
+	}
+	
+	for (i = 0, j = replies.length; i < j; ++i) {
+		if (!(backlinks = replies[i].getElementsByClassName('backlink'))) {
+			continue;
+		}
+		linklist = {};
+		for (ii = 0, jj = backlinks.length; ii < jj; ++ii) {
+			tid = backlinks[ii].getAttribute('href').split(/#/);
+			if (!(t = document.getElementById(tid[1])) || t.tagName == 'DIV') {
+				continue;
+			}
+			bl = document.createElement('a');
+			bl.className = 'backlink';
+			bl.href = '#' + replies[i].id;
+			bl.textContent = '>>' + replies[i].id.slice(1);
+			if (!(qb = t.getElementsByClassName('quoted-by')[0])) {
+				qb = document.createElement('div');
+				qb.className = 'quoted-by';
+				qb.textContent = 'Quoted by: ';
+				qb.appendChild(bl);
+				t.insertBefore(qb, t.getElementsByTagName('blockquote')[0]);
+			}
+			else {
+				if (linklist[replies[i].id]) {
+					continue;
+				}
+				linklist[replies[i].id] = true;
+				qb.appendChild(document.createTextNode(' '));
+				qb.appendChild(bl);
+			}
+		}
+	}
+}
+
 function run() {
 	var i, j, quotes, arr = location.href.split(/#/);
 	
@@ -113,17 +163,9 @@ function run() {
 	if(document.forms.postform && document.forms.postform.delpass)
 		document.forms.postform.delpass.value=get_cookie("delpass");
 	
-	quotes = document.getElementsByName('backlink');
-	if (document.addEventListener) {
-		for (i = 0, j = quotes.length; i < j; ++i) {
-			quotes[i].addEventListener('mouseover', who_are_you_quoting, false);
-			quotes[i].addEventListener('mouseout', remove_quote_preview, false);
-		}
-	} else if (document.attachEvent) {
-		for (i = 0, j = quotes.length; i < j; ++i) {
-			quotes[i].attachEvent('onmouseover', who_are_you_quoting);
-			quotes[i].attachEvent('onmouseout', remove_quote_preview);
-		}
+	if (document.getElementsByClassName) {
+		backlink();
+		quotePreview();
 	}
 }
 
