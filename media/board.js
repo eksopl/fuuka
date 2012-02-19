@@ -50,14 +50,22 @@ function toggle(id){
 }
 
 function who_are_you_quoting(e) {
-	var clr, src, cnt;
+	var parent, d, clr, src, cnt, left, top, width, maxWidth;
+	
+	maxWidth = 500;
 	
 	e = e.target || window.event.srcElement;
 	
 	cnt = document.createElement('div');
 	cnt.id = 'q-p';
 	
-	src = document.getElementById(e.getAttribute('href').replace('#','')).cloneNode(true);
+	src = document.getElementById(e.getAttribute('href').split('#')[1]);
+	
+	width = src.offsetWidth;
+	if (width > maxWidth) {
+		width = maxWidth;
+	}
+	src = src.cloneNode(true);
 	src.id = 'q-p-s';
 	if (src.tagName == 'DIV') {
 		src.setAttribute('class', 'q-p-op');
@@ -66,19 +74,31 @@ function who_are_you_quoting(e) {
 		src.appendChild(clr);
 	}
 	
+	left = 0;
+	top = e.offsetHeight + 1;
+	parent = e;
+	do {
+		left += parent.offsetLeft;
+		top += parent.offsetTop;
+	} while (parent = parent.offsetParent);
+	
+	if ((d = document.body.offsetWidth - left - width) < 0) {
+		left += d;
+	}
+	
+	cnt.setAttribute('style', 'left:' + left + 'px;top:' + top + 'px;');
 	cnt.appendChild(src);
-	e.parentNode.insertBefore(cnt, e.nextSibling);
+	document.body.appendChild(cnt);
 }
 
 function remove_quote_preview(e) {
-	var cnt = document.getElementById('q-p');
-	
-	if (cnt) {
-        (e.target || window.event.srcElement).parentNode.removeChild(cnt);
+	var cnt;
+	if (cnt = document.getElementById('q-p')) {
+		document.body.removeChild(cnt);
 	}
 }
 
-window.onload=function(){
+function run() {
 	var i, j, quotes, arr = location.href.split(/#/);
 	
 	if(arr[1]) 
@@ -107,3 +127,9 @@ window.onload=function(){
 	}
 }
 
+if (window.addEventListener) {
+	window.addEventListener('DOMContentLoaded', run, false);
+}
+else {
+	window.onload = run;
+}
