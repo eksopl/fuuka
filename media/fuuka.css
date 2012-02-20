@@ -159,6 +159,17 @@ a.tooltip-red:hover{
 .q-p-op {
 	background-color: #EEFFF2;
 }
+.quoted-by {
+	padding-top: 3px;
+	color: #707070;
+	margin-left: 25px;
+	font-size: 0.75em;
+	text-decoration: none;
+}
+.quoted-by a {
+	color: #707070 !important;
+	text-decoration: none;
+}
 
 .trip{
 	font-weight:normal !important;
