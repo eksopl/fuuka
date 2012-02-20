@@ -145,7 +145,7 @@ sub parse_post($$$){
 				<span \s class="commentpostername">(?:<a \s href="mailto:([^"]*)"[^>]*>)?(?:<span [^>]*>)?([^<]*?)(?:</span>)?(?:</a>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
 				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
-				\s ([^>]*) \s \s* <span[^>]*> \s* 
+				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s*
 				(?>.*?</span>) \s*
 				(?:
 					<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \s*
