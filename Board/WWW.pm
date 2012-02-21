@@ -36,10 +36,11 @@ sub wget($$;$){
 	
 	my $req=(GET $link);
 	$req->referer($referer) if $referer;
+	$req->accept_decodable() if $req->can('accept_decodable');
 	
 MAINLOOP:
 	$res=$self->{agent}->request($req);
-	$text=$res->content;
+	$text=$res->decoded_content;
 	
 	$self->error(0),return $text if $res->is_success;
 	my($no,$line)=$res->status_line=~/(\d+) (.*)/;
