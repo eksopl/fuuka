@@ -1,7 +1,5 @@
 #!/usr/local/perl
 
-if(-e "board-config-local.pl") { require "board-config-local.pl"; return 1 }
-
 #
 # General
 #

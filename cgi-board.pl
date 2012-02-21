@@ -25,7 +25,8 @@ use Board::Mysql;
 use Board::Sphinx_Mysql;
 use Board::Yotsuba;
 
-BEGIN{require "board-config.pl"}
+BEGIN{-e "board-config-local.pl" ? 
+	require "board-config-local.pl" : require "board-config.pl"}
 
 sub html_encode($);
 sub show_index();

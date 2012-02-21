@@ -13,7 +13,7 @@ use Board::Mysql;
 use Board::Sphinx_Mysql;
 $|++;
 
-BEGIN{require "board-config.pl"}
+BEGIN{-e "board-config-local.pl" ? require "board-config-local.pl" : require "board-config.pl"}
 my $board_name=shift or usage();
 my $bind_ip=shift;
 (my $settings=BOARD_SETTINGS->{$board_name}) or die "Can't archive $board_name until you add it to board-config.pl";

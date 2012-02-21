@@ -8,7 +8,9 @@ use 5.010;
 
 sub info(@);
 
-BEGIN{require "board-config.pl"}
+BEGIN{-e "board-config-local.pl" ? 
+    require "board-config-local.pl" : require "board-config.pl"}
+
 use Board::Mysql;
 use Board::Sphinx_Mysql;
 
