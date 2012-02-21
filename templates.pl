@@ -21,7 +21,7 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 	.doubledash { vertical-align:top;clear:both;float:left; }
 	.inline { vertical-align:top; }
 	.reply { background:#d6f0da; }
-	.subreply { background:#cce1cf; }
+	.subreply { background-color:#cce1cf; }
 	.highlight { background:#d6bad0; }
 	.unkfunc{ color:#789922; }
 	.postername { color:#117743; font-weight:bold; text-decoration: none; }
@@ -333,7 +333,7 @@ use constant POSTS_INCLUDE => q{
 			<table><tr>
 			
 			<td class="doubledash">&gt;&gt;</td>
-			<td class="<if $subnum>sub</if>reply" id="p<var $num><if $subnum>_<var $subnum></if>">
+			<td class="<if $subnum>subreply </if>reply" id="p<var $num><if $subnum>_<var $subnum></if>">
 			
 			}.POSTS_INCLUDE_POST_HEADER.q{
 			

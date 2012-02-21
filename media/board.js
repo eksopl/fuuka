@@ -122,8 +122,11 @@ function backlink() {
 		linklist = {};
 		for (ii = 0, jj = backlinks.length; ii < jj; ++ii) {
 			tid = backlinks[ii].getAttribute('href').split(/#/);
-			if (!(t = document.getElementById(tid[1])) || t.tagName == 'DIV') {
+			if (!(t = document.getElementById(tid[1]))) {
 				continue;
+			}
+			if (t.tagName == 'DIV') {
+				backlinks[ii].textContent = '>>OP';
 			}
 			bl = document.createElement('a');
 			bl.className = 'backlink';
