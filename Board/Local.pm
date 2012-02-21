@@ -25,7 +25,7 @@ sub new($$;%){
 	$self->{name}=$name;
 	
 	$self->{full}=(delete $info{full_pictures} or "");
-	$self->{webgid} = getgrnam($web_group);
+	$self->{webgid} = getgrnam($web_group) if $^O !~ /MSWin32/i and $web_group;
 
 	mkdir $path;
 	mkdir $self->{path};
