@@ -108,18 +108,14 @@ sub errstr{
 
 sub content($){
 	my $self=shift;
-	my($ref,$ref2)=@_;
+	my($ref)=@_;
 	
 	confess "arg '$ref' is not a valid reference"
         unless ref $ref and (ref $ref)=~/^Board::Request::(THREAD|RANGE|PAGE|POST)$/;
 
-    #TODO: Never got this sanity check working! Someone who actually understands perl do it for me :V
-    #confess "arg '$ref2' is not a valid reference"
-    #unless (ref $ref)=~/^Board::Request::(THREAD|PAGE|POST)$/ or (ref $ref2 and (ref $ref2)=~/^Board::Request::RANGE$/);
-
 	my $sub;
 	for($1){
-        /RANGE/     and $sub=sub{$self->get_thread_range($$ref, $$ref2)},last;
+        /RANGE/     and $sub=sub{$self->get_thread_range(@$ref[0], @$ref[1])},last;
 		/THREAD/	and $sub=sub{$self->get_thread($$ref)},last;
 		/PAGE/		and $sub=sub{$self->get_page($$ref)},last;
 		/POST/		and $sub=sub{$self->get_post($$ref)},last;

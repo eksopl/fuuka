@@ -12,11 +12,10 @@ sub THREAD($){
 	bless \$num,"Board::Request::THREAD";
 }
 sub RANGE($$){
-    my $num=$_[0];
-    my $limit=$_[1];
-    bless \$num,"Board::Request::RANGE";
-    bless \$limit,"Board::Request::RANGE";
-    return(\$num, \$limit);
+	my $num=$_[0];
+	my $limit=$_[1];
+	my @range = ($num, $limit);
+	bless \@range,"Board::Request::RANGE";
 }
 sub PAGE($){
 	my $num=$_[0];
