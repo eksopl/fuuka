@@ -1,4 +1,4 @@
-﻿#!/usr/bin/perl
+#!/usr/bin/perl
 
 use strict;
 use utf8;
@@ -270,7 +270,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
 </if>
 
-<var scalar gmtime($date)></label>
+<span class="posttime" name="<var deyotsutime($date)>"><var scalar gmtime($date)></span></label>
 
 <if $replyform and not $disableposting>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
