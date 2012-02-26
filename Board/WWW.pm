@@ -30,19 +30,20 @@ sub new{
 	bless $self,$class;
 }
 
-sub wget($$;$){
-	my($self,$link,$referer)=@_;
+sub wget($$;$$){
+	my($self,$link,$referer,$lastmod)=@_;
 	my($res,$text);
 	
 	my $req=(GET $link);
 	$req->referer($referer) if $referer;
 	$req->accept_decodable() if $req->can('accept_decodable');
+	$req->header("If-Modified-Since", $lastmod) if $lastmod;
 	
 MAINLOOP:
 	$res=$self->{agent}->request($req);
 	$text=$res->decoded_content;
 	
-	$self->error(0),return $text if $res->is_success;
+	$self->error(0),return ($text,$res) if $res->is_success;
 	my($no,$line)=$res->status_line=~/(\d+) (.*)/;
 	for($res->status_line){
 		/^500/ and $self->warn("www","$_") and goto MAINLOOP;

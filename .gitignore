@@ -1,6 +1,6 @@
 .htaccess
 board-config-local.pl
+brd
 panic.txt
-brd/
 .DS_Store
 *.swp

@@ -16,6 +16,7 @@ use URI::Escape;
 use Encode;
 use MIME::Base64;
 use Net::IP;
+use DateTime;
 
 # Fill in the path to the scripts if you're using mod_perl
 use lib "b:/scripts";
@@ -346,6 +347,18 @@ sub dqntime($){
 	my $min=int($diff%86400/60)%60;
 	
 	sprintf "1993-09-%02d %02d:%02d",$day,$hour,$min
+}
+
+# Converts 4chan time (EST) to UTC
+sub deyotsutime($){
+	my($time)=@_;
+	
+	my $dt_est = DateTime->from_epoch(epoch => $time);
+	my $dt = DateTime->new(year => $dt_est->year, month => $dt_est->month, day => $dt_est->day, hour => $dt_est->hour, 
+		minute => $dt_est->minute, second => $dt_est->second, time_zone => 'America/New_York');
+	$dt->set_time_zone('UTC');
+
+	$dt
 }
 
 sub make_filesize_string($){
