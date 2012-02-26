@@ -7,9 +7,11 @@ require Exporter;
 our @ISA=qw/Exporter/;
 our @EXPORT=qw/THREAD RANGE PAGE POSTNO/;
 
-sub THREAD($){
+sub THREAD($;$){
 	my $num=$_[0];
-	bless \$num,"Board::Request::THREAD";
+	my $lastmod=$_[1];
+	my @treq = ($num, $lastmod);
+	bless \@treq,"Board::Request::THREAD";
 }
 sub RANGE($$){
 	my $num=$_[0];
@@ -17,9 +19,11 @@ sub RANGE($$){
 	my @range = ($num, $limit);
 	bless \@range,"Board::Request::RANGE";
 }
-sub PAGE($){
+sub PAGE($;$){
 	my $num=$_[0];
-	bless \$num,"Board::Request::PAGE";
+    my $lastmod=$_[1];
+    my @preq = ($num, $lastmod);
+	bless \@preq,"Board::Request::PAGE";
 }
 
 sub POSTNO($){

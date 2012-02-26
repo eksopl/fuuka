@@ -106,7 +106,7 @@ sub mark_deletes($$){
 			$_->{deleted}=1;
 			# $st->();
 			push @{ $new->{posts} },$_;
-			print "post $_->{num} was deleted\n";
+			debug TALK,"$_->{num} (post): deleted";
 		}
 	}
 	
@@ -158,11 +158,15 @@ async{my $local_board=SPAWNER->($board_name);while(1){
 async{
 	my $board=$board_spawner->();
 	my($pagenos,$wait)=@$_;
+	my %lastmods;
 	while(1){
 		my $now=time;
 		
 		foreach my $pageno(@$pagenos){
-			my $list=$board->content(PAGE $pageno);
+			my $lastmod = defined $lastmods{$pageno} ? $lastmods{$pageno} : undef;
+			my $list=$board->content(PAGE($pageno,$lastmod));
+			$lastmods{$pageno} = $list->{lastmod};
+			next if $board->error and  $board->errstr eq 'Not Modified';
 			sleep 1 and print $board->errstr,"\n" and next if $board->error;
 			
 			for(@{$list->{threads}}){
@@ -226,8 +230,16 @@ async{my $board=$board_spawner->();while(1){
 	}
 	
 	my $gettime=time;
-	my $thread=$board->content(THREAD $_);
+
+	my $lastmod = defined $threads{$_} ? $threads{$_}->{ref}->{lastmod} : undef;
+	my $thread=$board->content(THREAD($_, $lastmod)); 
 	if($board->error){
+		if($board->errstr eq 'Not Modified') {
+			debug TALK,"$_: wasn't modified";
+			$threads{$_}->{remaking} = 0;
+			$threads{$_}->{lasthit} = time;
+			goto finished;
+		}
 		debug WARN,"$_: error: ",$board->errstr;
 		
 		# if thread is no more than 1 hour old, it was forcefully deleted

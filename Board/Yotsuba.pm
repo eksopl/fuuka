@@ -234,7 +234,7 @@ sub get_media_preview($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
-	my $data=$self->wget("$self->{preview_link}/thumb/$post->{preview}?" . time);
+	my ($data,undef)=$self->wget("$self->{preview_link}/thumb/$post->{preview}?" . time);
 	
 	\$data;
 }
@@ -246,7 +246,7 @@ sub get_media($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
 	
-	my $data=$self->wget("$post->{link}?" . time);
+	my ($data,undef)=$self->wget("$post->{link}?" . time);
 	
 	\$data;
 }
@@ -255,13 +255,13 @@ sub get_post($$){
 	my $self=shift;
 	my($postno)=@_;
 	
-	my $res=$self->wget($self->link_post($postno));
+	my($res,undef)=$self->wget($self->link_post($postno));
 	return if $self->error;
 	
 	my($thread)=$res=~m!"0;URL=http://.*/res/(\d+)\.html#$postno"!
 		or $self->error(FORGET_IT,"Couldn't find post $postno"),return;
 	
-	my $contents=$self->get_thread($thread);
+	my $contents=$self->get_thread($thread,undef);
 	return if $self->error;
 	
 	my($post)=grep{$_->{num}==$postno} @{$contents->{posts}}
@@ -274,9 +274,11 @@ sub get_post($$){
 
 sub get_thread($$){
 	my $self=shift;
-	my($thread)=@_;
+	my($thread,$lastmod)=@_;
 
-	my $res=$self->wget($self->link_thread($thread));
+	my ($res,$httpres)=$self->wget($self->link_thread($thread),undef,$lastmod);
+    # FIXME: The dumper is dying when this happens. Who is sending a _DIE_ signal, and why?
+    $self->error(FORGET_IT,"Thread came back with no content") if !defined $res;
 	return if $self->error;
 	
 	my $t;
@@ -305,6 +307,8 @@ sub get_thread($$){
 			push @{$t->{posts}},$self->parse_post($text,$t->{num});
 		}
 	}
+
+	$t->{lastmod} = $httpres->header("Last-Modified");
 	
 	$self->ok;
 	$t
@@ -312,9 +316,9 @@ sub get_thread($$){
 
 sub get_page($$){
 	my $self=shift;
-	my($page)=@_;
+	my($page,$lastmod)=@_;
 	
-	my $res=$self->wget($self->link_page($page));
+	my($res,$httpres)=$self->wget($self->link_page($page),undef,$lastmod);
 	return if $self->error;
 	
 	my $t;
@@ -341,6 +345,8 @@ sub get_page($$){
 			push @{$t->{posts}},$self->parse_post($text,$t->{num});
 		}
 	}
+
+    $p->{lastmod} = $httpres->header("Last-Modified");
 	
 	$self->error(0);
 	$p

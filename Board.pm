@@ -116,8 +116,8 @@ sub content($){
 	my $sub;
 	for($1){
         /RANGE/     and $sub=sub{$self->get_thread_range(@$ref[0], @$ref[1])},last;
-		/THREAD/	and $sub=sub{$self->get_thread($$ref)},last;
-		/PAGE/		and $sub=sub{$self->get_page($$ref)},last;
+		/THREAD/	and $sub=sub{$self->get_thread(@$ref[0], @$ref[1])},last;
+		/PAGE/		and $sub=sub{$self->get_page(@$ref[0], @$ref[1])},last;
 		/POST/		and $sub=sub{$self->get_post($$ref)},last;
 	}
 	
