@@ -405,47 +405,56 @@ sub insert{
 	
 	$num or $parent or $self->error(FORGET_IT,"Must specify a thread number for this board"),return 0;
 	my $sage = 0;
-
-	$self->query("insert into $self->{table} values ".join(",",map{
-		my $h=$_;
-		$sage = 1 if $h->{email} eq 'sage' and $self->{sage};
-		
-		my($location)=$num?
-			# insert a post with specified number
-			sprintf "%d,%d",$h->{num},($h->{subnum} or 0):
+	
+	while($#posts > 1) {
+		my @postbatch;
+		if($#posts > 500) {
+			@postbatch = splice(@posts, 0, 500, ());
+		} else {
+			@postbatch = @posts;
+			@posts = ();
+		}
+	
+		$self->query("insert into $self->{table} values ".join(",",map{
+			my $h=$_;
+			$sage = 1 if $h->{email} eq 'sage' and $self->{sage};
 			
-			# insert a post into thread, automatically get num and subnum
-			sprintf "(select max(num) from (select * from $self->{table} where parent=%d or num=%d) as x),".
-			"(select max(subnum)+1 from (select * from $self->{table} where num=(select max(num) from $self->{table} where parent=%d or num=%d)) as x)",
-			$parent,$parent,$parent,$parent;
-		
-		sprintf "(NULL, %s,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%d)",
-			defined $h->{id} ? $h->{id}->bstr() : 0,
-			$h->{parent},
-			$h->{date},
-			$h->{preview} ? $dbh->quote($h->{preview}) : 'NULL',
-			$h->{preview_w},
-			$h->{preview_h},
-			$h->{media} ? $dbh->quote($h->{media}) : 'NULL',
-			$h->{media_w},
-			$h->{media_h},
-			$h->{media_size},
-			$h->{media_hash} ? $dbh->quote($h->{media_hash}) : 'NULL',
-			$h->{media_filename} ? $dbh->quote($h->{media_filename}) : 'NULL',
-			$h->{spoiler},
-			$h->{deleted},
-			$h->{capcode} ? $dbh->quote($h->{capcode}) : "'N'",
-			$h->{email} ? $dbh->quote($h->{email}) : 'NULL',
-			$h->{name} ? $dbh->quote($h->{name}) : 'NULL',
-			$h->{trip} ? $dbh->quote($h->{trip}) : 'NULL',
-			$h->{title} ? $dbh->quote($h->{title}) : 'NULL',
-			$h->{comment} ? $dbh->quote($h->{comment}) : 'NULL',
-			$h->{password} ? $dbh->quote($h->{password}) : 'NULL',
-			$h->{sticky};
-		
-		}@posts) . " on duplicate key update comment = values(comment), deleted = values(deleted),
-					 	media = coalesce(values(media), media), sticky = (values(sticky) || sticky)"
-	) or return 0;
+			my($location)=$num?
+				# insert a post with specified number
+				sprintf "%d,%d",$h->{num},($h->{subnum} or 0):
+				
+				# insert a post into thread, automatically get num and subnum
+				sprintf "(select max(num) from (select * from $self->{table} where parent=%d or num=%d) as x),".
+				"(select max(subnum)+1 from (select * from $self->{table} where num=(select max(num) from $self->{table} where parent=%d or num=%d)) as x)",
+				$parent,$parent,$parent,$parent;
+			
+			sprintf "(NULL, %s,$location,%u,%u,%s,%d,%d,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%d)",
+				defined $h->{id} ? $h->{id}->bstr() : 0,
+				$h->{parent},
+				$h->{date},
+				$h->{preview} ? $dbh->quote($h->{preview}) : 'NULL',
+				$h->{preview_w},
+				$h->{preview_h},
+				$h->{media} ? $dbh->quote($h->{media}) : 'NULL',
+				$h->{media_w},
+				$h->{media_h},
+				$h->{media_size},
+				$h->{media_hash} ? $dbh->quote($h->{media_hash}) : 'NULL',
+				$h->{media_filename} ? $dbh->quote($h->{media_filename}) : 'NULL',
+				$h->{spoiler},
+				$h->{deleted},
+				$h->{capcode} ? $dbh->quote($h->{capcode}) : "'N'",
+				$h->{email} ? $dbh->quote($h->{email}) : 'NULL',
+				$h->{name} ? $dbh->quote($h->{name}) : 'NULL',
+				$h->{trip} ? $dbh->quote($h->{trip}) : 'NULL',
+				$h->{title} ? $dbh->quote($h->{title}) : 'NULL',
+				$h->{comment} ? $dbh->quote($h->{comment}) : 'NULL',
+				$h->{password} ? $dbh->quote($h->{password}) : 'NULL',
+				$h->{sticky};
+			
+			}@postbatch) . " on duplicate key update comment = values(comment), deleted = values(deleted),
+							media = coalesce(values(media), media), sticky = (values(sticky) || sticky)") or return 0;
+	}
 
 	$self->ok;
 
