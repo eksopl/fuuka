@@ -136,6 +136,7 @@ function backlink() {
 				qb = document.createElement('div');
 				qb.className = 'quoted-by';
 				qb.textContent = 'Quoted by: ';
+				linklist[replies[i].id] = true;
 				qb.appendChild(bl);
 				t.insertBefore(qb, t.getElementsByTagName('blockquote')[0]);
 			}
