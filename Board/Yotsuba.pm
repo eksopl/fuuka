@@ -121,18 +121,22 @@ sub parse_thread($$){
 				<span \s class="postername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
 				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
+				(?: \s* <span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* | ([^)]*))\)</span>)?
 				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s*
 				<span[^>]*> (?> .*?</a>.*?</a>) \s* (?:<img [^>]* alt="(sticky)">)? (?> .*?</span>) \s* 
 				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
 				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
 				(?:<span \s class="omittedposts">(\d+).*?(\d+)?.*?</span>)?
 	!xs or $self->troubles("error parsing thread\n------\n$text\n------\n") and return;
+	
+	my $cap = $16 ? $16 : $17;
+
 	$self->new_thread(
 		num			=> $11,
-		omposts		=>($21 or 0),
-		omimages	=>($22 or 0),
+		omposts		=>($23 or 0),
+		omimages	=>($24 or 0),
 		posts		=>[$self->new_yotsuba_post(
-			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,0
+			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$cap,$19,$20,$21,$22,0
 		)],
 	)
 }
@@ -145,6 +149,7 @@ sub parse_post($$$){
 				<span \s class="commentpostername">(?:<a \s href="mailto:([^"]*)"[^>]*>)?(?:<span [^>]*>)?([^<]*?)(?:</span>)?(?:</a>)?</span>
 				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
 				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
+				(?: \s* <span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* | ([^)]*))\)</span>)?
 				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s*
 				(?>.*?</span>) \s*
 				(?:
@@ -165,9 +170,12 @@ sub parse_post($$$){
 				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
 				</td></tr></table>
 	!xs or $self->troubles("error parsing post\n------\n$text\n------\n") and return;
+
+	my $cap = $6 ? $6 : $7;
+
 	
 	$self->new_yotsuba_post(
-		$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$1,$2,$3,$4,$5,$6,$7,0,$18,$19,$parent
+		$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$1,$2,$3,$4,$5,$cap,$9,0,$20,$21,$parent
 	)
 }
 
