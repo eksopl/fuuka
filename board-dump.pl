@@ -4,8 +4,10 @@ use strict;
 use warnings;
 use threads;
 use threads::shared 1.21;
+
 use Carp qw/confess/;
 use Data::Dumper;
+
 use Board::Request;
 use Board::Errors;
 use Board::Yotsuba;
@@ -54,6 +56,8 @@ sub debug($@){
 		if $level-1<$debug_level;
 }
 
+# Receives a thread reference and a post num.
+# The post corresponding to that num if it exists in said thread.
 sub find_post($$){
 	my($ref,$num)=@_;
 	
@@ -62,6 +66,10 @@ sub find_post($$){
 	}
 }
 
+# Receives a thread.
+# For each post that has an image, put it in the queue to fetch
+# images/thumbs.
+# Then place the thread itself in the queue for thread updating.
 sub update_thread($){
 	my($thread)=@_;
 	
@@ -81,23 +89,29 @@ sub update_thread($){
 	push @thread_updates,$thread;
 }
 
+# Gets two threads, the old thread and the new one we just got.
+# Returns: 1 if there's been a change in the deletion status of any post in the new thread.
+#          0 otherwise.
 sub mark_deletes($$){
 	my($old,$new)=@_;
 	my $changed=0;
-	
+
+	# Return if the old thread has no posts	
 	return unless $old and $old->{ref}->{posts};
 	
+	# Get the posts from the old thread not marked as deleted.
+	# (no point on getting the deleted ones, we'd just end up marking them as deleted twice)
 	my(@posts)=grep{not $_->{deleted}} @{$old->{ref}->{posts}};
 	
 	return unless @posts;
 	
 	my $dst=0;
 	my $st=sub{
-	return if $dst;
-	$dst=1;
-	print "old thread: ",(join ", ",map{$_->{num}}@posts),"\n";
-	print "new thread: ",(join ", ",map{$_->{num}}@{$new->{posts}})," (",$new->{omposts}," posts omitted)\n";
-	print "fixed thread: ",(join ", ",map{$_->{num}}@posts[0,$new->{omposts}+1..$#posts]),"\n";
+		return if $dst;
+		$dst=1;
+		print "old thread: ",(join ", ",map{$_->{num}}@posts),"\n";
+		print "new thread: ",(join ", ",map{$_->{num}}@{$new->{posts}})," (",$new->{omposts}," posts omitted)\n";
+		print "fixed thread: ",(join ", ",map{$_->{num}}@posts[0,$new->{omposts}+1..$#posts]),"\n";
 	};
 	
 	foreach(@posts[0,$new->{omposts}+1..$#posts]){
@@ -116,7 +130,8 @@ sub mark_deletes($$){
 # fetch thumbs
 async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(1){
 	my $ref;
-	{	lock @media_preview_updates;
+	{
+		lock @media_preview_updates;
 		$ref=shift @media_preview_updates;
 	}
 	
@@ -131,7 +146,8 @@ async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(
 # fetch pics
 async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(1){
 	my $ref;
-	{	lock @media_updates;
+	{
+		lock @media_updates;
 		$ref=shift @media_updates;
 	}
 	
@@ -154,56 +170,81 @@ async{my $local_board=SPAWNER->($board_name);while(1){
 	sleep 1;
 }};
 
-# scan pages
+# Scan pages
 async{
 	my $board=$board_spawner->();
+
+	# $pagenos is a list with the page numbers
+	# $wait is the refresh time for those pages
+	# %lastmods contains last modification dates for each page
 	my($pagenos,$wait)=@$_;
 	my %lastmods;
 	while(1){
 		my $now=time;
-		
+	
+		# Scan through pages with the same wait period	
 		foreach my $pageno(@$pagenos){
+			# If there's a lastmod in the lastmods hash, we pass it to content()...
 			my $lastmod = defined $lastmods{$pageno} ? $lastmods{$pageno} : undef;
 			my $list=$board->content(PAGE($pageno,$lastmod));
+
+			# ...and then we store the lastmod date for the page we just got
 			$lastmods{$pageno} = $list->{lastmod};
+
+			# Just move on if it hasn't been modified
 			next if $board->error and  $board->errstr eq 'Not Modified';
 			sleep 1 and print $board->errstr,"\n" and next if $board->error;
-			
+	
+			# Scan through threads on that page
 			for(@{$list->{threads}}){
 				my $num=$_->{num};
+
+				# Push thread into new threads queue and skips
+				# if we haven't seen it before
 				push @newthreads,$num and next unless $threads{$num};
 				
+				# Otherwise we get the thread we had already
+				# previously seen
 				my $thread=$threads{$num};
 				my(@posts)=@{$_->{posts}};
 				
 				my($old,$new,$must_refresh)=(0,0,0);
-				
+
+				# We check for any posts that got deleted.
 				mark_deletes $thread,$_ and $must_refresh=1;
-				
 				for(@posts){
+					# Get the same post from the previous encountered thread
 					my $post=find_post($thread->{ref},$_->{num});
 					
 					# Comment too long. Click here to view the full text.
+					# This means we have to refresh the full thread
 					$must_refresh=1 if $_->{omitted};
 					
-					# this post already is in %threads
+					# This post was already in %threads. Next post
 					$post and ++$old and next;
 					
-					# is not
+					# If it's new, deep copies the thread into our thread hash
 					push @{$thread->{ref}->{posts}},shared_clone($_);
 					$new++;
 					
+					# We have to refresh to get the image filename, sadly
 					$must_refresh=1 if $_->{media};
 				}
 				
+				# Update the time we last hit this thread
 				$thread->{lasthit}=time;
 				
-				# no new posts
+				# No new posts
 				next if $old!=0 and $new==0;
 				
 				debug TALK,"$_->{num}: ".($pageno==0?"front page":"page $pageno")." update";
-				
+			
+				# Push new posts/images/thumbs to their queues	
 				update_thread $thread->{ref};
+				
+				# And send the thread to the new threads queue if we were
+				# forced to refresh earlier or if the only old post we
+				# saw was the OP, as that means we're missing posts from inside the thread.
 				push @newthreads,$num if $must_refresh or $old<2;
 			}
 		}
@@ -218,13 +259,15 @@ async{my $board=$board_spawner->();while(1){
 	use threads::shared;
 
 	local $_;
-	{	lock @newthreads;
+	{
+		lock @newthreads;
 		$_=shift @newthreads;
 	}
 	
 	sleep 1 and next unless $_ and /^\d+$/;
 	
-	{	lock %busythreads;
+	{
+		lock %busythreads;
 		next if $busythreads{$_};
 		$busythreads{$_}=1;
 	}
@@ -257,7 +300,7 @@ async{my $board=$board_spawner->();while(1){
 	}
 	
 	# This is silly
-	# Sometimes when refreshig thread it takes too much time to get it,
+	# Sometimes when refreshing thread it takes too much time to get it,
 	# it gets updated from front page, resulting in all new posts being marked
 	# as deleted.
 	# This is silly.
@@ -265,18 +308,19 @@ async{my $board=$board_spawner->();while(1){
 	goto finished if $threads{$_} and $threads{$_}->{lasthit}>$gettime;
 	
 	debug TALK,"$_: ".($threads{$_}?"updated":"new");
-	
+
 	mark_deletes $threads{$_},$thread;
 	$threads{$_}=shared_clone({
-		num		=> $_,
-		lasthit	=> time,
-		ref		=> $thread,
+		num		 => $_,
+		lasthit	 => time,
+		ref		 => $thread,
 	});
 	
 	update_thread $threads{$_}->{ref};
 
 finished:
-	{	lock %busythreads;
+	{
+		lock %busythreads;
 		delete $busythreads{$_};
 	}
 }} foreach 1..$settings->{"new-thread-threads"};
