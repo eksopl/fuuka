@@ -261,7 +261,7 @@ sub get_post($$){
 	my($thread)=$res=~m!"0;URL=http://.*/res/(\d+)\.html#$postno"!
 		or $self->error(FORGET_IT,"Couldn't find post $postno"),return;
 	
-	my $contents=$self->get_thread($thread,undef);
+	my $contents=$self->get_thread($thread);
 	return if $self->error;
 	
 	my($post)=grep{$_->{num}==$postno} @{$contents->{posts}}
@@ -272,7 +272,7 @@ sub get_post($$){
 	$post
 }
 
-sub get_thread($$){
+sub get_thread($$;$){
 	my $self=shift;
 	my($thread,$lastmod)=@_;
 
