@@ -1,4 +1,6 @@
-﻿use strict;
+﻿#!/usr/bin/perl
+
+use strict;
 use utf8;
 
 use constant NORMAL_HEAD_INCLUDE => <<'HERE';

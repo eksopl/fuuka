@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # /^([\w_]+)$/ and print "<<'$1'," foreach <DATA>;
 
 use utf8;
