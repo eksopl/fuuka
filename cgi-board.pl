@@ -358,7 +358,7 @@ sub deyotsutime($){
 		minute => $dt_est->minute, second => $dt_est->second, time_zone => 'America/New_York');
 	$dt->set_time_zone('UTC');
 
-	$dt
+	$dt->epoch;
 }
 
 sub make_filesize_string($){

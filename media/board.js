@@ -186,6 +186,10 @@ function backlink() {
 	}
 }
 
+function pad(n) {
+	return String("0" + n).slice(-2);
+}
+
 function localDate() {
 	var form, dates;
 	
@@ -196,7 +200,7 @@ function localDate() {
 	}
 
 	for (i = 0, j = dates.length; i < j; ++i) {
-		var postdate = new Date(dates[i].getAttribute("name"));
+		var postdate = new Date(parseInt(dates[i].getAttribute("name")));
 		var date = postdate.getDate();
 		var month = postdate.getMonthNameShort("en");
 		var year = postdate.getFullYear();
@@ -205,7 +209,7 @@ function localDate() {
 		var seconds = postdate.getSeconds();
 		var day = postdate.getDayNameShort("en");
 		var datestring = day + " " + month + " " + date + " " + 
-			hours + ":" + minutes + ":" +seconds + " " + year;
+			pad(hours) + ":" + pad(minutes) + ":" + pad(seconds) + " " + year;
 
 		dates[i].innerHTML = datestring;
 	}
