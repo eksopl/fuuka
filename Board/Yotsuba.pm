@@ -277,8 +277,6 @@ sub get_thread($$;$){
 	my($thread,$lastmod)=@_;
 
 	my ($res,$httpres)=$self->wget($self->link_thread($thread),undef,$lastmod);
-    # FIXME: The dumper is dying when this happens. Who is sending a _DIE_ signal, and why?
-    $self->error(FORGET_IT,"Thread came back with no content") if !defined $res;
 	return if $self->error;
 	
 	my $t;
