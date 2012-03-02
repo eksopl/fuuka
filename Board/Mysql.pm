@@ -406,10 +406,10 @@ sub insert{
 	$num or $parent or $self->error(FORGET_IT,"Must specify a thread number for this board"),return 0;
 	my $sage = 0;
 	
-	while($#posts > 1) {
+	while($#posts >= 0) { # 1 post or more
 		my @postbatch;
-		if($#posts > 500) {
-			@postbatch = splice(@posts, 0, 500, ());
+		if($#posts >= 499) { # 500 posts or more
+			@postbatch = splice(@posts, 0, 500, ()); # get 500 posts for this batch
 		} else {
 			@postbatch = @posts;
 			@posts = ();
