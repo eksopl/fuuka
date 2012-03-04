@@ -44,13 +44,13 @@ sub wget($$;$$){
 MAINLOOP:
 	$res=$self->{agent}->request($req);
 
+	my $dec_error = 0;
 	eval {
-		local $SIG{__DIE__};
+		local $SIG{__DIE__} = sub{$dec_error=1};
 		$text=$res->decoded_content();
-	} or do {
-		$self->error(FORGET_IT,"Can't decode content"),return;
 	};
 
+	$self->error(FORGET_IT,"Can't decode content"),return if $dec_error;
 	$self->error(0),return ($text,$res) if $res->is_success;
 	my($no,$line)=$res->status_line=~/(\d+) (.*)/;
 	($retrycount-- and goto MAINLOOP) if($no =~ /^500/ and $retrycount > 0);
