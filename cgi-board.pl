@@ -825,7 +825,6 @@ sub add_reply($$$$$$){
 sub show_page($){
 	my($pageno)=(@_);
 
-	error "That's too far!" if $pageno > 500;
 	$pageno="S$pageno" if $ghost_mode and $pageno!~/^S/;
 	
 	my $page=$board->content(PAGE $pageno);

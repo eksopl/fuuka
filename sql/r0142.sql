@@ -163,5 +163,5 @@ END;
 DELIMITER ;
 
 -- Add the remaining indexes
-CREATE INDEX parent_index ON `a_threads` (parent);
+CREATE UNIQUE INDEX parent_index ON `a_threads` (parent);
 CREATE INDEX time_ghost_bump_index ON `a_threads` (time_ghost_bump);

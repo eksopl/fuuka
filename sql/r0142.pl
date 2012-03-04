@@ -190,7 +190,7 @@ END;
 DELIMITER ;
 
 -- Add the remaining indexes
-CREATE INDEX parent_index ON `$_\_threads` (parent);
+CREATE UNIQUE INDEX parent_index ON `$_\_threads` (parent);
 CREATE INDEX time_ghost_bump_index ON `$_\_threads` (time_ghost_bump);
 HERE
 }
