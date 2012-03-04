@@ -41,6 +41,8 @@ for(@boards) {
 -- Processing table `$_`
 --
 
+DROP TABLE `$_\_threads`;
+
 -- Creating threads table
 CREATE TABLE IF NOT EXISTS `$_\_threads` (
   `doc_id_p` int unsigned NOT NULL,
@@ -54,8 +56,6 @@ CREATE TABLE IF NOT EXISTS `$_\_threads` (
   `nimages` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`doc_id_p`)
 ) ENGINE=InnoDB;
-
-TRUNCATE TABLE `$_\_threads`;
 
 -- Populating threads table with threads
 INSERT INTO `$_\_threads` (
@@ -188,5 +188,9 @@ END;
 //
 
 DELIMITER ;
+
+-- Add the remaining indexes
+CREATE INDEX parent_index ON `$_\_threads` (parent);
+CREATE INDEX time_ghost_bump_index ON `$_\_threads` (time_ghost_bump);
 HERE
 }

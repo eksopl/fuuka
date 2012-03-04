@@ -220,21 +220,15 @@ sub get_page($$){
 	my @list;
 
 	my @results=@{ $self->query($shadow?<<HERE:<<THERE,$self->{threads_per_page},$self->{threads_per_page}*$page) or return };
-select * from $self->{table},
-    (select unq_parent, max_timestamp from
-        (select parent as unq_parent, max(b.timestamp) as max_timestamp, b.num from
-            (select num, parent, subnum, timestamp, email from $self->{table}
-                where subnum > 0 and (email <> 'sage' or email is null or (email = 'sage' and parent = 0))
-                order by timestamp desc limit 0, 100000) as b
-            group by unq_parent order by max(b.timestamp) desc limit ? offset ?) as t
-    left join $self->{table} as g on g.num = t.unq_parent and g.subnum = 0) as j
-where $self->{table}.parent = j.unq_parent or $self->{table}.num = j.unq_parent
-order by j.max_timestamp desc, num, subnum asc;
+select $self->{table}.* from
+    (select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads join $self->{table}
+        on threads.parent=$self->{table}.num or threads.parent=$self->{table}.parent
+			order by threads.time_ghost_bump desc,num,subnum asc
 HERE
 select $self->{table}.* from
-	(select num from $self->{table} where parent=0 order by num desc limit ? offset ?) as threads join $self->{table}
-		on threads.num=$self->{table}.num or threads.num=$self->{table}.parent
-			order by case parent when 0 then $self->{table}.num else parent end desc,num,subnum asc
+	(select parent from $self->{table}_threads order by parent desc limit ? offset ?) as threads join $self->{table}
+		on threads.parent=$self->{table}.num or threads.parent=$self->{table}.parent
+			order by threads.parent desc,num,subnum asc
 THERE
 	for my $ref(@results){
 		my($doc_id,$id,$num,$subnum,$parent)=@$ref;
