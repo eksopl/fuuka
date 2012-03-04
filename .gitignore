@@ -1,6 +1,7 @@
+.DS_Store
+*.swp
 .htaccess
 board-config-local.pl
 brd
 panic.txt
-.DS_Store
-*.swp
+sql/*.mine.sql
