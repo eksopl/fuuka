@@ -41,7 +41,7 @@ for(@boards) {
 -- Processing table `$_`
 --
 
-DROP TABLE `$_\_threads`;
+DROP TABLE IF EXISTS `$_\_threads`;
 
 -- Creating threads table
 CREATE TABLE IF NOT EXISTS `$_\_threads` (
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `$_\_threads` (
   `nreplies` int unsigned NOT NULL DEFAULT '0',
   `nimages` int unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`doc_id_p`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB COLLATE utf8_general_ci;
 
 -- Populating threads table with threads
 INSERT INTO `$_\_threads` (
