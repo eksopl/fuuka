@@ -3,5 +3,8 @@
 .htaccess
 board-config-local.pl
 brd
+reports/graphs/*.graph+
+reports/graphs/*.data
+reports/status
 panic.txt
 sql/*.mine.sql

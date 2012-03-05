@@ -50,7 +50,7 @@ our $disableposting     = $boards{$board_name}->{"disable-posting"};
 
 our %cgi_params;
 	
-use constant LOCAL      => $ENV{REMOTE_ADDR} eq '127.0.0.1';
+use constant LOCAL      => $ENV{REMOTE_ADDR} eq '127.0.0.1' || $ENV{REMOTE_ADDR} eq '::1';
 
 our $yotsuba_link       = $boards{$board_name}->{link} // '';
 
@@ -498,10 +498,11 @@ Content-type: text/plain; charset=utf-8
 HERE
 }
 
-sub redirect($){
-	my($location)=@_;
+sub redirect($;$){
+	my($location,$status)=@_;
+	$status //= "301";
 	print <<HERE and exit;
-Status: 301
+Status: $status
 Location: $location
 Content-Type: text/html; charset=utf-8
 
@@ -1288,14 +1289,18 @@ if($path){
     },exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
-		error "You are trying to do dangerous things" unless $ENV{REMOTE_ADDR} eq '127.0.0.1';
+		my $pass = defined $cookies{'delpass'} ? $cookies{'delpass'}->value : '';
+		my $authorized = $pass eq DELPASS;
+
+		error "You are trying to do dangerous things" unless LOCAL or $authorized;
 
 		for($act){
 		/^update-report$/ and do{
 			my(%opts)=get_report $args;
 
 			utime 0, 0, "$opts{'result-location'}/$board_name/$opts{'result'}";
-			redirect "$self/report/$args";
+			redirect "$self/report/$args", 303;
+			exit;
 		};
 		}
 
