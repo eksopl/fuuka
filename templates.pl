@@ -273,9 +273,9 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <span class="posttime" name="<var deyotsutime($date) * 1000>"><var scalar gmtime($date)></span></label>
 
 <if $replyform and not $disableposting>
-<a class="js" href="<var ref_post($parent,$num,$subnum)>">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
+<a class="js" href="<var ref_post($parent,$num,$subnum)>" onclick="replyhighlight('p<var $num>')">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
 <else>
-<a class="js" href="<var ref_post($parent,$num,$subnum)>">No.<var ref_post_text($num,$subnum)></a>
+<a class="js" href="<var ref_post($parent,$num,$subnum)>" onclick="replyhighlight('p<var $num>')">No.<var ref_post_text($num,$subnum)></a>
 </if>
 
 <if $subnum><img class="inline" src="<const MEDIA_LOCATION_HTTP>/internal.png" alt="[INTERNAL]" title="This is not an archived reply" />&nbsp;</if>

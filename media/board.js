@@ -37,12 +37,12 @@ function replyhighlight(id){
 	var tdtags=document.getElementsByTagName("td");
 	var new_selected_style="reply";
 	for(i=0; i<tdtags.length; i++){
-		if(tdtags[i].className=="highlight"){
+		if(tdtags[i].className=="highlight reply"){
 			tdtags[i].className=selected_style;
 		}
 		if(tdtags[i].id==id){
 			new_selected_style=tdtags[i].className;
-			tdtags[i].className="highlight";
+			tdtags[i].className="highlight reply";
 		}
 	}
 	selected_style=new_selected_style;
@@ -166,6 +166,7 @@ function backlink() {
 			bl.className = 'backlink';
 			bl.href = '#' + replies[i].id;
 			bl.textContent = '>>' + replies[i].id.slice(1);
+			bl.onclick = new Function("replyhighlight('" + replies[i].id + "')");
 			if (!(qb = t.getElementsByClassName('quoted-by')[0])) {
 				qb = document.createElement('div');
 				qb.className = 'quoted-by';
