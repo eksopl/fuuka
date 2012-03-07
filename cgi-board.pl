@@ -45,7 +45,7 @@ our $limit              = 20;
 our $self               = "$script_path/$board_name";
 our $cgi                = new CGI;
 our %cookies            = fetch CGI::Cookie;
-our $id                 = (new Net::IP($ENV{REMOTE_ADDR}))->intip();
+our $id                 = defined $ENV{REMOTE_ADDR} ? (new Net::IP($ENV{REMOTE_ADDR}))->intip() : 1;
 our $disableposting     = $boards{$board_name}->{"disable-posting"};
 
 our %cgi_params;
@@ -964,7 +964,7 @@ sub get_report($){
 	}
 	close HANDLE;
 	error "$loc/$name: wrong format: must have field $_"
-		foreach grep{not $opts{$_}} "query","mode","refresh-rate";
+		foreach grep{not defined $opts{$_}} "query","mode","refresh-rate";
 
 	if($opts{mode} eq 'graph'){
 		$opts{'result-location'}="$imgloc/graphs";
@@ -981,17 +981,27 @@ sub show_report($){
 	my($name)=@_;
 	my(%opts)=get_report $name;
 
-	my $time=mtime "$opts{'result-location'}/$board_name/$opts{'result'}";
+	$opts{query}=~s/%%BOARD%%/$board_name/g;
+	$opts{query}=~s/%%NOW%%/yotsutime/ge;
+
+	my $time;
+	my @list;
+	if(not $opts{'refresh-rate'}) {
+		$time = time;
+		@list = map { @$_ } $board->query($opts{'query'});
+	} else {
+		$time=mtime "$opts{'result-location'}/$board_name/$opts{'result'}";
 	
-	goto skip_messing_with_text_data if $opts{mode} eq 'graph';
+		goto skip_messing_with_text_data if $opts{mode} eq 'graph';
 	
-	open HANDLE,"$opts{'result-location'}/$board_name/$opts{'result'}" or error "$! - $opts{'result-location'}/$board_name/$opts{'result'}";
-	binmode HANDLE,":utf8";
-	<HANDLE>;
-	my @list=map{
-		[map{s/^\s*//;s/\s*$//;$_}split /\|/,$_]
-	}<HANDLE>;
-	close HANDLE;
+		open HANDLE,"$opts{'result-location'}/$board_name/$opts{'result'}" or error "$! - $opts{'result-location'}/$board_name/$opts{'result'}";
+		binmode HANDLE,":utf8";
+		<HANDLE>;
+		@list=map{
+			[map{s/^\s*//;s/\s*$//;$_}split /\|/,$_]
+		}<HANDLE>;
+		close HANDLE;
+	}
 
 	my @rowtypes=split /,/,$opts{"row-types"};
 	my @rownames=split /,/,$opts{"rows"};
@@ -1096,9 +1106,6 @@ skip_messing_with_text_data:
 	$template=REPORT_GRAPH_TEMPLATE if $opts{mode} eq 'graph';
 
 	die unless $template;
-	
-	$opts{query}=~s/%%BOARD%%/$board_name/g;
-	$opts{query}=~s/%%NOW%%/yotsutime/ge;
 
 	sendpage $template,(
 		%opts,
@@ -1109,7 +1116,8 @@ skip_messing_with_text_data:
 		
 		last		=> time-$time,
 		next		=> $opts{"refresh-rate"}-(time-$time),
-		
+	
+		instant 	=> $opts{"refresh-rate"} == 0,	
 		page		=> 0,
 		thread		=> 0,
 	);

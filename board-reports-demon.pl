@@ -82,8 +82,10 @@ MAINLOOP:
 		close HANDLE;
 		
 		warn "$filename: wrong format: must have field $_" and next MAINLOOP
-			foreach grep{not $opts{$_}} "query","mode","refresh-rate";
-		
+			foreach grep{not defined $opts{$_}} "query","mode","refresh-rate";
+	
+		next if not $opts{'refresh-rate'};
+	
 		$opts{filename}="$_";
 		
 		if($opts{mode} eq 'graph'){
