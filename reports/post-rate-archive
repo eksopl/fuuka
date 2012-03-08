@@ -3,4 +3,4 @@ Title:			Post rate (Archive)
 Rows:			Posts in last hour,Posts per minute
 Row-Types:		text,text
 Mode:			table
-Refresh-Rate:	180
+Refresh-Rate:	0

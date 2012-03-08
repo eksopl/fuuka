@@ -14,7 +14,7 @@ use utf8;
 # Hardcore usage:
 # perl r0142_2.pl | mysql -u <mysqluser> -p
 #
-# There's also a static version in r0142.sql, if you don't want automatic
+# There's also a static version in r0142_2.sql, if you don't want automatic
 # generation for some reason.
 
 BEGIN{-e "../board-config-local.pl" ?
@@ -54,6 +54,17 @@ CREATE TABLE `$_\_images` (
   PRIMARY KEY (`media_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `$_\_daily` (
+  `day` int(10) unsigned NOT NULL,
+  `posts` int(10) unsigned NOT NULL,
+  `images` int(10) unsigned NOT NULL,
+  `sage` int(10) unsigned NOT NULL,
+  `anons` int(10) unsigned NOT NULL,
+  `trips` int(10) unsigned NOT NULL,
+  `names` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`day`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Creating stored procedures and updating triggers
 DELIMITER //
 
@@ -86,6 +97,53 @@ BEGIN
   UPDATE `$_\_images` SET total = (total - 1) WHERE media_hash = n_media_hash;
 END//
 
+DROP PROCEDURE IF EXISTS `insert_post_$_`//
+
+CREATE PROCEDURE `insert_post_$_` (timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), name VARCHAR(100), trip VARCHAR(25))
+BEGIN
+  DECLARE n_day INT;
+  DECLARE n_image INT;
+  DECLARE n_sage INT;
+  DECLARE n_anon INT;
+  DECLARE n_trip INT;
+  DECLARE n_name INT;
+  
+  SET n_day = FLOOR(timestamp/86400)*86400;
+  SET n_image = media_hash IS NOT NULL;
+  SET n_sage = COALESCE(email = 'sage', 0);
+  SET n_anon = COALESCE(name = 'Anonymous' AND trip IS NULL, 0);
+  SET n_trip = trip IS NOT NULL;
+  SET n_name = COALESCE(name <> 'Anonymous' AND trip IS NULL, 1);
+  
+  INSERT INTO $_\_daily VALUES(n_day, 1, n_image, n_sage, n_anon, n_trip, n_name)
+    ON DUPLICATE KEY UPDATE posts=posts+1, images=images+n_image,
+    sage=sage+n_sage, anons=anons+n_anon, trips=trips+n_trip,
+    names=names+n_name;
+END//
+
+DROP PROCEDURE IF EXISTS `delete_post_$_`//
+
+CREATE PROCEDURE `delete_post_$_` (timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), name VARCHAR(100), trip VARCHAR(25))
+BEGIN
+  DECLARE n_day INT;
+  DECLARE n_image INT;
+  DECLARE n_sage INT;
+  DECLARE n_anon INT;
+  DECLARE n_trip INT;
+  DECLARE n_name INT;
+  
+  SET n_day = FLOOR(timestamp/86400)*86400;
+  SET n_image = media_hash IS NOT NULL;
+  SET n_sage = COALESCE(email = 'sage', 0);
+  SET n_anon = COALESCE(name = 'Anonymous' AND trip IS NULL, 0);
+  SET n_trip = trip IS NOT NULL;
+  SET n_name = COALESCE(name <> 'Anonymous' AND trip IS NULL, 1);
+  
+  UPDATE $_\_daily SET posts=posts-1, images=images-n_image,
+    sage=sage-n_sage, anons=anons-n_anon, trips=trips-n_trip,
+    names=names-n_name WHERE day = n_day;
+END//
+
 DROP TRIGGER IF EXISTS `after_ins_$_`//
 
 CREATE TRIGGER `after_ins_$_` AFTER INSERT ON `$_`
@@ -95,12 +153,13 @@ BEGIN
     CALL create_thread_$_(NEW.doc_id, NEW.num, NEW.timestamp);
   END IF;
   CALL update_thread_$_(NEW.parent);
+  CALL insert_post_$_(NEW.timestamp, NEW.media_hash, 
+    NEW.email, NEW.name, NEW.trip);
   IF NEW.media_hash IS NOT NULL THEN
     CALL insert_image_$_(NEW.media_hash, NEW.num, NEW.subnum, NEW.parent,
       NEW.preview);
   END IF;
-END;
-//
+END//
 
 DROP TRIGGER IF EXISTS `after_del_$_`//
 
@@ -111,11 +170,12 @@ BEGIN
   IF OLD.parent = 0 THEN
     CALL delete_thread_$_(OLD.num);
   END IF;
+  CALL delete_post_$_(OLD.timestamp, OLD.media_hash, 
+    OLD.email, OLD.name, OLD.trip);
   IF OLD.media_hash IS NOT NULL THEN
     CALL delete_image_$_(OLD.media_hash);
   END IF;
-END;
-//
+END//
 
 DELIMITER ;
 
@@ -126,6 +186,16 @@ INSERT INTO `$_\_images` (
     (SELECT media_hash as hash, COUNT(media_hash) AS total FROM `$_` GROUP BY
       media_hash) AS x ON media_hash=hash GROUP BY media_hash) AS x 
   ON media_hash=hash AND preview_w=w GROUP BY media_hash ORDER BY total DESC
+);
+
+-- Populating daily report table with info
+INSERT INTO `$_\_daily` (
+  SELECT FLOOR(timestamp/86400)*86400 AS days, COUNT(*), 
+    SUM(media_hash IS NOT NULL), SUM(COALESCE(email = 'sage', 0)),
+    SUM(COALESCE(name = 'Anonymous' AND trip IS NULL, 0)), 
+    SUM(trip IS NOT NULL), 
+    SUM(COALESCE(name <> 'Anonymous' AND trip IS NULL, 1)) 
+  FROM $_ GROUP BY days
 );
 
 -- Add the remaining indexes
