@@ -65,6 +65,19 @@ CREATE TABLE IF NOT EXISTS `$_\_daily` (
   PRIMARY KEY (`day`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `$_\_users` (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT '',
+  `trip` varchar(25) DEFAULT '',
+  `firstseen` int(11) NOT NULL,
+  `postcount` int(11) NOT NULL,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `name` (`name`,`trip`),
+  KEY `firstseen` (`firstseen`),
+  KEY `postcount` (`postcount`)
+) ENGINE=InnoDB DEFAULT CHARSET=$charset;
+
+
 -- Creating stored procedures and updating triggers
 DELIMITER //
 
@@ -99,7 +112,7 @@ END//
 
 DROP PROCEDURE IF EXISTS `insert_post_$_`//
 
-CREATE PROCEDURE `insert_post_$_` (timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), name VARCHAR(100), trip VARCHAR(25))
+CREATE PROCEDURE `insert_post_$_` (o_timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), o_name VARCHAR(100), o_trip VARCHAR(25))
 BEGIN
   DECLARE n_day INT;
   DECLARE n_image INT;
@@ -108,22 +121,25 @@ BEGIN
   DECLARE n_trip INT;
   DECLARE n_name INT;
   
-  SET n_day = FLOOR(timestamp/86400)*86400;
+  SET n_day = FLOOR(o_timestamp/86400)*86400;
   SET n_image = media_hash IS NOT NULL;
   SET n_sage = COALESCE(email = 'sage', 0);
-  SET n_anon = COALESCE(name = 'Anonymous' AND trip IS NULL, 0);
-  SET n_trip = trip IS NOT NULL;
-  SET n_name = COALESCE(name <> 'Anonymous' AND trip IS NULL, 1);
+  SET n_anon = COALESCE(o_name = 'Anonymous' AND o_trip IS NULL, 0);
+  SET n_trip = o_trip IS NOT NULL;
+  SET n_name = COALESCE(o_name <> 'Anonymous' AND o_trip IS NULL, 1);
   
   INSERT INTO $_\_daily VALUES(n_day, 1, n_image, n_sage, n_anon, n_trip, n_name)
     ON DUPLICATE KEY UPDATE posts=posts+1, images=images+n_image,
     sage=sage+n_sage, anons=anons+n_anon, trips=trips+n_trip,
     names=names+n_name;
+  INSERT INTO $_\_users VALUES(NULL, o_name, o_trip, o_timestamp, 1)
+    ON DUPLICATE KEY UPDATE SET postcount=postcount+1,
+    timestamp = LEAST(VALUES(timestamp), timestamp);
 END//
 
 DROP PROCEDURE IF EXISTS `delete_post_$_`//
 
-CREATE PROCEDURE `delete_post_$_` (timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), name VARCHAR(100), trip VARCHAR(25))
+CREATE PROCEDURE `delete_post_$_` (timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), p_name VARCHAR(100), trip VARCHAR(25))
 BEGIN
   DECLARE n_day INT;
   DECLARE n_image INT;
@@ -135,13 +151,17 @@ BEGIN
   SET n_day = FLOOR(timestamp/86400)*86400;
   SET n_image = media_hash IS NOT NULL;
   SET n_sage = COALESCE(email = 'sage', 0);
-  SET n_anon = COALESCE(name = 'Anonymous' AND trip IS NULL, 0);
+  SET n_anon = COALESCE(p_name = 'Anonymous' AND trip IS NULL, 0);
   SET n_trip = trip IS NOT NULL;
-  SET n_name = COALESCE(name <> 'Anonymous' AND trip IS NULL, 1);
+  SET n_name = COALESCE(p_name <> 'Anonymous' AND trip IS NULL, 1);
   
   UPDATE $_\_daily SET posts=posts-1, images=images-n_image,
     sage=sage-n_sage, anons=anons-n_anon, trips=trips-n_trip,
     names=names-n_name WHERE day = n_day;
+  
+  UPDATE $_\_users SET postcount = postcount-1 WHERE
+    CASE WHEN p_name IS NULL THEN name IS NULL ELSE name = p_name END AND
+    CASE WHEN p_trip IS NULL THEN trip IS NULL ELSE trip = p_trip END;  
 END//
 
 DROP TRIGGER IF EXISTS `after_ins_$_`//
@@ -179,16 +199,28 @@ END//
 
 DELIMITER ;
 
+--
 -- Populating images table with image info
+--
+-- (About 7 minutes on /a/ with Easymodo data)
 INSERT INTO `$_\_images` (
-  SELECT media_hash, num, subnum, parent, preview, total FROM `$_` JOIN 
-  (SELECT hash, total, MAX(preview_w) AS w FROM `$_` JOIN 
-    (SELECT media_hash as hash, COUNT(media_hash) AS total FROM `$_` GROUP BY
-      media_hash) AS x ON media_hash=hash GROUP BY media_hash) AS x 
-  ON media_hash=hash AND preview_w=w GROUP BY media_hash ORDER BY total DESC
+  SELECT media_hash, num, subnum, parent, preview, COUNT(*)
+  FROM `$_` WHERE parent = 0 AND media_hash IS NOT NULL AND preview IS NOT NULL
+  GROUP BY media_hash
 );
 
+-- (About 14 minutes on /a/ with Easymodo data)
+INSERT INTO `$_\_images` (
+  SELECT media_hash, num, subnum, parent, preview, count(*) AS replyt
+   FROM `$_` WHERE parent != 0 AND 
+   media_hash IS NOT NULL AND preview IS NOT NULL GROUP BY media_hash
+   )
+ON DUPLICATE KEY UPDATE total = total + VALUES(total);
+
+--
 -- Populating daily report table with info
+--
+-- (About 6 minutes on /a/ with Easymodo data)
 INSERT INTO `$_\_daily` (
   SELECT FLOOR(timestamp/86400)*86400 AS days, COUNT(*), 
     SUM(media_hash IS NOT NULL), SUM(COALESCE(email = 'sage', 0)),
@@ -198,7 +230,24 @@ INSERT INTO `$_\_daily` (
   FROM $_ GROUP BY days
 );
 
+--
+-- Populating users table with users
+--
+-- (About 8 minutes on /a/ with Easymodo data)
+INSERT INTO `$_\_users` (
+  SELECT NULL, name, NULL, MIN(timestamp), COUNT(*) from `$_`
+  WHERE trip IS NULL GROUP BY name 
+);
+
+-- (About 6 minutes on /a/ with Easymodo data)
+INSERT INTO `$_\_users` (
+  SELECT NULL, name, trip, MIN(timestamp), COUNT(*) from `$_`
+  WHERE trip IS NOT NULL GROUP BY trip 
+);
+
 -- Add the remaining indexes
 CREATE INDEX total_index ON `$_\_images` (total);
+CREATE INDEX firstseen_index ON `$_\_users` (firstseen);
+CREATE INDEX postcount_index ON `$_\_users` (postcount);
 HERE
 }
