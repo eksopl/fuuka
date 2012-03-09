@@ -138,7 +138,7 @@ BEGIN
     names=names+n_name;
   INSERT INTO $_\_users VALUES(NULL, o_name, o_trip, o_timestamp, 1)
     ON DUPLICATE KEY UPDATE postcount=postcount+1,
-    timestamp = LEAST(VALUES(timestamp), timestamp);
+    firstseen = LEAST(VALUES(firstseen), firstseen);
 END//
 
 DROP PROCEDURE IF EXISTS `delete_post_$_`//
