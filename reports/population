@@ -1,4 +1,4 @@
-Query:         select day, trips, names, anons from %%BOARD%%_daily where floor((%%NOW%%-31536000)/86400)*86400 group by day order by day
+Query:         select day, trips, names, anons from %%BOARD%%_daily where day > floor((%%NOW%%-31536000)/86400)*86400 group by day order by day
 Title:			Population
 Mode:			graph
 Refresh-Rate:	3600
