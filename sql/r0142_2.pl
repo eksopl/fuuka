@@ -54,6 +54,8 @@ CREATE TABLE `$_\_images` (
   PRIMARY KEY (`media_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `$_\daily`;
+
 CREATE TABLE IF NOT EXISTS `$_\_daily` (
   `day` int(10) unsigned NOT NULL,
   `posts` int(10) unsigned NOT NULL,
@@ -64,6 +66,8 @@ CREATE TABLE IF NOT EXISTS `$_\_daily` (
   `names` int(10) unsigned NOT NULL,
   PRIMARY KEY (`day`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `$_\users`;
 
 CREATE TABLE IF NOT EXISTS `$_\_users` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
@@ -133,7 +137,7 @@ BEGIN
     sage=sage+n_sage, anons=anons+n_anon, trips=trips+n_trip,
     names=names+n_name;
   INSERT INTO $_\_users VALUES(NULL, o_name, o_trip, o_timestamp, 1)
-    ON DUPLICATE KEY UPDATE SET postcount=postcount+1,
+    ON DUPLICATE KEY UPDATE postcount=postcount+1,
     timestamp = LEAST(VALUES(timestamp), timestamp);
 END//
 
