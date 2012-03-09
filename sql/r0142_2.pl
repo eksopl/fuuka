@@ -54,7 +54,7 @@ CREATE TABLE `$_\_images` (
   PRIMARY KEY (`media_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `$_\daily`;
+DROP TABLE IF EXISTS `$_\_daily`;
 
 CREATE TABLE IF NOT EXISTS `$_\_daily` (
   `day` int(10) unsigned NOT NULL,
@@ -67,18 +67,14 @@ CREATE TABLE IF NOT EXISTS `$_\_daily` (
   PRIMARY KEY (`day`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `$_\users`;
+DROP TABLE IF EXISTS `$_\_users`;
 
 CREATE TABLE IF NOT EXISTS `$_\_users` (
-  `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) DEFAULT '',
-  `trip` varchar(25) DEFAULT '',
+  `name` varchar(100) NOT NULL DEFAULT '',
+  `trip` varchar(25) NOT NULL DEFAULT '',
   `firstseen` int(11) NOT NULL,
   `postcount` int(11) NOT NULL,
-  PRIMARY KEY (`uid`),
-  UNIQUE KEY `name` (`name`,`trip`),
-  KEY `firstseen` (`firstseen`),
-  KEY `postcount` (`postcount`)
+  PRIMARY KEY (`name`, `trip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=$charset;
 
 
@@ -136,7 +132,7 @@ BEGIN
     ON DUPLICATE KEY UPDATE posts=posts+1, images=images+n_image,
     sage=sage+n_sage, anons=anons+n_anon, trips=trips+n_trip,
     names=names+n_name;
-  INSERT INTO $_\_users VALUES(NULL, o_name, o_trip, o_timestamp, 1)
+  INSERT INTO $_\_users VALUES(COALESCE(o_name,''), COALESCE(o_trip,''), o_timestamp, 1)
     ON DUPLICATE KEY UPDATE postcount=postcount+1,
     firstseen = LEAST(VALUES(firstseen), firstseen);
 END//
@@ -164,8 +160,7 @@ BEGIN
     names=names-n_name WHERE day = n_day;
   
   UPDATE $_\_users SET postcount = postcount-1 WHERE
-    CASE WHEN p_name IS NULL THEN name IS NULL ELSE name = p_name END AND
-    CASE WHEN p_trip IS NULL THEN trip IS NULL ELSE trip = p_trip END;  
+    name = COALESCE(p_name, '') AND trip = COALESCE(p_trip, '');  
 END//
 
 DROP TRIGGER IF EXISTS `after_ins_$_`//
@@ -239,13 +234,13 @@ INSERT INTO `$_\_daily` (
 --
 -- (About 8 minutes on /a/ with Easymodo data)
 INSERT INTO `$_\_users` (
-  SELECT NULL, name, NULL, MIN(timestamp), COUNT(*) from `$_`
+  SELECT COALESCE(name, ''), '', MIN(timestamp), COUNT(*) from `$_`
   WHERE trip IS NULL GROUP BY name 
 );
 
 -- (About 6 minutes on /a/ with Easymodo data)
 INSERT INTO `$_\_users` (
-  SELECT NULL, name, trip, MIN(timestamp), COUNT(*) from `$_`
+  SELECT COALESCE(name, ''), trip, MIN(timestamp), COUNT(*) from `$_`
   WHERE trip IS NOT NULL GROUP BY trip 
 );
 
