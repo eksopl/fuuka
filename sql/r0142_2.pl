@@ -112,55 +112,68 @@ END//
 
 DROP PROCEDURE IF EXISTS `insert_post_$_`//
 
-CREATE PROCEDURE `insert_post_$_` (o_timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), o_name VARCHAR(100), o_trip VARCHAR(25))
+CREATE PROCEDURE `insert_post_$_` (p_timestamp INT, p_media_hash VARCHAR(25), p_email VARCHAR(100), p_name VARCHAR(100), p_trip VARCHAR(25))
 BEGIN
-  DECLARE n_day INT;
-  DECLARE n_image INT;
-  DECLARE n_sage INT;
-  DECLARE n_anon INT;
-  DECLARE n_trip INT;
-  DECLARE n_name INT;
+  DECLARE d_day INT;
+  DECLARE d_image INT;
+  DECLARE d_sage INT;
+  DECLARE d_anon INT;
+  DECLARE d_trip INT;
+  DECLARE d_name INT;
   
-  SET n_day = FLOOR(o_timestamp/86400)*86400;
-  SET n_image = media_hash IS NOT NULL;
-  SET n_sage = COALESCE(email = 'sage', 0);
-  SET n_anon = COALESCE(o_name = 'Anonymous' AND o_trip IS NULL, 0);
-  SET n_trip = o_trip IS NOT NULL;
-  SET n_name = COALESCE(o_name <> 'Anonymous' AND o_trip IS NULL, 1);
+  SET d_day = FLOOR(p_timestamp/86400)*86400;
+  SET d_image = p_media_hash IS NOT NULL;
+  SET d_sage = COALESCE(p_email = 'sage', 0);
+  SET d_anon = COALESCE(p_name = 'Anonymous' AND p_trip IS NULL, 0);
+  SET d_trip = p_trip IS NOT NULL;
+  SET d_name = COALESCE(p_name <> 'Anonymous' AND p_trip IS NULL, 1);
   
-  INSERT INTO $_\_daily VALUES(n_day, 1, n_image, n_sage, n_anon, n_trip, n_name)
-    ON DUPLICATE KEY UPDATE posts=posts+1, images=images+n_image,
-    sage=sage+n_sage, anons=anons+n_anon, trips=trips+n_trip,
-    names=names+n_name;
-  INSERT INTO $_\_users VALUES(COALESCE(o_name,''), COALESCE(o_trip,''), o_timestamp, 1)
+  INSERT INTO $_\_daily VALUES(d_day, 1, d_image, d_sage, d_anon, d_trip, d_name)
+    ON DUPLICATE KEY UPDATE posts=posts+1, images=images+d_image,
+    sage=sage+d_sage, anons=anons+d_anon, trips=trips+d_trip,
+    names=names+d_name;
+    
+  -- Also should be a transaction. Lol MySQL.  
+  IF (SELECT trip FROM $_\_users WHERE trip = p_trip) IS NOT NULL THEN
+    UPDATE $_\_users SET postcount=postcount+1, 
+      firstseen = LEAST(VALUES(firstseen), firstseen)
+      WHERE trip = p_trip;
+  ELSE
+    INSERT INTO $_\_users VALUES(COALESCE(p_name,''), COALESCE(p_trip,''), p_timestamp, 1)
     ON DUPLICATE KEY UPDATE postcount=postcount+1,
     firstseen = LEAST(VALUES(firstseen), firstseen);
+  END IF;
 END//
 
 DROP PROCEDURE IF EXISTS `delete_post_$_`//
 
-CREATE PROCEDURE `delete_post_$_` (timestamp INT, media_hash VARCHAR(25), email VARCHAR(100), p_name VARCHAR(100), trip VARCHAR(25))
+CREATE PROCEDURE `delete_post_$_` (p_timestamp INT, p_media_hash VARCHAR(25), p_email VARCHAR(100), p_name VARCHAR(100), p_trip VARCHAR(25))
 BEGIN
-  DECLARE n_day INT;
-  DECLARE n_image INT;
-  DECLARE n_sage INT;
-  DECLARE n_anon INT;
-  DECLARE n_trip INT;
-  DECLARE n_name INT;
+  DECLARE d_day INT;
+  DECLARE d_image INT;
+  DECLARE d_sage INT;
+  DECLARE d_anon INT;
+  DECLARE d_trip INT;
+  DECLARE d_name INT;
   
-  SET n_day = FLOOR(timestamp/86400)*86400;
-  SET n_image = media_hash IS NOT NULL;
-  SET n_sage = COALESCE(email = 'sage', 0);
-  SET n_anon = COALESCE(p_name = 'Anonymous' AND trip IS NULL, 0);
-  SET n_trip = trip IS NOT NULL;
-  SET n_name = COALESCE(p_name <> 'Anonymous' AND trip IS NULL, 1);
+  SET d_day = FLOOR(p_timestamp/86400)*86400;
+  SET d_image = p_media_hash IS NOT NULL;
+  SET d_sage = COALESCE(p_email = 'sage', 0);
+  SET d_anon = COALESCE(p_name = 'Anonymous' AND p_trip IS NULL, 0);
+  SET d_trip = p_trip IS NOT NULL;
+  SET d_name = COALESCE(p_name <> 'Anonymous' AND p_trip IS NULL, 1);
   
-  UPDATE $_\_daily SET posts=posts-1, images=images-n_image,
-    sage=sage-n_sage, anons=anons-n_anon, trips=trips-n_trip,
-    names=names-n_name WHERE day = n_day;
+  UPDATE $_\_daily SET posts=posts-1, images=images-d_image,
+    sage=sage-d_sage, anons=anons-d_anon, trips=trips-d_trip,
+    names=names-d_name WHERE day = d_day;
   
-  UPDATE $_\_users SET postcount = postcount-1 WHERE
-    name = COALESCE(p_name, '') AND trip = COALESCE(p_trip, '');  
+  -- Also should be a transaction. Lol MySQL.
+  IF (SELECT trip FROM $_\_users WHERE trip = p_trip) IS NOT NULL THEN
+    UPDATE $_\_users SET postcount = postcount-1 WHERE trip = p_trip;  
+  ELSE
+    UPDATE $_\_users SET postcount = postcount-1 WHERE
+      name = COALESCE(p_name, '') AND trip = COALESCE(p_trip, '');
+  END IF;
 END//
 
 DROP TRIGGER IF EXISTS `after_ins_$_`//

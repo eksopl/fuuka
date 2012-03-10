@@ -146,6 +146,7 @@ sub do_report{
 		my $xstart = $list->[0][0];
 		my $xend   = $list->[-1][0];
 		open HANDLE,">$loc/graphs/$name.data" or die "$! - $loc/graphs/$name.data";
+		print HANDLE "0\t0\t0\t0\n" if !defined $list->[0][0];
 		print HANDLE (join "\t",@$_),"\n" foreach @$list;
 		close HANDLE;
 		
