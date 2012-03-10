@@ -1,0 +1,6 @@
+Query:			select name, trip, firstseen, postcount FROM %%BOARD%%_users where postcount > 30 order by firstseen desc;
+Title:			Users by date of first post 
+Rows:			Name,First seen,Total posts
+Row-Types:		username,timestamp,text
+Mode:			table
+Refresh-Rate:	0
