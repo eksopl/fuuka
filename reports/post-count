@@ -1,6 +1,6 @@
-Query:			select name,trip,count(*) from %%BOARD%% group by name,trip order by count(*) desc limit 512
+Query:			select name, trip, postcount from %%BOARD%%_users order by postcount desc limit 512
 Title:			Post counts
 Rows:			Name,Total posts
 Row-Types:		username,text
 Mode:			table
-Refresh-Rate:	345600
+Refresh-Rate:	0

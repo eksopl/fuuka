@@ -82,8 +82,10 @@ MAINLOOP:
 		close HANDLE;
 		
 		warn "$filename: wrong format: must have field $_" and next MAINLOOP
-			foreach grep{not $opts{$_}} "query","mode","refresh-rate";
-		
+			foreach grep{not defined $opts{$_}} "query","mode","refresh-rate";
+	
+		next if not $opts{'refresh-rate'};
+	
 		$opts{filename}="$_";
 		
 		if($opts{mode} eq 'graph'){
@@ -144,6 +146,7 @@ sub do_report{
 		my $xstart = $list->[0][0];
 		my $xend   = $list->[-1][0];
 		open HANDLE,">$loc/graphs/$name.data" or die "$! - $loc/graphs/$name.data";
+		print HANDLE "0\t0\t0\t0\n" if !defined $list->[0][0];
 		print HANDLE (join "\t",@$_),"\n" foreach @$list;
 		close HANDLE;
 		

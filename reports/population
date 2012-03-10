@@ -1,4 +1,4 @@
-Query:         select floor(timestamp/86400)*86400 as days,count(trip),count(case when (name!='Anonymous' and trip is NULL) then 1 else NULL end),count(case when (name='Anonymous' and trip is NULL) then 1 else NULL end) from %%BOARD%% force index(timestamp_index) where timestamp>%%NOW%%-31536000 group by days order by days
+Query:         select day, trips, names, anons from %%BOARD%%_daily where day > floor((%%NOW%%-31536000)/86400)*86400 group by day order by day
 Title:			Population
 Mode:			graph
-Refresh-Rate:	84600
+Refresh-Rate:	3600

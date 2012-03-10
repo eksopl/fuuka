@@ -1,6 +1,10 @@
+.DS_Store
+*.swp
 .htaccess
 board-config-local.pl
 brd
+reports/graphs/*.graph+
+reports/graphs/*.data
+reports/status
 panic.txt
-.DS_Store
-*.swp
+sql/*.mine.sql

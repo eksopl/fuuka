@@ -3,4 +3,4 @@ Title:			Users posting in archive
 Rows:			Posted as,Last seen,Last post
 Row-Types:		text,timediff,postno
 Mode:			table
-Refresh-Rate:	60
+Refresh-Rate:	0
