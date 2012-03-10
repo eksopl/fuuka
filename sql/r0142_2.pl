@@ -136,7 +136,7 @@ BEGIN
   -- Also should be a transaction. Lol MySQL.  
   IF (SELECT trip FROM $_\_users WHERE trip = p_trip) IS NOT NULL THEN
     UPDATE $_\_users SET postcount=postcount+1, 
-      firstseen = LEAST(VALUES(firstseen), firstseen)
+      firstseen = LEAST(p_timestamp, firstseen)
       WHERE trip = p_trip;
   ELSE
     INSERT INTO $_\_users VALUES(COALESCE(p_name,''), COALESCE(p_trip,''), p_timestamp, 1)
