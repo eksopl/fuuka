@@ -652,6 +652,11 @@ sub error(@){
 	sendpage ERROR_TEMPLATE,(
 		cause=>[map{map{html_encode $_}split /\n/,$_}@_],
 	);
+
+	# This may look dumb, but it's to prevent mod_perl from appending Apache's
+	# default 404 page. 
+	# Actual page still returns 404 status.
+	$cgi->r->status(200);
 	exit;
 }
 	

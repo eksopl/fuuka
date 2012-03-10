@@ -1,4 +1,4 @@
-Query:			select preview,num,subnum,parent,media_hash,total from %%BOARD%%_images group by media_hash order by total desc limit 32;
+Query:			select preview,num,subnum,parent,media_hash,total from %%BOARD%%_images order by total desc limit 32;
 Title:			Most Reposted Images
 Rows:			Image,Reposts
 Row-Types:		image,text

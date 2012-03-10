@@ -435,6 +435,7 @@ use constant REPORT_THUMBS_INCLUDE => <<'HERE';
 </loop>
 
 </div>
+<div style="clear: both;"></div>
 <hr />
 HERE
 
