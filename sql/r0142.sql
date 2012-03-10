@@ -9,6 +9,7 @@
 -- instead, which will generate an .sql file for you)
 --
 
+USE archive;
 
 --
 -- Processing table `a`
