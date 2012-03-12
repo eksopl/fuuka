@@ -398,7 +398,6 @@ sub insert{
 	}
 	
 	$num or $parent or $self->error(FORGET_IT,"Must specify a thread number for this board"),return 0;
-	my $sage = 0;
 	
 	while($#posts >= 0) { # 1 post or more
 		my @postbatch;
@@ -411,7 +410,6 @@ sub insert{
 	
 		$self->query("insert into $self->{table} values ".join(",",map{
 			my $h=$_;
-			$sage = 1 if $h->{email} eq 'sage' and $self->{sage};
 			
 			my($location)=$num?
 				# insert a post with specified number
