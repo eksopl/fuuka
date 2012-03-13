@@ -407,7 +407,7 @@ use constant REPORT_HEADER_INCLUDE => <<'HERE';
 <tr><th>Updated</th><td>Real-time</td></tr>
 <else>
 <tr><th>Updated</th><td><var ucfirst time_period_after($last,6)>. Next update <var time_period_before($next,6)></td></tr>
-<tr><th>Actions</th><td>[<a href="<var $self>/actions/update-report/<var $name>">Update</a>]</td></tr>
+<if $authorized><tr><th>Actions</th><td>[<a href="<var $self>/actions/update-report/<var $name>">Update</a>]</td></tr></if>
 </if>
 </tbody></table>
 HERE

@@ -83,6 +83,11 @@ $ghost_mode				= 'yes' if
 	defined $cookies{'ghost'} and $cookies{'ghost'}->value eq 'yes' and
 	$cgi->param("task")!='page';
 
+our $authorized			= 0;
+$authorized				= 1 if
+		LOCAL or
+        defined $cookies{'delpass'} and $cookies{'delpass'}->value eq DELPASS;
+
 my $board_engine = "Board::".(BOARD_SETTINGS->{$board_name}->{"database"} or DEFAULT_ENGINE);
 
 our $board				= $board_engine->new($board_name,
@@ -111,7 +116,7 @@ our @navigation=(
 		["index",		"Go to front page of archiver",		"$script_path/"],
 		["top",			"Go to first page of this board",	"$self/"],
 		["reports",		"",					"$self/reports"],
-		["report a bug",	"Report a bug or suggest a feature",	"http://code.google.com/p/fuuka/issues/list"],
+		["report a bug",	"Report a bug or suggest a feature",	"https://github.com/eksopl/fuuka"],
 	]
 );
 
@@ -653,10 +658,10 @@ sub error(@){
 		cause=>[map{map{html_encode $_}split /\n/,$_}@_],
 	);
 
-	# This may look dumb, but it's to prevent mod_perl from appending Apache's
-	# default 404 page. 
+	# This may look dumb, but in some cases, mod_perl can append Apache's
+	# default 404 page to the output. This prevents it. 
 	# Actual page still returns 404 status.
-	$cgi->r->status(200);
+	$cgi->r->status(200) if $cgi->r;
 	exit;
 }
 	
@@ -1302,10 +1307,7 @@ if($path){
     },exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
-		my $pass = defined $cookies{'delpass'} ? $cookies{'delpass'}->value : '';
-		my $authorized = $pass eq DELPASS;
-
-		error "You are trying to do dangerous things" unless LOCAL or $authorized;
+		error "You are trying to do dangerous things" unless $authorized;
 
 		for($act){
 		/^update-report$/ and do{
