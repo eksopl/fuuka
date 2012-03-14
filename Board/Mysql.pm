@@ -220,17 +220,20 @@ sub get_page($$){
 	my @list;
 
 	my @results=@{ $self->query($shadow?<<HERE:<<THERE,$shadow?($self->{threads_per_page},$self->{threads_per_page}*$page):(),$self->{threads_per_page},$self->{threads_per_page}*$page) or return };
-select $self->{table}.* from
+select * from
+(select $self->{table}.*,time_ghost_bump from
 	$self->{table}
 	join
 	(select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads 
 	on threads.parent=$self->{table}.num
 union
-select $self->{table}.* from
+select $self->{table}.*,time_ghost_bump from
 	$self->{table} 
 	join 
 	(select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads 
-	on threads.parent=$self->{table}.parent;
+	on threads.parent=$self->{table}.parent
+) as posts
+order by time_ghost_bump desc,num,subnum asc;
 HERE
 select $self->{table}.* from
 	(select parent from $self->{table}_threads order by parent desc limit ? offset ?) as threads join $self->{table}
