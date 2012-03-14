@@ -219,11 +219,18 @@ sub get_page($$){
 	my $p=$self->new_page($page);
 	my @list;
 
-	my @results=@{ $self->query($shadow?<<HERE:<<THERE,$self->{threads_per_page},$self->{threads_per_page}*$page) or return };
+	my @results=@{ $self->query($shadow?<<HERE:<<THERE,$shadow?($self->{threads_per_page},$self->{threads_per_page}*$page):(),$self->{threads_per_page},$self->{threads_per_page}*$page) or return };
 select $self->{table}.* from
-    (select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads join $self->{table}
-        on threads.parent=$self->{table}.num or threads.parent=$self->{table}.parent
-			order by threads.time_ghost_bump desc,num,subnum asc
+	$self->{table}
+	join
+	(select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads 
+	on threads.parent=$self->{table}.num
+union
+select $self->{table}.* from
+	$self->{table} 
+	join 
+	(select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads 
+	on threads.parent=$self->{table}.parent;
 HERE
 select $self->{table}.* from
 	(select parent from $self->{table}_threads order by parent desc limit ? offset ?) as threads join $self->{table}
