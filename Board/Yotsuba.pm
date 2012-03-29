@@ -246,7 +246,7 @@ sub get_media($$){
 	
 	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
 	
-	my ($data,undef)=$self->wget("$post->{link}?" . time);
+	my ($data,undef)=$self->wget("$self->{img_link}/src/$post->{media_filename}?" . time);
 	
 	\$data;
 }
