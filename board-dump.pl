@@ -189,6 +189,7 @@ async{
 			my $list=$board->content(PAGE($pageno,$lastmod));
 
 			# ...and then we store the lastmod date for the page we just got
+			delete $lastmods{$pageno};
 			$lastmods{$pageno} = $list->{lastmod};
 
 			# Just move on if it hasn't been modified
