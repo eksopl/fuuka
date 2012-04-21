@@ -271,6 +271,9 @@ sub format_comment($$$){
 
 	# format quotes
 	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>!g;
+
+	# fixes people quoting wrong
+	s!(&gt;&gt;&gt;/$board_name/(\d+(?:&\#44;\d+)?))!&gt;&gt;$2!g;
 	
 	# >>postno links
 	s!
