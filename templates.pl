@@ -120,13 +120,20 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <td><input type="text" name="search_text" size="32" value="<var html_encode($search_text)>" /></td>
 </tr>
 
+<if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
-<td class="postblock">Username <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> user name. Leave empty for any user name.</span></a></td>
+<td class="postblock">Subject <a class="tooltip" href="#">[?]<span>Search by post subject. Leave empty for any.</span></a></span></a></td>
+<td><input type="text" name="search_subject" size="32" value="<var $search_subject>" /></td>
+</tr>
+</if>
+
+<tr>
+<td class="postblock">Username <a class="tooltip" href="#">[?]<span>Search for user name. Leave empty for any user name.</span></a></td>
 <td><input type="text" name="search_username" size="32" value="<var $search_username>" /></td>
 </tr>
 
 <tr>
-<td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for <b>exact</b> tripcode. Leave empty for any.</span></a></td>
+<td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for tripcode. Leave empty for any.</span></a></td>
 <td><input type="text" name="search_tripcode" size="32" value="<var $search_tripcode>" /></td>
 </tr>
 

@@ -54,6 +54,9 @@ sub search($$$$){
     my @sql_conditions;
     my @index_hint;
 
+    push @matches,'@title '.$self->_sphinx_escape($settings{subject}).' '
+        if $settings{subject};
+
     push @matches,'@name '.$self->_sphinx_full_escape($settings{name}).' '
         if $settings{name};
 

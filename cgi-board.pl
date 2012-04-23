@@ -137,7 +137,7 @@ sub cgi_params(){
 		foreach qw/search_text/;
 	
 	$cgi->param("$_") and $params{$_}=Encode::decode_utf8($cgi->param("$_"))
-		foreach qw/search_username search_tripcode search_datefrom search_dateto search_del search_int search_ord search_res task search_media_hash/;
+		foreach qw/search_subject search_username search_tripcode search_datefrom search_dateto search_del search_int search_ord search_res task search_media_hash/;
 	
 	$params{$_}=$cgi_params{$_}
 		foreach keys %cgi_params;
@@ -903,6 +903,7 @@ sub show_search($$$){
 	$keys{search_media_hash} = encode_base64(urlsafe_b64decode($keys{search_media_hash}), '') if $keys{search_media_hash};
 
 	my @list=$board->search($text,24,$offset,$advanced?(
+		subject		=> ($keys{search_subject} or ""),
 		name		=> ($keys{search_username} or ""),
 		tripcode	=> ($keys{search_tripcode} or ""),
 		datefrom	=> ($keys{search_datefrom} or ""),
