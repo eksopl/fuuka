@@ -1097,7 +1097,7 @@ sub show_report($){
 					
 					push @$ref,{
 						name	=> $rownames[$num],
-						text	=> qq{<a class="invis-link" href="$self?}."task=search2&".x_www_params('search_username', $name, 'search_tripcode', $trip).qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
+						text	=> qq{<a class="invis-link" href="$self?}."task=search2". ($trip?'': '&'.x_www_params('search_username', $name)) .'&'.x_www_params('search_tripcode', $trip).qq{"><span class="postername">$name</span><span class="postertrip">$trip</span></a>},
 						type	=> "text",
 					};
 					next;
