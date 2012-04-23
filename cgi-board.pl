@@ -221,35 +221,40 @@ sub bbcode_encode($){
 	my($line)=@_;
 	my $res="";	
 	my(@tags);
-	my $quoting=0;
+	my $literal=0;
+	my $noquote=0;
 	
-	while($line=~m!(.*?)(\[(/?)([\w]+)(:\w+)?\])?!g){
-		my($text,$fulltag,$closing,$tag,$ext)=($1,$2,$3,$4,$5);
-		$res.=$text;
+	while($line=~m!(\r?\n|^)?(.*?)(\[(/?)([\w]+)(:\w+)?\])?!g){
+		my($newline,$text,$fulltag,$closing,$tag,$ext)=($1,$2,$3,$4,$5,$6);
+		$res.=$newline.$text;
 		$fulltag //= ''; $ext //= '';
-	
+
+		($res.="<quot>") if (defined $newline and ($literal or $noquote));	
 		$tag or $res.=$fulltag,next;
 		(my $html=BBCODE->{$tag}) or $res.=$fulltag,next;
 		$res.='['.$closing.$tag.']',next if $ext eq ':lit';
-		
-		if($quoting and $tag eq 'code'){
+	
+		$noquote-- if $noquote and $tag eq 'aa';
+	
+		if($literal and $tag eq 'code'){
 			if(not $closing){
 				push @tags,$tag;
-				$quoting++;
+				$literal++;
 			} else{
 				pop @tags;
-				$quoting--;
+				$literal--;
 			}
 			
-			$res.=$fulltag if $quoting;
-			$res.=$html->[1] unless $quoting;
-		} elsif($quoting){
+			$res.=$fulltag if $literal;
+			$res.=$html->[1] unless $literal;
+		} elsif($literal){
 			$res.=$fulltag;
 		} elsif(not $closing){
 			push @tags,$tag;
 			$res.=$html->[0];
 			
-			$quoting++ if $tag eq 'code';
+			$literal++ if $tag eq 'code';
+			$noquote++ if $tag eq 'aa';
 		} elsif($tags[$#tags] eq $tag){
 			pop @tags;
 			$res.=$html->[1];
@@ -268,9 +273,6 @@ sub bbcode_encode($){
 sub format_comment($$$){
 	local $_=html_encode(shift);
 	my($present_posts,$posts)=@_;
-
-	# format quotes
-	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>!g;
 
 	# fixes people quoting wrong
 	s!(&gt;&gt;&gt;/$board_name/(\d+(?:&\#44;\d+)?))!&gt;&gt;$2!g;
@@ -322,14 +324,22 @@ sub format_comment($$$){
 		qq{<a href="$link">$text</a>}
 	!sgixe;
 
+    $_ = bbcode_encode($_);
+
 	# strip whitespace at beginning and end of lines	
 	s/^\s*//;
 	s/\s*$//;
+    
+	# format quotes
+    s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>!g;
 
-	# turn newlines in <br />s	
-	s!\r?\n!<br />!g;
-	
-	bbcode_encode($_)
+	# handles the lines that shouldn't get quote formatting
+	s/^<quot>//;
+
+    # turn newlines in <br />s  
+    s!\r?\n!<br />!g;
+
+	$_
 }
 sub simple_format($){
 	local $_=html_encode(shift);
