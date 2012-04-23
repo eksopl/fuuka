@@ -324,20 +324,20 @@ sub format_comment($$$){
 		qq{<a href="$link">$text</a>}
 	!sgixe;
 
-    $_ = bbcode_encode($_);
+	$_ = bbcode_encode($_);
 
 	# strip whitespace at beginning and end of lines	
 	s/^\s*//;
 	s/\s*$//;
     
 	# format quotes
-    s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>!g;
+	s!(\r?\n|^)(&gt;.*?)(?=$|\r?\n)!$1<span class="unkfunc">$2</span>!g;
 
 	# handles the lines that shouldn't get quote formatting
 	s/^<quot>//;
 
-    # turn newlines in <br />s  
-    s!\r?\n!<br />!g;
+	# turn newlines in <br />s  
+	s!\r?\n!<br />!g;
 
 	$_
 }
