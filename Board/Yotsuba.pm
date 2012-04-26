@@ -7,19 +7,29 @@ use Board::WWW;
 use Board::Errors;
 our @ISA = qw/Board::WWW/;
 
-my %boards_list;
+
+sub get_board_list($) {
+    my $board = shift;
+
+    return {
+    	link => "http://boards.4chan.org/$board",
+    	img_link => "http://images.4chan.org/$board",
+    	preview_link => "http://0.thumbs.4chan.org/$board",
+    	html => "http://boards.4chan.org/$board/",
+    	script => "http://sys.4chan.org/$board/imgboard.php"
+	};
+}
 
 sub new{
 	my $class=shift;
 	my($board)=shift;
 	my $self=$class->SUPER::new(@_);
 	
-	return unless $boards_list{$board};
-	
 	$self->{name}=$board;
 	$self->{renzoku}=20*1000000;
-	$self->{$_}=$boards_list{$board}->{$_}
-		foreach keys %{$boards_list{$board}};
+	my $board_list = get_board_list($board);
+	$self->{$_} = $board_list->{$_}
+		foreach keys %$board_list;
 	
 	$self->{opts}=[{@_},$board];
 
@@ -138,6 +148,7 @@ sub parse_thread($$){
 		posts		=>[$self->new_yotsuba_post(
 			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$cap,$19,$20,$21,$22,0
 		)],
+		allposts	=> [$11]
 	)
 }
 
@@ -232,7 +243,7 @@ sub get_media_preview($$){
 	my $self=shift;
 	my($post)=@_;
 	
-	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
+	$post->{preview} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
 	my ($data,undef)=$self->wget("$self->{preview_link}/thumb/$post->{preview}?" . time);
 	
@@ -244,7 +255,7 @@ sub get_media($$){
 	my $self=shift;
 	my($post)=@_;
 	
-	$post->{link} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
+	$post->{media_filename} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
 	
 	my ($data,undef)=$self->wget("$self->{img_link}/src/$post->{media_filename}?" . time);
 	
@@ -301,8 +312,9 @@ sub get_thread($$;$){
 			$t=$self->parse_thread($text);
 		}else{
 			$self->troubles("posts without thread------$res------") unless $t;
-			
-			push @{$t->{posts}},$self->parse_post($text,$t->{num});
+			$_ = $self->parse_post($text,$t->{num});
+			push @{$t->{posts}},$_;
+			push @{$t->{allposts}},$_->{num};
 		}
 	}
 
@@ -340,7 +352,9 @@ sub get_page($$){
 			$t=$self->parse_thread($text);
 			push @{$p->{threads}},$t if $t;
 		}else{
-			push @{$t->{posts}},$self->parse_post($text,$t->{num});
+            $_ = $self->parse_post($text,$t->{num});
+            push @{$t->{posts}},$_;
+            push @{$t->{allposts}},$_->{num};
 		}
 	}
 
@@ -429,64 +443,6 @@ sub do_clean($$){
 	$self->_clean_simple($_);
 }
 
-while(<<HERE=~/(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)/g){
-a		boards	images	sys		Anime & Manga
-b		boards	images	sys		Random
-c		boards	images	sys		Anime/Cute
-d		boards	images	sys		Hentai/Alternative
-e		boards	images	sys		Ecchi
-g		boards	images	sys		Technology
-gif		boards	images	sys		Animated GIF
-h		boards	images	sys		Hentai
-hr		boards	images	sys		High Resolution
-k		boards	images	sys		Weapons
-m		boards	images	sys		Mecha
-o		boards	images	sys		Auto
-p		boards	images	sys		Photography
-r		boards	images	sys		Request
-s		boards	images	sys		Sexy Beautiful Women
-t		boards	images	sys		Torrents
-u		boards	images	sys		Yuri
-v		boards	images	sys		Video Games
-w		boards	images	sys		Anime/Wallpapers
-wg		boards	images	sys		Wallpapers/General
-i		boards	images	sys		Oekaki
-ic		boards	images	sys		Artwork/Critique
-cm		boards	images	sys		Cute/Male
-y		boards	images	sys		Yaoi
-3		boards	images	sys		3DCG
-adv		boards	images	sys		Advice
-an		boards	images	sys		Animals & Nature
-cgl		boards	images	sys		Cosplay & EGL
-ck		boards	images	sys		Food & Cooking
-co		boards	images	sys		Comics & Cartoons
-fa		boards	images	sys		Fashion
-fit		boards	images	sys		Health & Fitness
-int		boards	images	sys		International
-jp		boards	images	sys		Otaku Culture
-lit		boards	images	sys		Literature
-mu		boards	images	sys		Music
-n		boards	images	sys		Transportation
-po		boards	images	sys		Papercraft & Origami
-sci		boards	images	sys		Science & Math
-soc		boards	images	sys		NORMALFRIENDS
-sp		boards	images	sys		Sports
-tg		boards	images	sys		Traditional Games
-toy		boards	images	sys		Toys
-trv		boards	images	sys		Travel
-tv		boards	images	sys		Television & Film
-vp		boards	images	sys		Pokémon
-x		boards	images	sys		Paranormal
-HERE
 
-	$boards_list{$1}={
-		desc=>"$5",
-		link=>"http://$2.4chan.org/$1",
-		img_link=>"http://$3.4chan.org/$1",
-		preview_link=>"http://0.thumbs.4chan.org/$1",
-		html=>"http://$2.4chan.org/$1/",
-		script=>"http://$4.4chan.org/$1/imgboard.php",
-	};
-}
 
 1;

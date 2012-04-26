@@ -147,8 +147,8 @@ sub insert_media_preview{
 	my $self=shift;
 	my($h,$source)=@_;
 	
-	ref $h eq "Board::Post"
-		or die "Can only insert Board::Post, tried to insert ".ref $h;
+	ref $h eq "Board::Post" or ref $h eq "Board::MediaPost"
+		or die "Can only insert Board::[Media]Post, tried to insert ".ref $h;
 		
 	my($thumb_dir)=$self->make_dirs($h->{parent} or $h->{num});
 	
@@ -187,8 +187,8 @@ sub insert_media{
 	my $self=shift;
 	my($h,$source)=@_;
 	
-	ref $h eq "Board::Post"
-		or die "Can only insert Board::Post, tried to insert ".ref $h;
+	ref $h eq "Board::Post" or ref $h eq "Board::MediaPost"
+		or die "Can only insert Board::[Media]Post, tried to insert ".ref $h;
 		
 	my(undef,$media_dir)=$self->make_dirs($h->{parent} or $h->{num});
 	
