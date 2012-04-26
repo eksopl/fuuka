@@ -325,8 +325,7 @@ async{my $board=$board_spawner->();while(1){
                     push @deleted_posts, $oldthread->{ref}->{posts}->[0];
                     debug TALK,"$num: deleted (last seen on page " . $oldthread->{lastpage} . ")" ;
                 }
-                
-                delete $threads{$num};
+                ${$threads{$num}}->{purge} = 1;
             } else {
                 debug ERROR, "$num: error: ". $board->error;
             }
@@ -371,6 +370,10 @@ while(1) {
         lock(%threads);
         
         for(keys %threads) {
+            if(defined $threads{$_} and ${$threads{$_}}->{purge}) {
+                delete $threads{$_};
+                next;
+            }
             lock(${$threads{$_}});
             my $thread=${$threads{$_}};
             next if $thread->{busy};
