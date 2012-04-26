@@ -320,7 +320,6 @@ async{my $board=$board_spawner->();while(1){
                     $oldthread->{lasthit} = time;
                     $oldthread->{busy} = 0;
                 }
-                next;
             } elsif($board->errstr eq 'Not Found' and defined $oldthread) {
                 if($oldthread->{lastpage} < PAGELIMBO) {
                     push @deleted_posts, $oldthread->{ref}->{posts}->[0];
@@ -330,8 +329,8 @@ async{my $board=$board_spawner->();while(1){
                 delete $threads{$num};
             } else {
                 debug ERROR, "$num: error: ". $board->error;
-                next;
             }
+            next;
         }
         
         my $lastpage = 0;
