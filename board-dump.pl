@@ -94,6 +94,7 @@ sub find_deleted($$$){
 			
 			$changed = 1;
 			my @oldposts = grep { $_ != $post } @{$old->{allposts}};
+			delete $old->{allposts} if defined $old->{allposts};
 			$old->{allposts} = shared_clone(\@oldposts);
 			
 			push @deleted_posts, $post;
@@ -142,6 +143,7 @@ async{my $local_board=SPAWNER->($board_name);while(1){
 	{
 		lock($thread);
 		next if not $thread->{ref};
+		
 		$local_board->insert($thread->{ref});
 		
 		debug ERROR,"Couldn't insert posts into database: ".$local_board->errstr
@@ -229,11 +231,12 @@ async {
 				# if we haven't seen it before
 				push @newthreads, $num and next unless $threads{$num};
 				
-				lock ${$threads{$num}};
-				
 				# Otherwise we get the thread we had already
 				# previously seen
 				my $thread = ${$threads{$num}};
+				lock $thread;
+				next unless defined $threads{$num};
+				
 				my(@posts) = @{$_->{posts}};
 				
 				next if $thread->{lasthit} > $starttime;
@@ -296,8 +299,7 @@ async {
 
 # Topic Fetcher
 # Rebuild whole thread, either because it's new or because it's too old
-async{my $board=$board_spawner->();my $tref;
-while(1){
+async{my $board=$board_spawner->();while(1){
 	use threads;
 	use threads::shared;
 
@@ -308,13 +310,13 @@ while(1){
 	}
 	
 	my $num = $_;
-	$tref = undef;
 	
 	sleep 1 and next unless $_ and /^\d+$/;
 	{
-		lock(${$threads{$num}}) if defined $threads{$num};
 		my $oldthread = defined $threads{$num} ? ${$threads{$num}} : undef;
-		
+		lock($oldthread) if defined $oldthread;
+		next if defined $oldthread and not defined $threads{$num};
+				
 		my $lastmod = defined $oldthread ? $oldthread->{ref}->{lastmod} : undef;
 		my $starttime=time;
 		my $thread = $board->content(THREAD($_, $lastmod)); 
@@ -334,7 +336,7 @@ while(1){
 					debug TALK, "$num: deleted (last seen on page " 
 						. $oldthread->{lastpage} . ")";
 				}
-				$tref = $threads{$num};
+				delete $oldthread->{ref};
 				delete $threads{$num};
 			} else {
 				debug ERROR, "$num: error: ". $board->errstr;
@@ -372,23 +374,21 @@ while(1){
 # Topic Rebuilder
 # check for old threads to rebuild
 while(1) {
-	{
-		lock(%threads);
+	for(keys %threads) {
+		my $thread = ${$threads{$_}};
+		lock($thread);
+		next unless defined $threads{$_};
 		
-		for(keys %threads) {
-			lock(${$threads{$_}});
-			my $thread=${$threads{$_}};
-			next if $thread->{busy};
+		next if $thread->{busy};
 
-			my $lasthit = time - $thread->{lasthit};
-			
-			next unless $lasthit > $settings->{"thread-refresh-rate"}*60;
-			
-			$thread->{busy} = 1;
-			push @newthreads, $_;
-		}
+		my $lasthit = time - $thread->{lasthit};
+		
+		next unless $lasthit > $settings->{"thread-refresh-rate"}*60;
+		
+		$thread->{busy} = 1;
+		push @newthreads, $_;
 	}
-	
+
 	exit if $panic;
 	sleep 1;
 }
