@@ -105,6 +105,7 @@ sub find_deleted($$$){
 	$changed
 }
 
+# Thumb Fetcher
 # fetch thumbs
 async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(1) {
 	my $ref;
@@ -121,6 +122,7 @@ async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(
 		and next if $local_board->error;
 }} foreach 1..$settings->{"thumb-threads"};
 
+# Media Fetcher
 # fetch pics
 async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(1) {
 	my $ref;
@@ -137,6 +139,7 @@ async{my $board=$board_spawner->();my $local_board=SPAWNER->($board_name);while(
 		and next if $local_board->error;
 }} foreach 1..$settings->{"media-threads"};
 
+# Thread Inserter
 # insert updates into database
 async{my $local_board=SPAWNER->($board_name);while(1){
 	while(my $thread = pop @thread_updates) {
@@ -375,9 +378,10 @@ async{my $board=$board_spawner->();while(1){
 # check for old threads to rebuild
 while(1) {
 	for(keys %threads) {
-		my $thread = ${$threads{$_}};
+	    my $num = $_;
+		my $thread = ${$threads{$num}};
 		lock($thread);
-		next unless defined $threads{$_};
+		next unless defined $threads{$num};
 		
 		next if $thread->{busy};
 
