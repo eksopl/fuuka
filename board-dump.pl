@@ -379,6 +379,7 @@ async{my $board=$board_spawner->();while(1){
 while(1) {
 	for(keys %threads) {
 	    my $num = $_;
+	    next unless $num and defined $threads{$num};
 		my $thread = ${$threads{$num}};
 		lock($thread);
 		next unless defined $threads{$num};
