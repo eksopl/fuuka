@@ -67,23 +67,28 @@ sub parse_date($$){
 sub new_yotsuba_post($$$$$$$$$$$$){
 	my $self=shift;
 	my($link,$orig_filename,$spoiler,$filesize,$width,$height,$filename,$twidth,$theight,
-		$md5base64,$num,$title,$email,$name,$trip,$capcode,$date,$sticky,$comment,
-		$omitted,$parent)=@_;
+		$md5,$num,$title,$email,$name,$trip,$capcode,$date,$sticky,$comment,
+		$omitted,$parent) = @_;
 		
-		
+	my($type, $media, $preview, $timestamp);
 	
-	my($type,$media,$preview,$timestamp,$md5);
+	# Extract extra info we need from media links
 	if($link){
-		(my $number,$type)=$link=~m!/src/(\d+)\.(\w+)!;
+		(my $number, $type)=$link=~m!/src/(\d+)\.(\w+)!;
 		$orig_filename //= "$number.$type";
-		$media=($filename or "$number.$type");
-		$preview="${number}s.jpg";
-		$md5=$md5base64;
-	} else{
-		($type,$media,$preview,$md5)=("","","","");
+		$media = ($filename or "$number.$type");
+		$preview = "${number}s.jpg";
+	} else {
+		($type, $media, $preview) = ("", "", "");
 	}
-	$timestamp=$self->parse_date($date);
-	$omitted=$omitted?1:0;
+	
+	# Thumbnail dimensions are meaningless if the image is spoilered
+	if($spoiler) {
+		$twidth = 0;
+		$theight = 0;
+	}
+	
+	$timestamp = $self->parse_date($date);
 		
 	$self->new_post(
 		link		=>($link or ""),
@@ -105,11 +110,11 @@ sub new_yotsuba_post($$$$$$$$$$$$){
 		trip		=> ($trip or ""),
 		date		=> $timestamp,
 		comment		=> $self->do_clean($comment),
-		spoiler		=> ($spoiler?1:0),
+		spoiler		=> ($spoiler ? 1 : 0),
 		deleted		=> 0,
-		sticky		=> ($sticky?1:0),
+		sticky		=> ($sticky ? 1 : 0),
 		capcode		=> ($capcode or 'N'),
-		omitted		=> $omitted
+		omitted		=> ($omitted ? 1 : 0)
 	);
 }
 
@@ -118,7 +123,7 @@ sub parse_thread($$){
 	my($text)=@_;
 	my $post = $self->parse_post($text,0);
 
-	$self->troubles("error parsing thread\n------\n") and return
+	$self->troubles("Error parsing thread (see failed post above)\n------\n") and return
 		unless defined $post->{num};
 		
 	my $omposts = $1 if
@@ -126,9 +131,8 @@ sub parse_thread($$){
 		
 	my $omimages = $1 if
 		$text=~m!<em>\(([0-9]*) \s have \s images\)</em>!xs;
-		
+				
 	$self->new_thread(
-
 		num			=> $post->{num},
 		omposts		=> ($omposts or 0),
 		omimages	=> ($omimages or 0),
@@ -138,10 +142,10 @@ sub parse_thread($$){
 }
 
 sub parse_post($$$){
-	my $self=shift;
-	my($post,$parent)=@_;
-	my ($num, $title, $email, $name, $trip, $capcode, $capalt, $uid, $date, $link, $spoiler,
-		$filesize, $width, $height, $media, $md5, $twidth, $theight, $comment,
+	my $self = shift;
+	my($post,$parent) = @_;
+	my ($num, $title, $email, $name, $trip, $capcode, $capalt, $uid, $date, $link, 
+		$spoiler, $filesize, $width, $height, $media, $md5, $twidth, $theight, $comment,
 		$omitted, $sticky, $filename);
 
 	$num = $1 if
@@ -151,13 +155,14 @@ sub parse_post($$$){
 		$post=~m!<span \s class="subject">([^<]*)</span>!xs;
 
 	($email, $name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5, $6) if
-		$post=~m!<span \s class="name">
-				(?:<a \s href="mailto:([^"]*)" \s class="useremail">)?([^<]*)
-				(?:</a>)?(?:</span>)? \s*
-				(?: <span \s class="postertrip">([^<]*).*?)?
-				(?: <strong \s class="capcode">\#\# \s (.)[^<]*</strong>)?
-				(?: <span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* 
-					| ([^)]*))\)</span>.*?)?</span>!xs;
+		$post=~m!(?:<a \s href="mailto:([^"]*)" \s class="useremail">)? \s*
+				<span \s class="name">([^<]*)(?:</span>)? \s*
+				(?:<span \s class="postertrip">([^<]*).*?)?
+				(?:<strong \s class="capcode">\#\# \s (.)[^<]*</strong>)?
+				(?:</span>)?(?:</a>)?
+				(?:<span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* 
+					| ([^)]*))\)</span>.*?)?
+				!xs;
 	
 	$capcode //= $capalt;
 
@@ -176,8 +181,11 @@ sub parse_post($$$){
 		
 	$sticky = 1 if
 		$post=~m!<img [^>]* \s* alt="Sticky" \s* title="Sticky" \s */>!xs;
+		
+	$omitted = 1 if
+		$post=~m!<span \s class="abbr">Comment \s too \s long!xs;
 
-	$self->troubles("error parsing post\n------\n$post\n------\n") and return
+	$self->troubles("Error parsing post $num:\n------\n$post\n------\n") and return
 		unless ($num and defined $name and $date and $comment);
 
 	$self->new_yotsuba_post(
@@ -405,6 +413,7 @@ sub do_clean($$){
 	# Escaping tags we don't want users to use
 	s!\[(banned|moot)\]![${1}:lit]!g;
 
+	# Comment too long. Also, exif tag toggle
 	s!<span class="abbr">.*?</span>!!g;
 	
 	# (USER WAS BANNED|WARNED FOR THIS POST)
