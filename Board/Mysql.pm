@@ -297,6 +297,9 @@ sub search($$$$){
 	
 	push @conditions,"subnum=0"
 		if $settings{showext} and not $settings{showint};
+
+    push @conditions,"parent=0"
+        if $settings{op};
 	
 	my $ord=$settings{ord};
 	my $query_ord="timestamp desc";

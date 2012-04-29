@@ -137,7 +137,7 @@ sub cgi_params(){
 		foreach qw/search_text/;
 	
 	$cgi->param("$_") and $params{$_}=Encode::decode_utf8($cgi->param("$_"))
-		foreach qw/search_subject search_username search_tripcode search_datefrom search_dateto search_del search_int search_ord search_res task search_media_hash/;
+		foreach qw/search_subject search_username search_tripcode search_filename search_datefrom search_dateto search_op search_del search_int search_ord search_res task search_media_hash/;
 	
 	$params{$_}=$cgi_params{$_}
 		foreach keys %cgi_params;
@@ -899,6 +899,7 @@ sub show_search($$$){
 	
 	my $del=$keys{search_del};
 	my $int=$keys{search_int};
+	my $op=$keys{search_op};
 
 	$keys{search_media_hash} = encode_base64(urlsafe_b64decode($keys{search_media_hash}), '') if $keys{search_media_hash};
 
@@ -906,12 +907,14 @@ sub show_search($$$){
 		subject		=> ($keys{search_subject} or ""),
 		name		=> ($keys{search_username} or ""),
 		tripcode	=> ($keys{search_tripcode} or ""),
+		filename    => ($keys{search_filename} or ""),
 		datefrom	=> ($keys{search_datefrom} or ""),
 		dateto		=> ($keys{search_dateto} or ""),
 		showdel		=> ($del eq 'yes' or $del eq 'dontcare'),
 		shownodel	=> ($del eq 'no' or $del eq 'dontcare'),
 		showint		=> ($int eq 'yes' or $int eq 'dontcare'),
 		showext		=> ($int eq 'no' or $int eq 'dontcare'),
+		op          => ($op eq 'op'),
 		ord		=> ($keys{search_ord} or ""),
 		res         	=> ($keys{search_res} or ""),
 		media_hash	=> ($keys{search_media_hash} or ""),
