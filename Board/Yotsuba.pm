@@ -411,8 +411,9 @@ sub do_clean($$){
 	s!\[(banned|moot)\]![${1}:lit]!g;
 
 	s!<span class="abbr">.*?</span>!!g;
-	
-	s!<b style="color:red;">(.*?)</b>![banned]${1}[/banned]!g;
+
+	# (USER WAS BANNED|WARNED FOR THIS POST)
+	s!<(?:b|strong) style="color:\s*red;">(.*?)</(?:b|strong)>![banned]${1}[/banned]!g;	
 
 	s!<div style="padding: 5px;margin-left: \.5em;border-color: #faa;border: 2px dashed rgba\(255,0,0,\.1\);border-radius: 2px">(.*?)</div>![moot]${1}[/moot]!g;
 
@@ -420,12 +421,12 @@ sub do_clean($$){
 
 	s!<font class="unkfunc">(.*?)</font>!$1!g;
 	s!<a[^>]*>(.*?)</a>!$1!g;
-	
+
 	s!<span class="spoiler"[^>]*>![spoiler]!g;
 	s!</span>![/spoiler]!g;
 
 	s!<br \s* /?>!\n!gx;
-	
+
 	$self->_clean_simple($_);
 }
 
