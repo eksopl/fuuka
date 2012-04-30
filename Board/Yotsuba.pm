@@ -156,12 +156,12 @@ sub parse_post($$$){
 
 	($email, $name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5, $6) if
 		$post=~m!(?:<a \s href="mailto:([^"]*)" \s class="useremail">)? \s*
-				<span \s class="name">([^<]*)(?:</span>)? \s*
-				(?:<span \s class="postertrip">([^<]*).*?)?
-				(?:<strong \s class="capcode">\#\# \s (.)[^<]*</strong>)?
-				(?:</span>)?(?:</a>)?
+				<span \s class="name">([^<]*)</span> \s*
+				(?:<span \s class="postertrip">([^<]*)</span>)? \s*
+				(?:<strong \s class="capcode">\#\# \s (.)[^<]*</strong>)? \s*
+				(?:</a>)? \s*
 				(?:<span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* 
-					| ([^)]*))\)</span>.*?)?
+					| ([^)]*))\)</span>)?
 				!xs;
 	
 	$capcode //= $capalt;
