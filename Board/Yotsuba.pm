@@ -51,7 +51,7 @@ sub parse_date($$){
 		$text=~m!(\d+)/(\d+)/(\d+) \(\w+\) (\d+):(\d+)(?::(\d+))?!x;
 	
 	use Time::Local;
-	timegm($sec or (time%60),$min,$hour,$mday,$mon-1,$year);
+	timegm(($sec or (time%60)),$min,$hour,$mday,$mon-1,$year);
 }
 
 
