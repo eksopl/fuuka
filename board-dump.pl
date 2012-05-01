@@ -87,15 +87,16 @@ sub find_deleted($$$){
 	
 	return unless @posts;
 	
-	foreach(@posts[0, $new->{omposts}+1..$#posts]){
+	foreach(@posts[0, $new->{omposts}+1..$#posts]) {
 		my $post = $_;
 		if(not find_post $new, $post) {
 			return 1 if not $mark;
 			
 			$changed = 1;
-			my @oldposts = grep { $_ != $post } @{$old->{allposts}};
-			delete $old->{allposts} if defined $old->{allposts};
-			$old->{allposts} = shared_clone(\@oldposts);
+
+			foreach(@{$old->{allposts}}) {
+				$_ = undef if $_ == $post;
+			}
 			
 			push @deleted_posts, $post;
 			debug TALK,"$post (post): deleted";
@@ -155,17 +156,17 @@ async{my $local_board=SPAWNER->($board_name);while(1){
 		foreach(@{$thread->{ref}->{posts}}) {
 			my $mediapost;
 			if($_->{preview} or $_->{media_filename}) {
-				$mediapost = shared_clone(bless {
+				$mediapost = Board->new_media_post(
 					num			   => $_->{num},
 					parent		   => $_->{parent},
 					preview		   => $_->{preview},
 					media_filename => $_->{media_filename},
 					media_hash	   => $_->{media_hash}
-				}, "Board::MediaPost");
+				);
 			}
-			push @media_preview_updates, $mediapost
+			push @media_preview_updates, shared_clone($mediapost)
 				if $_->{preview} and $settings->{"thumb-threads"};
-			push @media_updates, $mediapost
+			push @media_updates, shared_clone($mediapost)
 				if $_->{media_filename} and $settings->{"media-threads"};
 		}
 
@@ -264,7 +265,7 @@ async {
 										
 					# If it's new, deep copies the post into our thread hash
 					push @{$thread->{ref}->{posts}}, shared_clone($_);
-					push @{$thread->{ref}->{allposts}}, shared_clone($_->{num});
+					push @{$thread->{ref}->{allposts}}, $_->{num};
 					
 					# Comment too long. Click here to view the full text.
 					# This means we have to refresh the full thread
@@ -378,8 +379,8 @@ async{my $board=$board_spawner->();while(1){
 # check for old threads to rebuild
 while(1) {
 	for(keys %threads) {
-	    my $num = $_;
-	    next unless $num and defined $threads{$num};
+		my $num = $_;
+		next unless $num and defined $threads{$num};
 		my $thread = ${$threads{$num}};
 		lock($thread);
 		next unless defined $threads{$num};
