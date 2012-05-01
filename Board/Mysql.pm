@@ -390,6 +390,14 @@ sub database_delete{
 	$self->query("delete from $self->{table} where num=? and subnum=?",$num,$subnum);
 }
 
+sub mark_deleted{
+	my $self=shift;
+    my($num)=@_;
+    ($num,my $subnum)=((split /,/,$num),0);
+
+    $self->query("update $self->{table} set deleted = 1 where num=? and subnum=?",$num,$subnum);
+}
+
 sub insert{
 	# That sprintf below spouts a billion of uninitialized value warnings
 	# really needs to be fixed, my error logs can't take it easy like this
