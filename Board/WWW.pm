@@ -58,6 +58,26 @@ MAINLOOP:
 	$self->error(FORGET_IT,$line);
 }
 
+sub wget_ref($$;$$) {
+	my($self,$link,$referer,$lastmod)=@_;
+	my($res,$text);
+	
+	my $req=(GET $link);
+	$req->referer($referer) if $referer;
+    $req->header("If-Modified-Since", $lastmod) if $lastmod;
+
+	my $retrycount = 3;
+
+MAINLOOP:
+	$res=$self->{agent}->request($req);
+
+	$self->error(0),return $res->content_ref if $res->is_success;
+	my($no,$line)=$res->status_line=~/(\d+) (.*)/;
+	($retrycount-- and goto MAINLOOP) if($no =~ /^500/ and $retrycount > 0);
+
+	$self->error(FORGET_IT,$line);
+}
+
 sub wpost_ext($$$$%){
 	my($self,$link,$referer,$contenttype,%params)=@_;
 	my($res,$text);

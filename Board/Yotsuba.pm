@@ -61,7 +61,7 @@ sub parse_date($$){
 		$text=~m!(\d+)/(\d+)/(\d+) \(\w+\) (\d+):(\d+)(?::(\d+))?!x;
 	
 	use Time::Local;
-	timegm($sec or (time%60),$min,$hour,$mday,$mon-1,$year);
+	timegm(($sec or (time%60)),$min,$hour,$mday,$mon-1,$year);
 }
 
 
@@ -245,9 +245,9 @@ sub get_media_preview($$){
 	
 	$post->{preview} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
-	my ($data,undef)=$self->wget("$self->{preview_link}/thumb/$post->{preview}?" . time);
+	my $data=$self->wget_ref("$self->{preview_link}/thumb/$post->{preview}?" . time);
 	
-	\$data;
+	$data;
 }
 
 
@@ -257,9 +257,9 @@ sub get_media($$){
 	
 	$post->{media_filename} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
 	
-	my ($data,undef)=$self->wget("$self->{img_link}/src/$post->{media_filename}?" . time);
+	my $data=$self->wget_ref("$self->{img_link}/src/$post->{media_filename}?" . time);
 	
-	\$data;
+	$data;
 }
 
 sub get_post($$){
