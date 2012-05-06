@@ -332,7 +332,6 @@ async{my $board=$board_spawner->();while(1){
 					delete $oldthread->{lasthit};
 					delete $oldthread->{busy};
 					$oldthread->{lasthit} = time;
-					$oldthread->{busy} = 0;
 				}
 			} elsif($board->errstr eq 'Not Found' and defined $oldthread) {
 				if($oldthread->{lastpage} < PAGELIMBO) {
@@ -344,6 +343,7 @@ async{my $board=$board_spawner->();while(1){
 				delete $threads{$num};
 			} else {
 				debug ERROR, "$num: error: ". $board->errstr;
+				delete $oldthread->{busy};
 			}
 			next;
 		}
@@ -359,7 +359,6 @@ async{my $board=$board_spawner->();while(1){
 			delete $oldthread->{busy};
 			$oldthread->{ref} = shared_clone($thread);
 			$oldthread->{lasthit} = $starttime;
-			$oldthread->{busy} = 0;
 		} else {
 			my $newthread :shared = shared_clone({
 				num		 => $num,
