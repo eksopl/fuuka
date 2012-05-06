@@ -163,7 +163,7 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 
 <tr>
 <td class="postblock"><label for="adv_search_op">Search in</label></td>
-<td><input type="radio" <if $search_op eq 'all' or not $search_op>checked="checked" </if>name="search_op" id="adv_search_op" value="post" />All Posts<br /><input type="radio" <if $search_op eq 'op'>checked="checked" </if>name="search_op" value="op" />OPs Only<br /></td>
+<td><input type="radio" <if $search_op eq 'all' or not $search_op>checked="checked" </if>name="search_op" id="adv_search_op" value="all" />All Posts<br /><input type="radio" <if $search_op eq 'op'>checked="checked" </if>name="search_op" value="op" />OPs Only<br /></td>
 </tr>
 
 <tr>
