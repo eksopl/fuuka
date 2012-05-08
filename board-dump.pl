@@ -335,7 +335,7 @@ async{my $board=$board_spawner->();while(1){
 				}
 			} elsif($board->errstr eq 'Not Found' and defined $oldthread) {
 				if($oldthread->{lastpage} < PAGELIMBO) {
-					push @deleted_posts, $oldthread->{ref}->{posts}->[0];
+					push @deleted_posts, $num;
 					debug TALK, "$num: deleted (last seen on page " 
 						. $oldthread->{lastpage} . ")";
 				}
