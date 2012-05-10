@@ -83,6 +83,16 @@ function toggle(id){
 	elem.style.display=elem.style.display?"":"none";
 }
 
+function toggle_search(source, dest) {
+	var source_form = document.forms[source + "-form"];
+    var dest_form = document.forms[dest + "-form"];
+
+    toggle(source);
+    toggle(dest);
+
+	dest_form.elements["search_text"].value = source_form.elements["search_text"].value;
+}
+
 function who_are_you_quoting(e) {
 	var parent, d, clr, src, cnt, left, top, width, maxWidth;
 	

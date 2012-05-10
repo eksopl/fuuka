@@ -51,6 +51,10 @@ sub new_page($$){
 	my $self=shift;
 	bless {num=>$_[0],threads=>[]},"Board::Page";
 }
+sub new_media_post($@){
+    my $self=shift;
+    bless {@_},"Board::MediaPost";
+}
 
 sub flattern($$){
 	my $self=shift;

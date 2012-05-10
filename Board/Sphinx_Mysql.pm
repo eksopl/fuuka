@@ -63,6 +63,9 @@ sub search($$$$){
     push @matches,'@trip '.$self->_sphinx_full_escape($settings{tripcode}).' '
         if $settings{tripcode};
 
+    push @matches,'@media '.$self->_sphinx_full_escape($settings{filename}).' '
+        if $settings{filename};
+
     push @matches,'@comment '.$self->_sphinx_escape($text).' '
         if $text;
     
@@ -77,6 +80,10 @@ sub search($$$$){
     push @sql_conditions,"media_hash=".$dbh->quote($settings{media_hash}) and
     push @index_hint,"media_hash_index"
        if $settings{media_hash};
+
+    push @conditions,"is_op=1" and
+    push @sql_conditions,"parent=0"
+        if $settings{op};
 
     push @conditions,"is_deleted=1" and
     push @sql_conditions,"deleted=1"

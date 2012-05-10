@@ -7,15 +7,16 @@ use Board::WWW;
 use Board::Errors;
 our @ISA = qw/Board::WWW/;
 
-sub get_board_list($) {
-	my $board = shift;
 
-	return {
-		link => "http://boards.4chan.org/$board",
-		img_link => "http://images.4chan.org/$board",
-		preview_link => "http://0.thumbs.4chan.org/$board",
-		html => "http://boards.4chan.org/$board/",
-		script => "http://sys.4chan.org/$board/imgboard.php"
+sub get_board_list($) {
+    my $board = shift;
+
+    return {
+    	link => "http://boards.4chan.org/$board",
+    	img_link => "http://images.4chan.org/$board",
+    	preview_link => "http://0.thumbs.4chan.org/$board",
+    	html => "http://boards.4chan.org/$board/",
+    	script => "http://sys.4chan.org/$board/imgboard.php"
 	};
 }
 
@@ -23,7 +24,7 @@ sub new{
 	my $class=shift;
 	my($board)=shift;
 	my $self=$class->SUPER::new(@_);
-		
+	
 	$self->{name}=$board;
 	$self->{renzoku}=20*1000000;
 	my $board_list = get_board_list($board);
@@ -57,10 +58,10 @@ sub parse_date($$){
 	my($text)=@_;
 	
 	my($mon,$mday,$year,$hour,$min,$sec)=
-		$text=~m!(\d+)/(\d+)/(\d+) \(\w+\) (\d+):(\d+)(?:(\d+))?!x;
+		$text=~m!(\d+)/(\d+)/(\d+) \(\w+\) (\d+):(\d+)(?::(\d+))?!x;
 	
 	use Time::Local;
-	timegm($sec or (time%60),$min,$hour,$mday,$mon-1,$year);
+	timegm(($sec or (time%60)),$min,$hour,$mday,$mon-1,$year);
 }
 
 
@@ -250,9 +251,9 @@ sub get_media_preview($$){
 	
 	$post->{preview} or $self->error(FORGET_IT,"This post doesn't have any media preview"),return;
 	
-	my ($data,undef)=$self->wget("$self->{preview_link}/thumb/$post->{preview}?" . time);
+	my $data=$self->wget_ref("$self->{preview_link}/thumb/$post->{preview}?" . time);
 	
-	\$data;
+	$data;
 }
 
 
@@ -262,9 +263,9 @@ sub get_media($$){
 	
 	$post->{media_filename} or $self->error(FORGET_IT,"This post doesn't have any media"),return;
 	
-	my ($data,undef)=$self->wget("$self->{img_link}/src/$post->{media_filename}?" . time);
+	my $data=$self->wget_ref("$self->{img_link}/src/$post->{media_filename}?" . time);
 	
-	\$data;
+	$data;
 }
 
 sub get_post($$){
@@ -438,7 +439,7 @@ sub do_clean($$){
 
 	# Newlines
 	s!<br \s* /?>!\n!gx;
-	
+
 	$self->_clean_simple($_);
 }
 

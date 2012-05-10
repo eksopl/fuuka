@@ -107,7 +107,7 @@ HERE
 use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <link href="<const MEDIA_LOCATION_HTTP>/calendar.css" rel="stylesheet" type="text/css">
 <script src="<const MEDIA_LOCATION_HTTP>/calendar.js" language="javascript"></script>
-<form action="<var $self>/" method="get">
+<form id="advanced-search-form" action="<var $self>/" method="get">
 <div id="advanced-search" class="postspan" style="float:left;<if not $standalone>display:none;</if>">
 <input type="hidden" name="task" value="search2" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
@@ -116,69 +116,81 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <tr><td colspan="2" class="theader">Advanced search</td></tr>
 
 <tr>
-<td class="postblock">Text to find</td>
-<td><input type="text" name="search_text" size="32" value="<var html_encode($search_text)>" /></td>
+<td class="postblock"><label for="adv_search_text">Text to find</label></td>
+<td><input type="text" name="search_text" id="adv_search_text" size="32" value="<var html_encode($search_text)>" /></td>
 </tr>
 
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
-<td class="postblock">Subject <a class="tooltip" href="#">[?]<span>Search by post subject. Leave empty for any.</span></a></span></a></td>
-<td><input type="text" name="search_subject" size="32" value="<var $search_subject>" /></td>
+<td class="postblock"><label for="adv_search_subject">Subject</label> <a class="tooltip" href="#">[?]<span>Search by post subject. Leave empty for any.</span></a></span></a></td>
+<td><input type="text" name="search_subject" id="adv_search_subject" size="32" value="<var $search_subject>" /></td>
 </tr>
 </if>
 
 <tr>
-<td class="postblock">Username <a class="tooltip" href="#">[?]<span>Search for user name. Leave empty for any user name.</span></a></td>
-<td><input type="text" name="search_username" size="32" value="<var $search_username>" /></td>
+<td class="postblock"><label for="adv_search_username">Username</label> <a class="tooltip" href="#">[?]<span>Search for user name. Leave empty for any user name.</span></a></td>
+<td><input type="text" name="search_username" id="adv_search_username" size="32" value="<var $search_username>" /></td>
 </tr>
 
 <tr>
-<td class="postblock">Tripcode <a class="tooltip" href="#">[?]<span>Search for tripcode. Leave empty for any.</span></a></td>
-<td><input type="text" name="search_tripcode" size="32" value="<var $search_tripcode>" /></td>
+<td class="postblock"><label for="adv_search_tripcode">Tripcode</label> <a class="tooltip" href="#">[?]<span>Search for tripcode. Leave empty for any.</span></a></td>
+<td><input type="text" name="search_tripcode" id="adv_search_tripcode" size="32" value="<var $search_tripcode>" /></td>
+</tr>
+
+<if $board_engine eq 'Board::Sphinx_Mysql'>
+<tr>
+<td class="postblock"><label for="adv_search_filename">Filename</label> <a class="tooltip" href="#">[?]<span>Search by image filename. Leave empty for any.</span></a></span></a></td>
+<td><input type="text" name="search_filename" id="adv_search_filename" size="32" value="<var $search_filename>" /></td>
+</tr>
+</if>
+
+<tr>
+<td class="postblock"><label for="adv_search_datefrom">From Date</label> <a class="tooltip" href="#">[?]<span>Enter what date to start searching from. Format is YYYY-MM-DD</span></a></td>
+<td><input type="text" name="search_datefrom" id="adv_search_datefrom" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_datefrom>" /></td>
 </tr>
 
 <tr>
-<td class="postblock">From Date <a class="tooltip" href="#">[?]<span>Enter what date to start searching from. Format is YYYY-MM-DD</span></a></td>
-<td><input type="text" name="search_datefrom" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_datefrom>" /></td>
-</tr>
-
-<tr>
-<td class="postblock">To Date <a class="tooltip" href="#">[?]<span>Enter what date to start searching until. Format is YYYY-MM-DD</span></a></td>
-<td><input type="text" name="search_dateto" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_dateto>" /></td>
+<td class="postblock"><label for="adv_search_dateto">To Date</label> <a class="tooltip" href="#">[?]<span>Enter what date to start searching until. Format is YYYY-MM-DD</span></a></td>
+<td><input type="text" name="search_dateto" id="adv_search_dateto" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_dateto>" /></td>
 </tr>
 
 <if $search_media_hash>
 <tr>
-<td class="postblock">Image hash</td>
-<td><input type="text" name="search_media_hash" size="32" value="<var $search_media_hash>" /></td>
+<td class="postblock"><label for="adv_search_media_hash">Image hash</label></td>
+<td><input type="text" name="search_media_hash" id="adv_search_media_hash" size="32" value="<var $search_media_hash>" /></td>
 </tr>
 </if>
 
 <tr>
-<td class="postblock">Deleted posts</td>
-<td><input type="radio" <if $search_del eq 'dontcare' or not $search_del>checked="checked" </if>name="search_del" value="dontcare" />Show all posts<br /><input type="radio" <if $search_del eq 'yes'>checked="checked" </if>name="search_del" value="yes" />Show only deleted posts<br /><input type="radio" <if $search_del eq 'no'>checked="checked" </if>name="search_del" value="no" />Only show non-deleted posts</td>
+<td class="postblock"><label for="adv_search_op">Search in</label></td>
+<td><input type="radio" <if $search_op eq 'all' or not $search_op>checked="checked" </if>name="search_op" id="adv_search_op" value="all" />All Posts<br /><input type="radio" <if $search_op eq 'op'>checked="checked" </if>name="search_op" value="op" />OPs Only<br /></td>
 </tr>
 
 <tr>
-<td class="postblock">Internal posts</td>
-<td><input type="radio" <if $search_int eq 'dontcare' or not $search_int>checked="checked" </if>name="search_int" value="dontcare" />Show all posts<br /><input type="radio" <if $search_int eq 'yes'>checked="checked" </if>name="search_int" value="yes" />Show only internal posts<br /><input type="radio" <if $search_int eq 'no'>checked="checked" </if>name="search_int" value="no" />Show only archived posts</td>
+<td class="postblock"><label for="adv_search_del">Deleted posts</label></td>
+<td><input type="radio" <if $search_del eq 'dontcare' or not $search_del>checked="checked" </if>name="search_del" id="adv_search_del" value="dontcare" />Show all posts<br /><input type="radio" <if $search_del eq 'yes'>checked="checked" </if>name="search_del" value="yes" />Show only deleted posts<br /><input type="radio" <if $search_del eq 'no'>checked="checked" </if>name="search_del" value="no" />Only show non-deleted posts</td>
 </tr>
 
 <tr>
-<td class="postblock">Order</td>
-<td><input type="radio" <if $search_ord eq 'new' or $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" value="new" />New posts first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /></td>
+<td class="postblock"><label for="adv_search_int">Internal posts</label></td>
+<td><input type="radio" <if $search_int eq 'dontcare' or not $search_int>checked="checked" </if>name="search_int" id="adv_search_int" value="dontcare" />Show all posts<br /><input type="radio" <if $search_int eq 'yes'>checked="checked" </if>name="search_int" value="yes" />Show only internal posts<br /><input type="radio" <if $search_int eq 'no'>checked="checked" </if>name="search_int" value="no" />Show only archived posts</td>
+</tr>
+
+<tr>
+<td class="postblock"><label for="adv_search_ord">Order</label></td>
+<td><input type="radio" <if $search_ord eq 'new' or $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" id="adv_search_ord" value="new" />New posts first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /></td>
 </tr>
 
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
-<td class="postblock">Results</td>
-<td><input type="radio" <if $search_res eq 'post' or not $search_res>checked="checked" </if>name="search_res" value="post" />Posts<br /><input type="radio" <if $search_res eq 'op'>checked="checked" </if>name="search_res" value="op" />Threads<br /></td>
+<td class="postblock"><label for="adv_search_res">Results</label></td>
+<td><input type="radio" <if $search_res eq 'post' or not $search_res>checked="checked" </if>name="search_res" id="adv_search_res" value="post" />Posts<br /><input type="radio" <if $search_res eq 'op'>checked="checked" </if>name="search_res" value="op" />Threads<br /></td>
 </tr>
 </if>
 
 <tr>
 <td class="postblock">Action</td>
-<td><input type="submit" value="Search" /> <a href="#" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Simple ]</a></td>
+<td><input type="submit" value="Search" /> <a href="#" onclick="javascript:toggle_search('advanced-search', 'simple-search');return false;">[ Simple ]</a></td>
 </tr>
 
 </tbody></table>
@@ -189,7 +201,7 @@ use constant SIDEBAR_INCLUDE => <<'HERE'.SIDEBAR_ADVANCED_SEARCH.<<'THERE';
 <hr />
 <div style="overflow:hidden;">
 
-<form action="<var $self>/" method="get">
+<form id="simple-search-form" action="<var $self>/" method="get">
 <div id="simple-search" class="postspan" style="float:left">
 <input type="hidden" name="task" value="search" />
 <input type="hidden" name="ghost" value="<var $ghost>" />
@@ -197,7 +209,7 @@ Text search
 <a class="tooltip" href="#">[?]<span>Place a <tt>|</tt> in between expressions to get one of them in results, e.g. <tt>tripcode|email</tt> to locate posts that contain either the word tripcode or email in them.<br />Place a <tt>-</tt> before a word to exclude posts containing that word: <tt>-tripcode</tt><br />Place quotes around phrases to find pages containing the phrase: <tt>"I am a filthy tripcode user"</tt></span></a>&nbsp;
 <input type="text" name="search_text" size="24" value="<var html_encode($search_text)>" />&nbsp;
 <input type="submit" value="Go" />&nbsp;
-<a href="<var $self>/advanced-search" onclick="javascript:toggle('advanced-search');toggle('simple-search');return false;">[ Advanced ]</a>
+<a href="<var $self>#" onclick="javascript:toggle_search('simple-search', 'advanced-search');return false;">[ Advanced ]</a>
 </div>
 </form>
 HERE

@@ -224,16 +224,16 @@ select * from
 (select $self->{table}.*,time_ghost_bump from
 	$self->{table}
 	join
-	(select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads 
+	(select parent, time_ghost_bump from $self->{table}_threads order by time_ghost_bump desc limit ? offset ?) as threads 
 	on threads.parent=$self->{table}.num
 union
 select $self->{table}.*,time_ghost_bump from
 	$self->{table} 
 	join 
-	(select parent, time_ghost_bump from $self->{table}_threads where time_ghost_bump is not null order by time_ghost_bump desc limit ? offset ?) as threads 
+	(select parent, time_ghost_bump from $self->{table}_threads order by time_ghost_bump desc limit ? offset ?) as threads 
 	on threads.parent=$self->{table}.parent
 ) as posts
-order by time_ghost_bump desc,num,subnum asc;
+where time_ghost_bump is not null order by time_ghost_bump desc,num,subnum asc;
 HERE
 select $self->{table}.* from
 	(select parent from $self->{table}_threads order by parent desc limit ? offset ?) as threads join $self->{table}
@@ -297,6 +297,9 @@ sub search($$$$){
 	
 	push @conditions,"subnum=0"
 		if $settings{showext} and not $settings{showint};
+
+    push @conditions,"parent=0"
+        if $settings{op};
 	
 	my $ord=$settings{ord};
 	my $query_ord="timestamp desc";
@@ -385,6 +388,14 @@ sub database_delete{
 	($num,my $subnum)=((split /,/,$num),0);
 	
 	$self->query("delete from $self->{table} where num=? and subnum=?",$num,$subnum);
+}
+
+sub mark_deleted{
+	my $self=shift;
+    my($num)=@_;
+    ($num,my $subnum)=((split /,/,$num),0);
+
+    $self->query("update $self->{table} set deleted = 1 where num=? and subnum=?",$num,$subnum);
 }
 
 sub insert{
