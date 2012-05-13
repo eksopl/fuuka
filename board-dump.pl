@@ -270,9 +270,6 @@ async {
 					# Comment too long. Click here to view the full text.
 					# This means we have to refresh the full thread
 					$must_refresh=1 if $_->{omitted};
-										
-					# We have to refresh to get the image filename, sadly
-					$must_refresh=1 if $_->{media};
 				}
 				
 				# Update the time we last hit this thread
