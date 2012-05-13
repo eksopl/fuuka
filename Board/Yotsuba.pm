@@ -298,7 +298,7 @@ sub get_thread($$;$){
 	
 	my $t;
 	while($res=~m!
-		(<div \s class="postContainer \s (opContainer|replyContainer)">.*?</blockquote>
+		(<div \s class="postContainer \s (opContainer|replyContainer)" [^>]*>.*?</blockquote>
 		\s* </div> 
 		(?: \s* <div [^>]*> \s* <span \s class="info">.*?</span>)?)
 	!gxs) {
@@ -331,7 +331,7 @@ sub get_page($$){
 	my $t;
 	my $p=$self->new_page($page);
 	while($res=~m!
-		(<div \s class="postContainer \s (opContainer|replyContainer)">.*?</blockquote>
+		(<div \s class="postContainer \s (opContainer|replyContainer)" [^>]*>.*?</blockquote>
 		\s* </div> 
 		(?: \s* <div [^>]*> \s* <span \s class="info">.*?</span>)?)
 	!gxs) {
