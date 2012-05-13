@@ -168,7 +168,7 @@ sub parse_post($$$){
 	$capcode //= $capalt;
 
 	$date = $1 if
-		$post=~m!<span \s class="dateTime">([^<]*)</span>!xs;
+		$post=~m!<span \s class="dateTime" [^>]*>([^<]*)</span>!xs;
 
 	($link, $spoiler, $filesize, $width, $height, $filename, $md5, $theight, $twidth) = 
 		($1, $2, $3, $4, $5, $6, $7, $8, $9) if
@@ -187,7 +187,7 @@ sub parse_post($$$){
 		$post=~m!<span \s class="abbr">Comment \s too \s long!xs;
 
 	$self->troubles("Error parsing post $num:\n------\n$post\n------\n") and return
-		unless ($num and defined $name and $date and $comment);
+		unless ($num and defined $name and $date and defined $comment);
 
 	$self->new_yotsuba_post(
 		$link,undef,$spoiler,$filesize,$width,$height,$filename,$twidth,$theight,
