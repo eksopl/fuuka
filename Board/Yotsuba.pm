@@ -67,126 +67,132 @@ sub parse_date($$){
 
 sub new_yotsuba_post($$$$$$$$$$$$){
 	my $self=shift;
-	my($link,$media_filename,$spoiler,$filesize,$width,$height,$filename,$twidth,$theight,
-		$md5base64,$num,$title,$email,$name,$trip,$capcode,$date,$sticky,$comment,$omitted,
-		$parent)=@_;
+	my($link,$orig_filename,$spoiler,$filesize,$width,$height,$filename,$twidth,$theight,
+		$md5,$num,$title,$email,$name,$trip,$capcode,$date,$sticky,$comment,
+		$omitted,$parent) = @_;
+		
+	my($type, $media, $preview, $timestamp);
 	
-	my($type,$media,$preview,$timestamp,$md5);
+	# Extract extra info we need from media links
 	if($link){
-		(my $number,$type)=$link=~m!/src/(\d+)\.(\w+)!;
-		$media=($filename or "$number.$type");
-		$preview="${number}s.jpg";
-		$md5=$md5base64;
-	} else{
-		($type,$media,$preview,$md5)=("","","","");
+		(my $number, $type)=$link=~m!/src/(\d+)\.(\w+)!;
+		$orig_filename //= "$number.$type";
+		$media = ($filename or "$number.$type");
+		$preview = "${number}s.jpg";
+	} else {
+		($type, $media, $preview) = ("", "", "");
 	}
-	$timestamp=$self->parse_date($date);
-	$omitted=$omitted?1:0;
-
+	
+	# Thumbnail dimensions are meaningless if the image is spoilered
+	if($spoiler) {
+		$twidth = 0;
+		$theight = 0;
+	}
+	
+	$timestamp = $self->parse_date($date);
+		
 	$self->new_post(
 		link		=>($link or ""),
 		type		=>($type or ""),
 		media		=> $media,
 		media_hash	=> $md5,
-		media_filename	=> $media_filename,
-		media_size	=>($filesize and $self->parse_filesize($filesize) or 0),
-		media_w		=>($width or 0),
-		media_h		=>($height or 0),
+		media_filename	=> $orig_filename,
+		media_size	=> ($filesize and $self->parse_filesize($filesize) or 0),
+		media_w		=> ($width or 0),
+		media_h		=> ($height or 0),
 		preview		=> $preview,
-		preview_w	=>($twidth or 0),
-		preview_h	=>($theight or 0),
+		preview_w	=> ($twidth or 0),
+		preview_h	=> ($theight or 0),
 		num			=> $num,
 		parent		=> $parent,
-		title		=>($title and $self->_clean_simple($title) or ""),
-		email		=>($email or ""),
+		title		=> ($title and $self->_clean_simple($title) or ""),
+		email		=> ($email or ""),
 		name		=> $self->_clean_simple($name),
-		trip		=>($trip or ""),
+		trip		=> ($trip or ""),
 		date		=> $timestamp,
 		comment		=> $self->do_clean($comment),
-		spoiler		=>($spoiler?1:0),
+		spoiler		=> ($spoiler ? 1 : 0),
 		deleted		=> 0,
-		sticky		=> ($sticky?1:0),
-		capcode		=>($capcode or 'N'),
-		omitted		=> $omitted,
+		sticky		=> ($sticky ? 1 : 0),
+		capcode		=> ($capcode or 'N'),
+		omitted		=> ($omitted ? 1 : 0)
 	);
 }
 
 sub parse_thread($$){
 	my $self=shift;
 	my($text)=@_;
-	$text=~m!	(?:
-					<a \s href="([^"]*/src/(\d+\.\w+))"[^>]*>[^<]*</a> \s*
-					\- \s* \((Spoiler \s Image, \s)?([\d\sGMKB\.]+)\, \s (\d+)x(\d+)(?:, \s* <span \s title="([^"]*)">[^<]*</span>)?\) \s*
-					</span> \s* 
-					(?:
-						<br>\s*<a[^>]*><img \s+ src=\S* \s+ border=\S* \s+ align=\S* \s+ (?:width="?(\d+)"? \s height="?(\d+)"?)? [^>]*? md5="?([\w\d\=\+\/]+)"? [^>]*? ></a> \s*
-						|
-						<a[^>]*><span \s class="tn_thread"[^>]*>Thumbnail \s unavailable</span></a>
-					)
-					|
-					<img [^>]* alt="File \s deleted\." [^>]* > \s*
-				)?
-				<a[^>]*></a> \s*
-				<input \s type=checkbox \s name="(\d+)"[^>]*><span \s class="filetitle">(?>(.*?)</span>) \s*
-				<span \s class="postername">(?:<span [^>]*>)?(?:<a \s href="mailto:([^"]*)"[^>]*>)?([^<]*?)(?:</a>)?(?:</span>)?</span>
-				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
-				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
-				(?: \s* <span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* | ([^)]*))\)</span>)?
-				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s*
-				<span[^>]*> (?> .*?</a>.*?</a>) \s* (?:<img [^>]* alt="(sticky)">)? (?> .*?</span>) \s* 
-				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
-				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
-				(?:<span \s class="omittedposts">(\d+).*?(\d+)?.*?</span>)?
-	!xs or $self->troubles("error parsing thread\n------\n$text\n------\n") and return;
-	
-	my $cap = $16 ? $16 : $17;
+	my $post = $self->parse_post($text,0);
 
+	$self->troubles("Error parsing thread (see failed post above)\n------\n") and return
+		unless defined $post->{num};
+		
+	my $omposts = $1 if
+		$text=~m!<span \s class="info">\s*<strong>([0-9]*) \s posts \s omitted!xs;
+		
+	my $omimages = $1 if
+		$text=~m!<em>\(([0-9]*) \s have \s images\)</em>!xs;
+				
 	$self->new_thread(
-		num			=> $11,
-		omposts		=>($23 or 0),
-		omimages	=>($24 or 0),
-		posts		=>[$self->new_yotsuba_post(
-			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$cap,$19,$20,$21,$22,0
-		)],
-		allposts	=> [$11]
+		num			=> $post->{num},
+		omposts		=> ($omposts or 0),
+		omimages	=> ($omimages or 0),
+		posts		=> [$post],
+		allposts	=> [$post->{num}]
 	)
 }
 
 sub parse_post($$$){
-	my $self=shift;
-	my($text,$parent)=@_;
-	$text=~m!	<td \s id="(\d+)"[^>]*> \s*
-				<input[^>]*><span \s class="replytitle">(?>(.*?)</span>) \s*
-				<span \s class="commentpostername">(?:<a \s href="mailto:([^"]*)"[^>]*>)?(?:<span [^>]*>)?([^<]*?)(?:</span>)?(?:</a>)?</span>
-				(?: \s* <span \s class="postertrip">(?:<span [^>]*>)?([a-zA-Z0-9\.\+/\!]+)(?:</a>)?(?:</span>)?</span>)?
-				(?: \s* <span \s class="commentpostername"><span [^>]*>\#\# \s (.?)[^<]*</span>(?:</a>)?</span>)?
-				(?: \s* <span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* | ([^)]*))\)</span>)?
-				\s* (?:<span \s class="posttime">)?([^>]*)(?:</span>)? \s*
-				(?>.*?</span>) \s*
-				(?:
-					<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \s*
-					<span \s class="filesize">File [^>]*
-					<a \s href="([^"]*/src/(\d+\.\w+))"[^>]*>[^<]*</a> \s*
-					\- \s* \((Spoiler \s Image,)?([\d\sGMKB\.]+)\, \s (\d+)x(\d+)(?:, \s* <span \s title="([^"]*)">[^<]*</span>)?\)
-					</span> \s*
-					(?:
-						<br>\s*<a[^>]*><img \s+ src=\S* \s+ border=\S* \s+ align=\S* \s+ (?:width=(\d+) \s height=(\d+))? [^>]*? md5="?([\w\d\=\+\/]+)"? [^>]*? ></a> \s*
-						|
-						<a[^>]*><span \s class="tn_reply"[^>]*>Thumbnail \s unavailable</span></a>
-					)
-					|
-					<br> \s*
-					<img [^>]* alt="File \s deleted\." [^>]* > \s*
-				)?
-				<blockquote>(?>(.*?)(<span \s class="abbr">(?:.*?))?</blockquote>)
-				</td></tr></table>
-	!xs or $self->troubles("error parsing post\n------\n$text\n------\n") and return;
+	my $self = shift;
+	my($post,$parent) = @_;
+	my ($num, $title, $email, $name, $trip, $capcode, $capalt, $uid, $date, $link, 
+		$spoiler, $filesize, $width, $height, $media, $md5, $twidth, $theight, $comment,
+		$omitted, $sticky, $filename);
 
-	my $cap = $6 ? $6 : $7;
+	$num = $1 if
+		$post=~m!<div \s id="p([^"]*)" \s class="post \s [^"]*">!xs;
 
+	$title = $1 if
+		$post=~m!<span \s class="subject">([^<]*)</span>!xs;
+
+	($email, $name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5, $6) if
+		$post=~m!(?:<a \s href="mailto:([^"]*)" \s class="useremail">)? \s*
+				<span \s class="name">([^<]*)</span> \s*
+				(?:<span \s class="postertrip">([^<]*)</span>)? \s*
+				(?:<strong \s class="capcode">\#\# \s (.)[^<]*</strong>)? \s*
+				(?:</a>)? \s*
+				(?:<span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* 
+					| ([^)]*))\)</span>)?
+				!xs;
 	
+	$capcode //= $capalt;
+
+	$date = $1 if
+		$post=~m!<span \s class="dateTime" [^>]*>([^<]*)</span>!xs;
+
+	($link, $spoiler, $filesize, $width, $height, $filename, $md5, $theight, $twidth) = 
+		($1, $2, $3, $4, $5, $6, $7, $8, $9) if
+		$post=~m!<a \s href="([^"]*)"[^<]*</a>-\((Spoiler \s Image,)? \s* ([\d\sGMKB\.]+),
+				\s* (\d+)x(\d+) (?:, \s* <span \s title="([^"]*)")?.*?
+				<img \s src="[^"]*" .*? data-md5="([^"]*)" \s style="height: \s 
+				([0-9]*)px; \s width: \s ([0-9]*)px;"!xs;
+
+	$comment = $1 if
+		$post=~m!<blockquote \s class="postMessage" [^>]*>(.*?)</blockquote>!xs;
+		
+	$sticky = 1 if
+		$post=~m!<img [^>]* \s* alt="Sticky" \s* title="Sticky" \s */>!xs;
+		
+	$omitted = 1 if
+		$post=~m!<span \s class="abbr">Comment \s too \s long!xs;
+
+	$self->troubles("Error parsing post $num:\n------\n$post\n------\n") and return
+		unless ($num and defined $name and $date and defined $comment);
+
 	$self->new_yotsuba_post(
-		$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$1,$2,$3,$4,$5,$cap,$9,0,$20,$21,$parent
+		$link,undef,$spoiler,$filesize,$width,$height,$filename,$twidth,$theight,
+		$md5,$num,$title,$email,$name,$trip,$capcode,$date,$sticky,$comment,$omitted,
+		$parent
 	)
 }
 
@@ -291,31 +297,22 @@ sub get_thread($$;$){
 	return if $self->error;
 	
 	my $t;
-	while($res=~m!(
-			(?:
-				(?:
-					<span \s class="filesize">.*?
-					|
-					<img \s src="[^"]*" \s alt="File \s deleted\.">.*?
-				)?
-				(<a \s name="[^"]*"></a> \s* <input [^>]*><span \s class="filetitle">)
-				(?>.*?</blockquote>)
-				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
-				(?:<span \s class="omittedposts">[^<]*</span>)?
-			)
-			|
-			(?:<table><tr><td \s nowrap \s class="doubledash">(?>.*?</blockquote></td></tr></table>))
-	)!gxs){
+	while($res=~m!
+		(<div \s class="postContainer \s (opContainer|replyContainer)" [^>]*>.*?</blockquote>
+		\s* </div> 
+		(?: \s* <div [^>]*> \s* <span \s class="info">.*?</span>)?)
+	!gxs) {
 		my($text,$type)=($1,$2);
-		if($type){
+		if($type eq 'opContainer') {
 			$self->troubles("two thread posts in one thread------$res------") if $t;
 			$t=$self->parse_thread($text);
-		}else{
+		} else {
 			$self->troubles("posts without thread------$res------") unless $t;
-			$_ = $self->parse_post($text,$t->{num});
-			push @{$t->{posts}},$_;
-			push @{$t->{allposts}},$_->{num};
-		}
+			my $pt = $self->parse_post($text,$t->{num});
+			next unless $pt;
+			push @{$t->{posts}},$pt;
+			push @{$t->{allposts}},$pt->{num};
+	   }
 	}
 
 	$t->{lastmod} = $httpres->header("Last-Modified");
@@ -333,32 +330,24 @@ sub get_page($$){
 	
 	my $t;
 	my $p=$self->new_page($page);
-	while($res=~m!(
-			(?:
-				(?:
-				    <span \s class="filesize">.*?
-				    |
-				    <img \s src="[^"]*" \s alt="File \s deleted\.">.*?
-				)?
-				(<a \s name="[^"]*"></a> \s* <input [^>]*><span \s class="filetitle">)
-				(?>.*?</blockquote>)
-				(?:<span \s class="oldpost">[^<]*</span><br> \s*)?
-				(?:<span \s class="omittedposts">[^<]*</span>)?)
-			|
-			(?:<table><tr><td \s nowrap \s class="doubledash">(?>.*?</blockquote></td></tr></table>))
-	)!gxs){
+	while($res=~m!
+		(<div \s class="postContainer \s (opContainer|replyContainer)" [^>]*>.*?</blockquote>
+		\s* </div> 
+		(?: \s* <div [^>]*> \s* <span \s class="info">.*?</span>)?)
+	!gxs) {
 		my($text,$type)=($1,$2);
-		if($type){
+		if($type eq 'opContainer') {
 			$t=$self->parse_thread($text);
 			push @{$p->{threads}},$t if $t;
-		}else{
-            $_ = $self->parse_post($text,$t->{num});
-            push @{$t->{posts}},$_;
-            push @{$t->{allposts}},$_->{num};
+	   } else {
+			my $pt = $self->parse_post($text,$t->{num});
+			next unless $pt;
+			push @{$t->{posts}},$pt;
+			push @{$t->{allposts}},$pt->{num};
 		}
 	}
 
-    $p->{lastmod} = $httpres->header("Last-Modified");
+	$p->{lastmod} = $httpres->header("Last-Modified");
 	
 	$self->error(0);
 	$p
@@ -420,30 +409,39 @@ sub do_clean($$){
 	(my($self),local($_))=@_;
 
 	# SOPA spoilers
-	s!<span class="spoiler"[^>]*>(.*?)</spoiler>(</span>)?!$1!g;
+	#s!<span class="spoiler"[^>]*>(.*?)</spoiler>(</span>)?!$1!g;
 
+	# Escaping tags we don't want users to use
 	s!\[(banned|moot)\]![${1}:lit]!g;
 
+	# Comment too long. Also, exif tag toggle
 	s!<span class="abbr">.*?</span>!!g;
-
+	
 	# (USER WAS BANNED|WARNED FOR THIS POST)
-	s!<(?:b|strong) style="color:\s*red;">(.*?)</(?:b|strong)>![banned]${1}[/banned]!g;	
+	s!<(?:b|strong) style="color:\s*red;">(.*?)</(?:b|strong)>![banned]${1}[/banned]!g;
 
+	# moot text
 	s!<div style="padding: 5px;margin-left: \.5em;border-color: #faa;border: 2px dashed rgba\(255,0,0,\.1\);border-radius: 2px">(.*?)</div>![moot]${1}[/moot]!g;
 
-	s!<b>(.*?)</b>![b]${1}[/b]!g;
+	# Bold text
+	s!<(?:b|strong)>(.*?)</(?:b|strong)>![b]${1}[/b]!g;
 
+	# Who are you quoting? (we reparse quotes on our side)
 	s!<font class="unkfunc">(.*?)</font>!$1!g;
+	s!<span class="quote">(.*?)</span>!$1!g;
+	
+	# Get rid of links (we recreate them on our side)
 	s!<a[^>]*>(.*?)</a>!$1!g;
-
+	
+	# Spoilers
 	s!<span class="spoiler"[^>]*>![spoiler]!g;
 	s!</span>![/spoiler]!g;
 
+	# Newlines
 	s!<br \s* /?>!\n!gx;
 
 	$self->_clean_simple($_);
 }
-
 
 
 1;
