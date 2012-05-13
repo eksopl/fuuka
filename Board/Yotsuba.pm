@@ -147,7 +147,7 @@ sub parse_post($$$){
 	my($post,$parent) = @_;
 	my ($num, $title, $email, $name, $trip, $capcode, $capalt, $uid, $date, $link, 
 		$spoiler, $filesize, $width, $height, $media, $md5, $twidth, $theight, $comment,
-		$omitted, $sticky, $filename);
+		$omitted, $sticky, $filename, $capold);
 
 	$num = $1 if
 		$post=~m!<div \s id="p([^"]*)" \s class="post \s [^"]*">!xs;
@@ -157,15 +157,18 @@ sub parse_post($$$){
 
 	($email, $name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5, $6) if
 		$post=~m!(?:<a \s href="mailto:([^"]*)" \s class="useremail">)? \s*
-				<span \s class="name">(?:<span [^>]*)?([^<]*)(?:</span>)?</span> \s*
-				(?:<span \s class="postertrip">(?:<span [^>]*)?([^<]*)(?:</span>)?</span>)? \s*
+				<span \s class="name">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span> \s*
+				(?:<span \s class="postertrip">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span>)? \s*
 				(?:<strong \s class="capcode [^"]*">\#\# \s (.)[^<]*</strong>)? \s*
 				(?:</a>)? \s*
 				(?:<span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* 
 					| ([^)]*))\)</span>)?
 				!xs;
 	
-	$capcode //= $capalt;
+	$capold = $1 if
+	    $post=~m!<span \s class="commentpostername"><span [^>]*>\#\# \s (.)[^<]*</span></span>!xs;
+	
+	$capcode //= $capalt // $capold;
 
 	$date = $1 if
 		$post=~m!<span \s class="dateTime" [^>]*>([^<]*)</span>!xs;
