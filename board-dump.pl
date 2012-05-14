@@ -312,8 +312,12 @@ async{my $board=$board_spawner->();while(1){
 	}
 	
 	my $num = $_;
+
+	if(not $num or $num !~ /^\d+$/) {
+		sleep 1;
+		next;
+	}
 	
-	sleep 1 and next unless ($num and $num =~ /^\d+$/);
 	{
 		my $oldthread = defined $threads{$num} ? ${$threads{$num}} : undef;
 		lock($oldthread) if defined $oldthread;
