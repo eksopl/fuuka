@@ -312,7 +312,7 @@ async{my $board=$board_spawner->();while(1){
 	
 	my $num = $_;
 	
-	sleep 1 and next unless $_ and /^\d+$/;
+	sleep 1 and next unless $num and /^\d+$/;
 	{
 		my $oldthread = defined $threads{$num} ? ${$threads{$num}} : undef;
 		lock($oldthread) if defined $oldthread;
@@ -320,7 +320,7 @@ async{my $board=$board_spawner->();while(1){
 				
 		my $lastmod = defined $oldthread ? $oldthread->{ref}->{lastmod} : undef;
 		my $starttime=time;
-		my $thread = $board->content(THREAD($_, $lastmod)); 
+		my $thread = $board->content(THREAD($num, $lastmod)); 
 
 		if($board->error){
 			if($board->errstr eq 'Not Modified') {
@@ -388,7 +388,7 @@ while(1) {
 		next unless $lasthit > $settings->{"thread-refresh-rate"}*60;
 		
 		$thread->{busy} = 1;
-		push @newthreads, $_;
+		push @newthreads, $num;
 	}
 
 	exit if $panic;
