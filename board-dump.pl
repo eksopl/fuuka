@@ -229,6 +229,7 @@ async {
 	
 			# Scan through threads on that page
 			for(@{$list->{threads}}) {
+				my $nthread = $_;
 				my $num = $_->{num};
 
 				# Push thread into new threads queue and skips
@@ -241,7 +242,7 @@ async {
 				lock $thread;
 				next unless defined $threads{$num};
 				
-				my(@posts) = @{$_->{posts}};
+				my(@posts) = @{$nthread->{posts}};
 				
 				next if $thread->{lasthit} > $starttime;
 				
@@ -251,7 +252,7 @@ async {
 				my($old, $new, $must_refresh) = (0, 0, 0);
 
 				# We check for any posts that got deleted.
-				if(find_deleted($thread->{ref}, $_, 0)) {
+				if(find_deleted($thread->{ref}, $nthread, 0)) {
 					$must_refresh = 1;
 					++$new;
 				}
@@ -278,7 +279,7 @@ async {
 				# No new posts
 				next if $old!=0 and $new==0;
 				
-				debug TALK, "$_->{num}: " . ($pageno == 0 ? "front page" : "page $pageno")
+				debug TALK, "$num: " . ($pageno == 0 ? "front page" : "page $pageno")
 					. " update";
 			
 				# Push new posts/images/thumbs to their queues	
@@ -311,8 +312,12 @@ async{my $board=$board_spawner->();while(1){
 	}
 	
 	my $num = $_;
+
+	if(not $num or $num !~ /^\d+$/) {
+		sleep 1;
+		next;
+	}
 	
-	sleep 1 and next unless $_ and /^\d+$/;
 	{
 		my $oldthread = defined $threads{$num} ? ${$threads{$num}} : undef;
 		lock($oldthread) if defined $oldthread;
@@ -320,7 +325,7 @@ async{my $board=$board_spawner->();while(1){
 				
 		my $lastmod = defined $oldthread ? $oldthread->{ref}->{lastmod} : undef;
 		my $starttime=time;
-		my $thread = $board->content(THREAD($_, $lastmod)); 
+		my $thread = $board->content(THREAD($num, $lastmod)); 
 
 		if($board->error){
 			if($board->errstr eq 'Not Modified') {
@@ -388,7 +393,7 @@ while(1) {
 		next unless $lasthit > $settings->{"thread-refresh-rate"}*60;
 		
 		$thread->{busy} = 1;
-		push @newthreads, $_;
+		push @newthreads, $num;
 	}
 
 	exit if $panic;
