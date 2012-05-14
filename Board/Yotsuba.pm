@@ -307,7 +307,7 @@ sub get_thread($$;$){
 	!gxs) {
 		my($text,$type)=($1,$2);
 		if($type eq 'opContainer') {
-			$self->troubles("Two thread posts in one thread at " . $self->link_thread($thread) ". Already had $t->{num}, trying to parse:\n$text\n\n------\n\n") if $t;
+			$self->troubles("Two thread posts in one thread at " . $self->link_thread($thread) . ". Already had $t->{num}, trying to parse:\n$text\n\n------\n\n") if $t;
 			$t=$self->parse_thread($text);
 		} else {
 			$self->troubles("posts without thread:\n$res\n\n------\n\n") unless $t;
