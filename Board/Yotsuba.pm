@@ -299,7 +299,7 @@ sub get_thread($$;$){
 	my ($res,$httpres)=$self->wget($self->link_thread($thread),undef,$lastmod);
 	return if $self->error;
 	
-	my $t;
+	my $t=undef;
 	while($res=~m!
 		(<div \s class="postContainer \s (opContainer|replyContainer)" [^>]*>.*?</blockquote>
 		\s* </div> 
@@ -307,10 +307,10 @@ sub get_thread($$;$){
 	!gxs) {
 		my($text,$type)=($1,$2);
 		if($type eq 'opContainer') {
-			$self->troubles("two thread posts in one thread------$res------") if $t;
+			$self->troubles("two thread posts in one thread already had $t->{num}, trying to parse:\n$text\n\n------\n\n") if $t;
 			$t=$self->parse_thread($text);
 		} else {
-			$self->troubles("posts without thread------$res------") unless $t;
+			$self->troubles("posts without thread:\n$res\n\n------\n\n") unless $t;
 			my $pt = $self->parse_post($text,$t->{num});
 			next unless $pt;
 			push @{$t->{posts}},$pt;
@@ -331,7 +331,7 @@ sub get_page($$){
 	my($res,$httpres)=$self->wget($self->link_page($page),undef,$lastmod);
 	return if $self->error;
 	
-	my $t;
+	my $t=undef;
 	my $p=$self->new_page($page);
 	while($res=~m!
 		(<div \s class="postContainer \s (opContainer|replyContainer)" [^>]*>.*?</blockquote>
