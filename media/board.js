@@ -211,7 +211,7 @@ function localDate() {
 	}
 
 	for (i = 0, j = dates.length; i < j; ++i) {
-		var postdate = new Date(parseInt(dates[i].getAttribute("name")));
+		var postdate = new Date(parseInt(dates[i].getAttribute("title")));
 		var date = postdate.getDate();
 		var month = postdate.getMonthNameShort("en");
 		var year = postdate.getFullYear();

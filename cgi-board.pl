@@ -922,7 +922,7 @@ sub show_search($$$){
 	
 	error $board->errstr if $board->error;
 	
-	sendpage SEARCH_PAGE_TEMPLATE,(title=>"Search: $text".($offset and ", offset: $offset" or ""),
+	sendpage SEARCH_PAGE_TEMPLATE,(title=>"Search: ".html_encode $text.($offset and ", offset: $offset" or ""),
 		cgi_params,
 		
 		threads			=> [{posts=>[map{

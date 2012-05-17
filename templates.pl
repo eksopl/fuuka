@@ -9,8 +9,10 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 <head>
 <title><if $board_desc>/<var $board_name>/ - <var $board_desc></if><if $title> - <var $title></if></title>
 <script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js"></script>
-<meta name="description" content="The Pleasure of Being Cummed Inside" />
+<meta name="description" content="Fuuka Imageboard Archiver" />
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
 <link rel="stylesheet" type="text/css" href="<const MEDIA_LOCATION_HTTP>/fuuka.css" title="Fuuka" />
+<link type="text/css" href="<const MEDIA_LOCATION_HTTP>/calendar.css" rel="stylesheet" />
 <style type="text/css"><!--
 	html,body { background:#eefff2; color:#002200; }
 	img { border: none; }
@@ -105,8 +107,7 @@ use constant INDEX_INCLUDE => <<'HERE';
 HERE
 
 use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
-<link href="<const MEDIA_LOCATION_HTTP>/calendar.css" rel="stylesheet" type="text/css">
-<script src="<const MEDIA_LOCATION_HTTP>/calendar.js" language="javascript"></script>
+<script src="<const MEDIA_LOCATION_HTTP>/calendar.js" type="text/javascript"></script>
 <form id="advanced-search-form" action="<var $self>/" method="get">
 <div id="advanced-search" class="postspan" style="float:left;<if not $standalone>display:none;</if>">
 <input type="hidden" name="task" value="search2" />
@@ -123,41 +124,41 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
 <td class="postblock"><label for="adv_search_subject">Subject</label> <a class="tooltip" href="#">[?]<span>Search by post subject. Leave empty for any.</span></a></span></a></td>
-<td><input type="text" name="search_subject" id="adv_search_subject" size="32" value="<var $search_subject>" /></td>
+<td><input type="text" name="search_subject" id="adv_search_subject" size="32" value="<var html_encode($search_subject)>" /></td>
 </tr>
 </if>
 
 <tr>
 <td class="postblock"><label for="adv_search_username">Username</label> <a class="tooltip" href="#">[?]<span>Search for user name. Leave empty for any user name.</span></a></td>
-<td><input type="text" name="search_username" id="adv_search_username" size="32" value="<var $search_username>" /></td>
+<td><input type="text" name="search_username" id="adv_search_username" size="32" value="<var html_encode($search_username)>" /></td>
 </tr>
 
 <tr>
 <td class="postblock"><label for="adv_search_tripcode">Tripcode</label> <a class="tooltip" href="#">[?]<span>Search for tripcode. Leave empty for any.</span></a></td>
-<td><input type="text" name="search_tripcode" id="adv_search_tripcode" size="32" value="<var $search_tripcode>" /></td>
+<td><input type="text" name="search_tripcode" id="adv_search_tripcode" size="32" value="<var html_encode($search_tripcode)>" /></td>
 </tr>
 
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
 <td class="postblock"><label for="adv_search_filename">Filename</label> <a class="tooltip" href="#">[?]<span>Search by image filename. Leave empty for any.</span></a></span></a></td>
-<td><input type="text" name="search_filename" id="adv_search_filename" size="32" value="<var $search_filename>" /></td>
+<td><input type="text" name="search_filename" id="adv_search_filename" size="32" value="<var html_encode($search_filename)>" /></td>
 </tr>
 </if>
 
 <tr>
 <td class="postblock"><label for="adv_search_datefrom">From Date</label> <a class="tooltip" href="#">[?]<span>Enter what date to start searching from. Format is YYYY-MM-DD</span></a></td>
-<td><input type="text" name="search_datefrom" id="adv_search_datefrom" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_datefrom>" /></td>
+<td><input type="text" name="search_datefrom" id="adv_search_datefrom" size="32" onmousedown="showCalendarControl(this);" value="<var html_encode($search_datefrom)>" /></td>
 </tr>
 
 <tr>
 <td class="postblock"><label for="adv_search_dateto">To Date</label> <a class="tooltip" href="#">[?]<span>Enter what date to start searching until. Format is YYYY-MM-DD</span></a></td>
-<td><input type="text" name="search_dateto" id="adv_search_dateto" size="32" onMouseDown="showCalendarControl(this);" value="<var $search_dateto>" /></td>
+<td><input type="text" name="search_dateto" id="adv_search_dateto" size="32" onmousedown="showCalendarControl(this);" value="<var html_encode($search_dateto)>" /></td>
 </tr>
 
 <if $search_media_hash>
 <tr>
 <td class="postblock"><label for="adv_search_media_hash">Image hash</label></td>
-<td><input type="text" name="search_media_hash" id="adv_search_media_hash" size="32" value="<var $search_media_hash>" /></td>
+<td><input type="text" name="search_media_hash" id="adv_search_media_hash" size="32" value="<var html_encode($search_media_hash)>" /></td>
 </tr>
 </if>
 
@@ -289,7 +290,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
 </if>
 
-<span class="posttime" name="<var deyotsutime($date) * 1000>"><var scalar gmtime($date)></span></label>
+<span class="posttime" title="<var deyotsutime($date) * 1000>"><var scalar gmtime($date)></span></label>
 
 <if $replyform and not $disableposting>
 <a class="js" href="<var ref_post($parent,$num,$subnum)>" onclick="replyhighlight('p<var ref_post_id($num,$subnum)>')">No.</a><a class="js" href="javascript:insert('&gt;&gt;<var ref_post_text($num,$subnum)>\n')"><var ref_post_text($num,$subnum)></a>
