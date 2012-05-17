@@ -155,9 +155,11 @@ sub parse_post($$$){
 	$title = $1 if
 		$post=~m!<span \s class="subject">([^<]*)</span>!xs;
 
-	($email, $name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5, $6) if
-		$post=~m!(?:<a \s href="mailto:([^"]*)" \s class="useremail">)? \s*
-				<span \s class="name">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span> \s*
+    $email = $1 if
+        $post=~m!<a \s href="mailto:([^"]*)" \s class="useremail">!xs;
+
+	($name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5) if
+		$post=~m!<span \s class="name">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span> \s*
 				(?:<span \s class="postertrip">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span>)? \s*
 				(?:<strong \s class="capcode [^"]*">\#\# \s (.)[^<]*</strong>)? \s*
 				(?:</a>)? \s*

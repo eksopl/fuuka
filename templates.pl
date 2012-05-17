@@ -123,7 +123,7 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
-<td class="postblock"><label for="adv_search_subject">Subject</label> <a class="tooltip" href="#">[?]<span>Search by post subject. Leave empty for any.</span></a></span></a></td>
+<td class="postblock"><label for="adv_search_subject">Subject</label> <a class="tooltip" href="#">[?]<span>Search by post subject. Leave empty for any.</span></a></td>
 <td><input type="text" name="search_subject" id="adv_search_subject" size="32" value="<var html_encode($search_subject)>" /></td>
 </tr>
 </if>
@@ -140,7 +140,7 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
-<td class="postblock"><label for="adv_search_filename">Filename</label> <a class="tooltip" href="#">[?]<span>Search by image filename. Leave empty for any.</span></a></span></a></td>
+<td class="postblock"><label for="adv_search_filename">Filename</label> <a class="tooltip" href="#">[?]<span>Search by image filename. Leave empty for any.</span></a></td>
 <td><input type="text" name="search_filename" id="adv_search_filename" size="32" value="<var html_encode($search_filename)>" /></td>
 </tr>
 </if>
