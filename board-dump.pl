@@ -327,6 +327,8 @@ async{my $board=$board_spawner->();while(1){
 		my $starttime=time;
 		my $thread = $board->content(THREAD($num, $lastmod)); 
 
+		next if not $thread->{num};
+
 		if($board->error){
 			if($board->errstr eq 'Not Modified') {
 				debug TALK,"$num: wasn't modified";
