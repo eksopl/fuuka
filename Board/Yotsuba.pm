@@ -419,6 +419,10 @@ sub do_clean($$){
 	# Escaping tags we don't want users to use
 	s!\[(banned|moot)\]![${1}:lit]!g;
 
+	# code tags
+	s!<pre [^>]*>![code]!g;
+	s!</pre>![/code]!g;
+
 	# Comment too long. Also, exif tag toggle
 	s!<span class="abbr">.*?</span>!!g;
 	
