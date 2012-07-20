@@ -9,6 +9,7 @@ use Board::Errors;
 our @ISA=qw/Board/;
 
 use LWP::UserAgent;
+use LWP::ConnCache;
 use HTTP::Request::Common;
 
 sub new{
@@ -18,10 +19,14 @@ sub new{
 	push(@LWP::Protocol::http::EXTRA_SOCK_OPTS, "LocalAddr" => $info{ipaddr}) if $info{ipaddr};
 
 	my $ua=LWP::UserAgent->new;
-	$ua->agent(delete $info{agent} or "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)");
+	$ua->agent(delete $info{agent} or "Fuuka Dumper/0.10");
 	$ua->proxy('http', "http://".($info{proxy})) if $info{proxy};
 	$ua->timeout($info{timeout}) if $info{timeout};
 	
+	my $conn_cache = LWP::ConnCache->new;
+	$conn_cache->total_capacity([1]) ;
+	$ua->conn_cache($conn_cache) ;
+
 	my $self=$class->SUPER::new(%info);
 	
 	$self->{agent}=$ua;
@@ -44,18 +49,21 @@ sub wget($$;$$){
 MAINLOOP:
 	$res=$self->{agent}->request($req);
 
-	my $dec_error = 0;
-	eval {
-		local $SIG{__DIE__} = sub{$dec_error=1};
-		$text=$res->decoded_content();
-	};
+	if($res->is_success) {
+		my $dec_error = 0;
+		eval {
+			local $SIG{__DIE__} = sub{$dec_error=1};
+			$text=$res->decoded_content();
+		};
 
-	$self->error(FORGET_IT,"Can't decode content"),return if $dec_error;
-	$self->error(0),return ($text,$res) if $res->is_success;
-	my($no,$line)=$res->status_line=~/(\d+) (.*)/;
-	($retrycount-- and goto MAINLOOP) if($no =~ /^500/ and $retrycount > 0);
-
-	$self->error(FORGET_IT,$line);
+		(--$retrycount and sleep(1) and goto MAINLOOP) if $dec_error;
+		$self->error(FORGET_IT,"Can't decode content"),return if $dec_error;
+		$self->error(0),return ($text,$res);
+	} else {
+		my($no,$line)=$res->status_line=~/(\d+) (.*)/;
+		($retrycount-- and goto MAINLOOP) if($no =~ /^500/ and $retrycount > 0);
+    	$self->error(FORGET_IT,$line);
+	}
 }
 
 sub wget_ref($$;$$) {
