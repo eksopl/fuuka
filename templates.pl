@@ -8,7 +8,7 @@ use constant NORMAL_HEAD_INCLUDE => <<'HERE';
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title><if $board_desc>/<var $board_name>/ - <var $board_desc></if><if $title> - <var $title></if></title>
-<script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js"></script>
+<script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js?v=1"></script>
 <meta name="description" content="Fuuka Imageboard Archiver" />
 <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
 <link rel="stylesheet" type="text/css" href="<const MEDIA_LOCATION_HTTP>/fuuka.css" title="Fuuka" />
@@ -48,7 +48,7 @@ use constant CENTER_HEAD_INCLUDE => <<'HERE';
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <title><var $title></title>
-<script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js"></script>
+<script type="text/javascript" src="<const MEDIA_LOCATION_HTTP>/board.js?v=1"></script>
 <style type="text/css">
 html, body {
 	height: 100%;         /* required */
