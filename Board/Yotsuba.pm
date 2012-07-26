@@ -12,10 +12,10 @@ sub get_board_list($) {
     my $board = shift;
 
     return {
-    	link => "https://boards.4chan.org/$board",
+    	link => "http://boards.4chan.org/$board",
     	img_link => "http://images.4chan.org/$board",
     	preview_link => "http://0.thumbs.4chan.org/$board",
-    	html => "https://boards.4chan.org/$board/",
+    	html => "http://boards.4chan.org/$board/",
     	script => "http://sys.4chan.org/$board/imgboard.php"
 	};
 }
