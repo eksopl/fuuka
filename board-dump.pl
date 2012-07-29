@@ -49,7 +49,7 @@ use constant ERROR		=> 1;
 use constant WARN		=> 2;
 use constant TALK		=> 3;
 
-use constant PAGELIMBO	=> 13;
+use constant PAGELIMBO	=> 8;
 
 sub debug($@){
 	my $level=shift;
