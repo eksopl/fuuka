@@ -161,7 +161,7 @@ sub parse_post($$$){
 	($name, $trip, $capcode, $capalt, $uid) = ($1, $2, $3, $4, $5) if
 		$post=~m!<span \s class="name">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span> \s*
 				(?:<span \s class="postertrip">(?:<span [^>]*>)?([^<]*)(?:</span>)?</span>)? \s*
-				(?:<strong \s class="capcode [^"]*">\#\# \s (.)[^<]*</strong>)? \s*
+				(?:<strong \s class="capcode [^"]*" \s title="[^"]*">\#\# \s (.)[^<]*</strong>)? \s*
 				(?:</a>)? \s*
 				(?:<span \s class="posteruid">\(ID: \s (?: <span [^>]*>(.)[^)]* 
 					| ([^)]*))\)</span>)?
