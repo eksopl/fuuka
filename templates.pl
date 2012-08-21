@@ -286,8 +286,9 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $trip><nonl>
 <if $email><a href="mailto:<var $email>"></if><nonl>
 <span class="postertrip<if $capcode eq 'A'> admin</if><if $capcode eq 'M'> mod</if>">&nbsp;<var $trip></span><if $email></a></if></if>
-<if $capcode eq 'A'><span class="postername admin"> ##Admin</span></if>
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
+<if $capcode eq 'A'><span class="postername admin"> ##Admin</span></if>
+<if $capcode eq 'D'><span class="postername dev"> ##Developer</span></if>
 </if>
 
 <span class="posttime" title="<var deyotsutime($date) * 1000>"><var scalar gmtime($date)></span></label>
