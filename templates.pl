@@ -280,14 +280,15 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <span style="background:white;color:black;border:1px solid gray;font-weight:bold;padding:0.5em 1.5em;position:relative;"><span style="background-image:url(/media/god-left.png);height:148px;left:-3em;position:absolute;top:-3.6em;width:121px;"></span><var $name> <span class="trip">## God</span></span>
 <span style="position:relative;"><span style="background-image:url(/media/god-right.png);height:148px;left:-6em;position:absolute;top:-4em;width:156px;"></span></span>
 <else>
-<span class="postername<if $capcode eq 'A'> admin</if><if $capcode eq 'M'> mod</if>">
+<span class="postername<if $capcode eq 'M'> mod</if><if $capcode eq 'A'> admin</if><if $capcode eq 'D'> dev</if>">
 <if $email><a href="mailto:<var $email>"></if><var $name><if $email></a></if><nonl>
 </span><nonl>
 <if $trip><nonl>
 <if $email><a href="mailto:<var $email>"></if><nonl>
-<span class="postertrip<if $capcode eq 'A'> admin</if><if $capcode eq 'M'> mod</if>">&nbsp;<var $trip></span><if $email></a></if></if>
-<if $capcode eq 'A'><span class="postername admin"> ##Admin</span></if>
+<span class="postertrip<if $capcode eq 'M'> mod</if><if $capcode eq 'A'> admin</if><if $capcode eq 'D'> dev</if>">&nbsp;<var $trip></span><if $email></a></if></if>
 <if $capcode eq 'M'><span class="postername mod"> ##Mod</span></if>
+<if $capcode eq 'A'><span class="postername admin"> ##Admin</span></if>
+<if $capcode eq 'D'><span class="postername dev"> ##Developer</span></if>
 </if>
 
 <span class="posttime" title="<var deyotsutime($date) * 1000>"><var scalar gmtime($date)></span></label>

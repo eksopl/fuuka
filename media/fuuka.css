@@ -196,5 +196,6 @@ a img { vertical-align: top; }
 	border: 2px dashed rgba(255,0,0,.1);
 	border-radius: 2px 
 }
-.admin{ color: #c00000 !important; }
 .mod{ color: #800080 !important; }
+.admin{ color: #c00000 !important; }
+.dev{ color: #0000F0 !important; }
