@@ -195,6 +195,18 @@ select * from $self->{table} where num=? union select * from $self->{table} wher
 HERE
 }
 
+sub get_image($$){
+	my $self=shift;
+	my($media)=(@_);
+
+	my($ref)=$self->query("select * from $self->{table} where media_filename=?",$media) or return;
+	$ref->[0] or $self->error(FORGET_IT,"Image not found in database: $media"),return;
+
+	$self->ok;
+
+	$self->_read_post($ref->[0]);
+}
+
 sub get_thread_range($$$){
     my $self=shift;
     my($thread,$limit)=@_;

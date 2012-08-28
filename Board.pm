@@ -115,7 +115,7 @@ sub content($){
 	my($ref)=@_;
 	
 	confess "arg '$ref' is not a valid reference"
-        unless ref $ref and (ref $ref)=~/^Board::Request::(THREAD|RANGE|PAGE|POST)$/;
+        unless ref $ref and (ref $ref)=~/^Board::Request::(THREAD|RANGE|PAGE|POST|MEDIA)$/;
 
 	my $sub;
 	for($1){
@@ -123,6 +123,7 @@ sub content($){
 		/THREAD/	and $sub=sub{$self->get_thread(@$ref[0], @$ref[1])},last;
 		/PAGE/		and $sub=sub{$self->get_page(@$ref[0], @$ref[1])},last;
 		/POST/		and $sub=sub{$self->get_post($$ref)},last;
+		/MEDIA/		and $sub=sub{$self->get_image($$ref)},last;
 	}
 	
 REDO:

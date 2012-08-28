@@ -1321,7 +1321,26 @@ if($path){
 	},exit;
     m!^/image_redirect/(.*)! and do{
         redirect_quick $original_img_link . "/$1";
-    },exit;
+	},exit;
+	m!^/full_image(?:/(.*))?! and do{
+		my($media)=$1;
+
+		my $post=$board->content(MEDIA $media);
+		ref $post or error $board->errstr;
+	
+		fix_post($post,'');
+
+		# Image found in the database, but it has been purged! 
+		if(!$post->{fullfile}) {
+			$cgi_params{search_media_hash}=$post->{media_hash};
+			$cgi_params{task}='search2';
+
+			show_search "",0,1;
+			exit;
+		}
+
+		redirect_quick $post->{fullfile};
+	},exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
 		error "You are trying to do dangerous things" unless $authorized;

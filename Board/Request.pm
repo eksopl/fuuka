@@ -5,7 +5,7 @@ use warnings;
 
 require Exporter;
 our @ISA=qw/Exporter/;
-our @EXPORT=qw/THREAD RANGE PAGE POSTNO/;
+our @EXPORT=qw/THREAD RANGE PAGE POSTNO MEDIA/;
 
 sub THREAD($;$){
 	my $num=$_[0];
@@ -30,4 +30,7 @@ sub POSTNO($){
 	my $num=$_[0];
 	bless \$num,"Board::Request::POST";
 }
-
+sub MEDIA($){
+    my $media=$_[0];
+    bless \$media,"Board::Request::MEDIA";
+}
