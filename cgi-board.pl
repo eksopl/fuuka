@@ -624,7 +624,7 @@ sub fix_filename($){
 	$server_file
 }
 
-sub fix_post($;$){
+sub fix_post($$){
 	my($post,$present_posts,$posts)=@_;
 	my($server_file,$server_fullfile);
 	
@@ -642,8 +642,7 @@ sub fix_post($;$){
 		"$server_fullfile":
 		"";
 
-	$post->{comment}=format_comment($post->{comment},$present_posts,$posts) 
-        if $present_posts and $posts;
+	$post->{comment}=format_comment($post->{comment},$present_posts,$posts);
 	$post->{name}=html_encode($post->{name});
 	$post->{title}=html_encode($post->{title});
 	
@@ -1329,7 +1328,7 @@ if($path){
 		my $post=$board->content(MEDIA $media);
 		ref $post or error $board->errstr;
 	
-		fix_post($post);
+		fix_post($post,{});
 
 		# Image found in the database, but it has been purged! 
 		if(!$post->{fullfile}) {
