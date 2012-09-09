@@ -136,7 +136,7 @@ sub search($$$$){
         "";
         
     my $query;
-    if($match eq "''" and !$op) {
+    if($match eq "''" and !$op and $settings{cap} eq "''") {
         $query = "select * from $self->{table} $index_hint where $sql_condition 1 order by $query_ord limit $offset, $limit";
     } else {
         my $sel_id = "id";
