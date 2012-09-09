@@ -137,7 +137,7 @@ sub cgi_params(){
 		foreach qw/search_text/;
 	
 	$cgi->param("$_") and $params{$_}=Encode::decode_utf8($cgi->param("$_"))
-		foreach qw/search_subject search_username search_tripcode search_filename search_datefrom search_dateto search_op search_del search_int search_ord search_res task search_media_hash/;
+		foreach qw/search_subject search_username search_tripcode search_filename search_email search_datefrom search_dateto search_op search_del search_int search_ord search_res search_capcode task search_media_hash/;
 	
 	$params{$_}=$cgi_params{$_}
 		foreach keys %cgi_params;
@@ -908,6 +908,7 @@ sub show_search($$$){
 		name		=> ($keys{search_username} or ""),
 		tripcode	=> ($keys{search_tripcode} or ""),
 		filename    => ($keys{search_filename} or ""),
+		email           => ($keys{search_email} or ""),
 		datefrom	=> ($keys{search_datefrom} or ""),
 		dateto		=> ($keys{search_dateto} or ""),
 		showdel		=> ($del eq 'yes' or $del eq 'dontcare'),
@@ -917,6 +918,7 @@ sub show_search($$$){
 		op          => ($op eq 'op'),
 		ord		=> ($keys{search_ord} or ""),
 		res         	=> ($keys{search_res} or ""),
+		cap             => ($keys{search_capcode} or ""),
 		media_hash	=> ($keys{search_media_hash} or ""),
 	):());
 	
