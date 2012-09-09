@@ -138,6 +138,11 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <td><input type="text" name="search_tripcode" id="adv_search_tripcode" size="32" value="<var html_encode($search_tripcode)>" /></td>
 </tr>
 
+<tr>
+<td class="postblock"><label for="adv_search_email">Email</label> <a class="tooltip" href="#">[?]<span>Search by email. Leave empty for any.</span></a></td>
+<td><input type="text" name="search_email" id="adv_search_email" size="32" value="<var html_encode($search_email)>" /></td>
+</tr>
+
 <if $board_engine eq 'Board::Sphinx_Mysql'>
 <tr>
 <td class="postblock"><label for="adv_search_filename">Filename</label> <a class="tooltip" href="#">[?]<span>Search by image filename. Leave empty for any.</span></a></td>
@@ -180,6 +185,17 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <tr>
 <td class="postblock"><label for="adv_search_ord">Order</label></td>
 <td><input type="radio" <if $search_ord eq 'new' or $search_ord eq 'rel' or not $search_ord>checked="checked" </if>name="search_ord" id="adv_search_ord" value="new" />New posts first<br /><input type="radio" <if $search_ord eq 'old'>checked="checked" </if>name="search_ord" value="old" />Old posts first<br /></td>
+</tr>
+
+<tr>
+<td class="postblock"><label for="adv_search_capcode">Capcode</label></td>
+<td>
+<input type="radio" name="search_capcode" id="adv_search_capcode" value="all"<if not $search_capcode> checked="checked"</if> />All Posts<br />
+<input type="radio" name="search_capcode" value="user"<if $search_capcode eq 'user'> checked="checked"</if> />Only by Users<br />
+<input type="radio" name="search_capcode" value="mod"<if $search_capcode eq 'mod'> checked="checked"</if> />Only by Mods<br />
+<input type="radio" name="search_capcode" value="admin"<if $search_capcode eq 'admin'> checked="checked"</if> />Only by Admins<br />
+<input type="radio" name="search_capcode" value="dev"<if $search_capcode eq 'dev'> checked="checked"</if> />Only by Developers<br />
+</td>
 </tr>
 
 <if $board_engine eq 'Board::Sphinx_Mysql'>
