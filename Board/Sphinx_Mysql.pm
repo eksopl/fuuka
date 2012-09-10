@@ -108,15 +108,15 @@ sub search($$$$){
     push @conditions,"cap=78" and
     push @sql_conditions,"capcode=".$dbh->quote($cap)
     	if $settings{cap} eq 'user';
-	push @conditions,"cap=77" and
+    push @conditions,"cap=77" and
     push @sql_conditions,"capcode=".$dbh->quote($cap)
-		if $settings{cap} eq 'mod';
-	push @conditions,"cap=65" and
+        if $settings{cap} eq 'mod';
+    push @conditions,"cap=65" and
     push @sql_conditions,"capcode=".$dbh->quote($cap)
-		if $settings{cap} eq 'admin';
-	push @conditions,"cap=68" and
+        if $settings{cap} eq 'admin';
+    push @conditions,"cap=68" and
     push @sql_conditions,"capcode=".$dbh->quote($cap)
-		if $settings{cap} eq 'dev';
+        if $settings{cap} eq 'dev';
 
     my $ord=$settings{ord};
     my $query_ord="timestamp desc";
@@ -136,7 +136,7 @@ sub search($$$$){
         "";
         
     my $query;
-    if($match eq "''" and !$op and $settings{cap} eq "''") {
+    if($match eq "''" and !$op and $settings{cap} eq "") {
         $query = "select * from $self->{table} $index_hint where $sql_condition 1 order by $query_ord limit $offset, $limit";
     } else {
         my $sel_id = "id";
