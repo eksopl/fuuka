@@ -318,6 +318,7 @@ use constant POSTS_INCLUDE_POST_HEADER => <<'HERE';
 <if $subnum><img class="inline" src="<const MEDIA_LOCATION_HTTP>/internal.png" alt="[INTERNAL]" title="This is not an archived reply" />&nbsp;</if>
 <if $spoiler><img class="inline" src="<const MEDIA_LOCATION_HTTP>/spoilers.png" alt="[SPOILER]" title="Picture in this post is marked as spoiler" />&nbsp;</if>
 <if $deleted><img class="inline" src="<const MEDIA_LOCATION_HTTP>/deleted.png" alt="[DELETED]" title="This post was deleted before its lifetime has expired" />&nbsp;</if>
+<if $sticky><img class="inline" src="<const MEDIA_LOCATION_HTTP>/sticky.png" alt="[STICKY]" title="This post was stickied on 4chan." />&nbsp;</if>
 HERE
 
 use constant POSTS_INCLUDE_FILE => <<'HERE';
