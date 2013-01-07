@@ -440,7 +440,7 @@ sub do_clean($$){
 	# Who are you quoting? (we reparse quotes on our side)
 	s!<font class="unkfunc">(.*?)</font>!$1!g;
 	s!<span class="quote">(.*?)</span>!$1!g;
-	s!<span class="quote deadlink">(.*?)</span>!$1!g;
+	s!<span class="(?:[^"]*)?deadlink">(.*?)</span>!$1!g;
 
 	# Get rid of links (we recreate them on our side)
 	s!<a[^>]*>(.*?)</a>!$1!g;
