@@ -701,15 +701,6 @@ HERE
     exit;
 }
 
-sub redirect_301($) {
-	my($link)=@_;
-
-    print <<HERE and exit;
-Status: 301
-Location: $link
-HERE
-}
-
 sub redirect_late($$){
 	my($title,$link)=@_;
 	my($list)=MESSAGES;
@@ -1348,7 +1339,7 @@ if($path){
 			exit;
 		}
 
-		redirect_301 $post->{fullfile};
+		redirect $post->{fullfile};
 	},exit;
 	m!^/actions?/([^/]*)/(.*)?!x and do{
 		my($act,$args)=($1,$2);
