@@ -452,6 +452,9 @@ sub do_clean($$){
 	s!<s>![spoiler]!g;
 	s!</s>![/spoiler]!g;
 
+	# <wbr>
+	s!<wbr>!!g;
+
 	# Newlines
 	s!<br \s* /?>!\n!gx;
 

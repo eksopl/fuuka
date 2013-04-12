@@ -8,3 +8,4 @@ reports/graphs/*.data
 reports/status
 panic.txt
 sql/*.mine.sql
+*.iml
