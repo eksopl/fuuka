@@ -288,6 +288,10 @@ sub search($$$$){
 	push @index_hint,"trip_index"
 		if $settings{tripcode};
 
+	push @conditions,"email=".$dbh->quote($settings{email}) and
+	push @index_hint,"email_index"
+		if $settings{email};
+
 	push @conditions,"timestamp > " . str2time($settings{datefrom})
 		if str2time($settings{datefrom});
 
@@ -297,7 +301,11 @@ sub search($$$$){
 	push @conditions,"media_hash=".$dbh->quote($settings{media_hash}) and
 	push @index_hint,"media_hash_index"
 		if $settings{media_hash};
-	
+
+	my $cap = substr(ucfirst($settings{cap}), 0, 1);
+	push @conditions,"capcode=".$dbh->quote($cap)
+		if $settings{cap} and not $settings{cap} eq 'all';
+
 	push @conditions,"deleted=1"
 		if $settings{showdel} and not $settings{shownodel};
 	

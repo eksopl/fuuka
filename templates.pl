@@ -190,8 +190,8 @@ use constant SIDEBAR_ADVANCED_SEARCH => <<'HERE';
 <tr>
 <td class="postblock"><label for="adv_search_capcode">Capcode</label></td>
 <td>
-<input type="radio" name="search_capcode" id="adv_search_capcode" value="all"<if not $search_capcode> checked="checked"</if> />All Posts<br />
-<input type="radio" name="search_capcode" value="user"<if $search_capcode eq 'user'> checked="checked"</if> />Only by Users<br />
+<input type="radio" name="search_capcode" id="adv_search_capcode" value="all"<if $search_capcode eq 'all' or not $search_capcode> checked="checked"</if> />All Posts<br />
+<input type="radio" name="search_capcode" value="normal"<if $search_capcode eq 'normal'> checked="checked"</if> />Only by Users<br />
 <input type="radio" name="search_capcode" value="mod"<if $search_capcode eq 'mod'> checked="checked"</if> />Only by Mods<br />
 <input type="radio" name="search_capcode" value="admin"<if $search_capcode eq 'admin'> checked="checked"</if> />Only by Admins<br />
 <input type="radio" name="search_capcode" value="dev"<if $search_capcode eq 'dev'> checked="checked"</if> />Only by Developers<br />
