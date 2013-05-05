@@ -24,7 +24,7 @@ source main
     sql_range_step  = 10000
     sql_query       = \
         SELECT doc_id, num, subnum, name, trip, email, media, (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum,        \
-        CAST(capcode AS UNSIGNED) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
+        ASCII(capcode) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
         spoiler AS is_spoiler, deleted AS is_deleted, sticky as is_sticky, (parent = 0) AS is_op, timestamp, title, comment \
         FROM a LIMIT 1
 
@@ -50,7 +50,7 @@ source a_main : main
 {
     sql_query       = \
         SELECT doc_id, num, subnum, name, trip, email, media, (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum,        \
-        CAST(capcode AS UNSIGNED) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
+        ASCII(capcode) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
         spoiler AS is_spoiler, deleted AS is_deleted, sticky as is_sticky, (parent = 0) AS is_op, timestamp, title, comment \
         FROM a WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info	= SELECT * FROM a WHERE doc_id=$id
@@ -79,7 +79,7 @@ source jp_main : main
 {
     sql_query       = \
         SELECT doc_id, num, subnum, name, trip, email, media, (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum,        \
-        CAST(capcode AS UNSIGNED) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
+        ASCII(capcode) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
         spoiler AS is_spoiler, deleted AS is_deleted, sticky as is_sticky, (parent = 0) AS is_op, timestamp, title, comment \
         FROM jp WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info	= SELECT * FROM jp WHERE doc_id=$id
@@ -108,7 +108,7 @@ source m_main : main
 {
     sql_query       = \
         SELECT doc_id, num, subnum, name, trip, email, media, (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum,        \
-        CAST(capcode AS UNSIGNED) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
+        ASCII(capcode) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
         spoiler AS is_spoiler, deleted AS is_deleted, sticky as is_sticky, (parent = 0) AS is_op, timestamp, title, comment \
         FROM m WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info	= SELECT * FROM m WHERE doc_id=$id
@@ -137,7 +137,7 @@ source tg_main : main
 {
     sql_query       = \
         SELECT doc_id, num, subnum, name, trip, email, media, (CASE parent WHEN 0 THEN num ELSE parent END) AS tnum,        \
-        CAST(capcode AS UNSIGNED) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
+        ASCII(capcode) AS cap, (media != '' AND media IS NOT NULL) AS has_image, (subnum != 0) AS is_internal,   \
         spoiler AS is_spoiler, deleted AS is_deleted, sticky as is_sticky, (parent = 0) AS is_op, timestamp, title, comment \
         FROM tg WHERE doc_id >= $start AND doc_id <= $end
     sql_query_info	= SELECT * FROM tg WHERE doc_id=$id
