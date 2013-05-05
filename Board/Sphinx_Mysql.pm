@@ -66,6 +66,9 @@ sub search($$$$){
     push @matches,'@media '.$self->_sphinx_full_escape($settings{filename}).' '
         if $settings{filename};
 
+    push @matches,'@email '.$self->_sphinx_full_escape($settings{email}).' '
+        if $settings{email};
+
     push @matches,'@comment '.$self->_sphinx_escape($text).' '
         if $text;
     
@@ -101,6 +104,20 @@ sub search($$$$){
     push @sql_conditions,"subnum=0"
         if $settings{showext} and not $settings{showint};
 
+    my $cap = substr(ucfirst($settings{cap}), 1);
+    push @conditions,"cap=78" and
+    push @sql_conditions,"capcode=".$dbh->quote($cap)
+    	if $settings{cap} eq 'user';
+    push @conditions,"cap=77" and
+    push @sql_conditions,"capcode=".$dbh->quote($cap)
+        if $settings{cap} eq 'mod';
+    push @conditions,"cap=65" and
+    push @sql_conditions,"capcode=".$dbh->quote($cap)
+        if $settings{cap} eq 'admin';
+    push @conditions,"cap=68" and
+    push @sql_conditions,"capcode=".$dbh->quote($cap)
+        if $settings{cap} eq 'dev';
+
     my $ord=$settings{ord};
     my $query_ord="timestamp desc";
 
@@ -119,7 +136,7 @@ sub search($$$$){
         "";
         
     my $query;
-    if($match eq "''" and !$op) {
+    if($match eq "''" and !$op and $settings{cap} eq "") {
         $query = "select * from $self->{table} $index_hint where $sql_condition 1 order by $query_ord limit $offset, $limit";
     } else {
         my $sel_id = "id";

@@ -188,7 +188,7 @@ sub parse_post($$$){
 		$post=~m!<blockquote \s class="postMessage" [^>]*>(.*?)</blockquote>!xs;
 		
 	$sticky = 1 if
-		$post=~m!<img [^>]* \s* alt="Sticky" \s* title="Sticky" \s */>!xs;
+		$post=~m!<img \s src="[^"]*" \s alt="Sticky" \s title="Sticky"[^>]*>!xs;
 		
 	$omitted = 1 if
 		$post=~m!<span \s class="abbr">Comment \s too \s long!xs;
