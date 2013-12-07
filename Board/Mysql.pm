@@ -486,7 +486,11 @@ sub insert{
 				$h->{sticky};
 			
 			}@postbatch) . " on duplicate key update comment = values(comment), deleted = values(deleted),
-							media = coalesce(values(media), media), sticky = (values(sticky) || sticky)") or return 0;
+							media = coalesce(values(media), media), sticky = (values(sticky) || sticky), 
+							preview = coalesce(values(preview), preview), preview_w = greatest(values(preview_w), preview_w),
+							preview_h = greatest(values(preview_h), preview_h), media_w = greatest(values(media_w), media_w),
+							media_h = greatest(values(media_h), media_h), media_size = greatest(values(media_size), media_size),
+							media_hash = coalesce(values(media_hash), media_hash), media_filename = coalesce(values(media_filename), media_filename)") or return 0;
 	}
 
 	$self->ok;
