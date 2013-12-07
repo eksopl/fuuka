@@ -13,8 +13,8 @@ sub get_board_list($) {
 
     return {
     	link => "http://boards.4chan.org/$board",
-    	img_link => "http://images.4chan.org/$board",
-    	preview_link => "http://0.thumbs.4chan.org/$board",
+    	img_link => "http://i.4cdn.org/$board",
+    	preview_link => "http://0.t.4cdn.org/$board",
     	html => "http://boards.4chan.org/$board/",
     	script => "http://sys.4chan.org/$board/imgboard.php"
 	};
@@ -177,7 +177,7 @@ sub parse_post($$$){
 
 	($spoilerfn, $link, $spoiler, $filesize, $width, $height, $filename, $md5, $theight, $twidth) = 
 		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) if
-		$post=~m!<span \s class="fileText" \s id="[^"]*"(?: \s* title="([^"]*)")?>File: \s <a \s href="([^"]*)"[^<]*</a>-\((Spoiler \s Image,)? \s* ([\d\sGMKB\.]+),
+		$post=~m!<div \s class="fileText" \s id="[^"]*"(?: \s* title="([^"]*)")?>File: \s <a \s href="([^"]*)"[^<]*</a>-\((Spoiler \s Image,)? \s* ([\d\sGMKB\.]+),
 				\s* (\d+)x(\d+) (?:, \s* <span \s title="([^"]*)")?.*?
 				<img \s src="[^"]*" .*? data-md5="([^"]*)" \s style="height: \s 
 				([0-9]*)px; \s width: \s ([0-9]*)px;"!xs;
