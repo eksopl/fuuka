@@ -23,7 +23,7 @@ use constant BOARD_SETTINGS         => {
 #        "media-threads"         => 0,               #     get pictures
 #        
 #        link                    => "http://boards.4chan.org/a",
-#        img_link                => "http://images.4chan.org/a",
+#        img_link                => "http://i.4cdn.org/a",
 #        "database"              => "Sphinx_Mysql",
 #        "disable-posting"       => 0,
 #    },
@@ -36,7 +36,7 @@ use constant BOARD_SETTINGS         => {
 #        "media-threads"         => 0,
 #        
 #        link                    => "http://boards.4chan.org/jp",
-#       img_link                => "http://images.4chan.org/jp",
+#       img_link                => "http://i.4cdn.org/jp",
 #        "database"              => "Mysql",
 #    },
 #   hr => {
