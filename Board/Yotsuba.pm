@@ -178,7 +178,7 @@ sub parse_post($$$){
 	($spoilerfn, $link, $spoiler, $filesize, $width, $height, $filename, $md5, $theight, $twidth) = 
 		($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) if
 		$post=~m!<div \s class="fileText" \s id="[^"]*"(?: \s* title="([^"]*)")?>File: \s <a \s href="([^"]*)"[^<]*</a>-\((Spoiler \s Image,)? \s* ([\d\sGMKB\.]+),
-				\s* (\d+)x(\d+) (?:, \s* <span \s title="([^"]*)")?.*?
+				\s* (\d+)x(\d+) (?:, \s* <span>([^<]*)</span>)?.*? 
 				<img \s src="[^"]*" .*? data-md5="([^"]*)" \s style="height: \s 
 				([0-9]*)px; \s width: \s ([0-9]*)px;"!xs;
 
